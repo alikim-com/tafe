@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>utils</name>
+    </assembly>
+    <members>
+        <member name="T:utils.Menu">
+            <summary>
+            Represents a menu that allows the user to select and execute tasks based on a list of options.
+            </summary>
+        </member>
+        <member name="F:utils.Menu.range">
+            <summary>
+            The range of valid menu choices.
+            </summary>
+        </member>
+        <member name="F:utils.Menu.content">
+            <summary>
+            The content of the menu, displaying available options to the user.
+            </summary>
+        </member>
+        <member name="F:utils.Menu.warn">
+            <summary>
+            A warning message to be displayed if an invalid input is provided by the user.
+            </summary>
+        </member>
+        <member name="F:utils.Menu.exit">
+            <summary>
+            A message that defines how to exit the menu.
+            </summary>
+        </member>
+        <member name="F:utils.Menu.list">
+            <summary>
+            The list of menu options, each associated with a task represented as a delegate.
+            </summary>
+        </member>
+        <member name="M:utils.Menu.#ctor(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Delegate}},System.Int32,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:utils.Menu"/> class.
+            </summary>
+            <param name="_list">A list of key-value pairs where keys represent menu options and values represent associated tasks as delegates.</param>
+            <param name="first">The starting index for menu choices.</param>
+            <param name="_warn">A warning message to display if an invalid input is provided by the user.</param>
+            <param name="_exit">A custom word that will exit the menu; set it to "" to exit by pressing Enter or to "end" to exit by typing 'end'. This is used only when none of the menu options have a null delegate, which otherwise indicates the menu exit.</param>
+        </member>
+        <member name="M:utils.Menu.RunUntilExit">
+            <summary>
+            Runs the menu and allows the user to select and execute tasks until an exit condition is met.
+            </summary>
+        </member>
+        <member name="T:utils.Output">
+            <summary>
+            A utility class for custom output 
+            </summary>
+        </member>
+        <member name="T:utils.Output.WL">
+            <summary>
+            A shortcut for Console.WriteLine
+            </summary>
+            <param name="obj">Console.WriteLine argument</param>
+        </member>
+        <member name="M:utils.Output.log(System.Object[])">
+            <summary>
+            Logging multiple arguments via Console
+            </summary>
+            <param name="args">multiple arguments passes into an array</param>
+        </member>
+        <member name="T:utils.UserInput">
+            <summary>
+            A utility class for handling user input and parsing.
+            </summary>
+        </member>
+        <member name="M:utils.UserInput.TryParseTo``1(System.String,``0@,System.String)">
+            <summary>
+            Attempts to parse the input string to the specified type.
+            </summary>
+            <typeparam name="T">The generic type to parse to.</typeparam>
+            <param name="str">The input string to parse.</param>
+            <param name="val">The parsed value if successful.</param>
+            <param name="warn">An optional warning to display in case of parsing failure.</param>
+            <returns>
+             0 if parsing is successful,<br/>
+             1 if parsing fails with a known exception,<br/>
+            -1 if an unforeseen exception occurs.
+            </returns>
+        </member>
+        <member name="M:utils.UserInput.UntilSafe``1(``0@,System.String,System.String,System.String)">
+            <summary>
+            Prompts the user for input until a valid value of type T (struct) is provided.
+            </summary>
+            <typeparam name="T">The type to parse to.</typeparam>
+            <param name="val">The parsed value if successful.</param>
+            <param name="prompt">An optional prompt to display before input.</param>
+            <param name="warn">An optional warning to display in case of parsing (TryParseTo) failure.</param>
+            <param name="exit">An optional exit command to terminate input.</param>
+            <returns>
+            0 if parsing is successful,<br/> 
+            1 if the user exits,<br/> 
+            -1 if an unforeseen exception (in TryParseTo) occurs.</returns>        
+        </member>
+        <member name="T:utils.UserInput.Validator`1">
+            <summary>
+            A delegate type used as UntilSafeCustom method parameter.
+            </summary>
+        </member>
+        <member name="M:utils.UserInput.FilledString(System.String,System.String,System.String@,System.Int32[])">
+            <summary>
+            Checks if the input string is not empty or only whitespaces, and optionally, if it's of a certain length.
+            </summary>
+            <param name="inp">The input string.</param>
+            <param name="warn">An optional warning message.</param>
+            <param name="val">The output string.</param>
+            <param name="cfg">An optional configuration array (zero element contains min length).</param>
+            <returns>
+            0 on success,<br/>
+            1 on failure<br/>
+            </returns>
+        </member>
+        <member name="M:utils.UserInput.CharRange(System.String,System.String,System.Char@,System.Int32[])">
+            <summary>
+            <code>Validator delegate</code>
+            Checks if the input string has only one character and (optionally) if this character is in the provided array.
+            </summary>
+            <param name="inp">The input string to be checked.</param>
+            <param name="warn">An optional warning message.</param>
+            <param name="val">When successful, contains the character from the input string.</param>
+            <param name="cfg">An optional configuration array.</param>
+            <returns>
+            0 on success,<br/>
+            1 if the input string is not a single character or does not match the configuration.
+            </returns>
+        </member>
+        <member name="M:utils.UserInput.IntRange(System.String,System.String,System.Int32@,System.Int32[])">
+            <summary>
+            <code>Validator delegate</code>
+            Tries to parse and then to validate if an integer input is within the specified range.
+            </summary>
+            <param name="inp">The input string to parse.</param>
+            <param name="warn">An optional warning to display in case of parsing (TryParseTo) failure or invalid range.</param>
+            <param name="val">The parsed integer value if successful.</param>
+            <param name="cfg">An optional configuration array defining the allowed range.</param>
+            <returns>
+             0 if parsing and validation are successful,<br/>
+             1 if parsing fails or validation fails,<br/> 
+            -1 if an unforeseen exception occurs (in TryParseTo).</returns>
+        </member>
+        <member name="M:utils.UserInput.GenWords(System.String,System.String,System.String[]@,System.Int32[])">
+            <summary>
+            <code>Validator delegate</code>
+            Generates an array of words (of a minimum length defined by conf array) from a given input string.
+            </summary>
+            <param name="inp">The input string to be split into words.</param>
+            <param name="warn">An optional warning message to be displayed when a condition is not met.</param>
+            <param name="sArr">An output parameter that receives the resulting array of words.</param>
+            <param name="cfg">An configuration array.</param>
+            <returns>
+            0 if the operation is successful,<br/>
+            1 if the input can not be split into a min required number of words.
+            </returns>
+        </member>
+        <member name="M:utils.UserInput.UntilSafeCustom``1(utils.UserInput.Validator{``0},System.Int32[],``0@,System.String,System.String,System.String)">
+            <summary>
+            Prompts the user for input until a valid value is provided satisfying a custom validator function.
+            </summary>
+            <typeparam name="T">The output type of the validator.</typeparam>
+            <param name="Func">The validator function.</param>
+            <param name="cfg">An optional configuration array for the validator.</param>
+            <param name="val">The output validated value (if successful).</param>
+            <param name="prompt">An optional prompt to display before input.</param>
+            <param name="warn">An optional warning for the validator.</param>
+            <param name="exit">An optional exit command to terminate input.</param>
+            <returns>
+             0 if parsing and validation are successful,<br/>
+             1 if the user exits,<br/>
+            -1 if an unforeseen exception occurs (in validator).</returns>
+        </member>
+    </members>
+</doc>

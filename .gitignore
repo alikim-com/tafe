@@ -1,0 +1,3 @@
+**/obj/
+**/bin/
+!programming/__dll/vcode/utils/bin/
