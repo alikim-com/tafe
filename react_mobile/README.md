@@ -21,7 +21,7 @@ Add command tools location to environmental variable `Path`:<br>
 
 Add new environmental variable<br>
 name = `ANDROID_HOME`<br>
-valu = `YourPath\android_sdk`<br>
+value = `YourPath\android_sdk`<br>
 
 Download openJDK v17.0.2 to run sdkmanager from command tools:<br>
 https://jdk.java.net/archive/
