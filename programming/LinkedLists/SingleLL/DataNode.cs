@@ -2,17 +2,16 @@
 /// Generic Data Node
 /// </summary>
 /// <typeparam name="T"></typeparam>
-class Node<T>
+class DataNode<T>
 {
-
     public T? Data { get; set; }
 
-    public Node()
+    public DataNode()
     {
 
     }
 
-    public Node(T data)
+    public DataNode(T data)
     {
         Data = data;
     }
@@ -20,7 +19,7 @@ class Node<T>
    public override string ToString() {
       return $"""
       -----------
-      object Node
+      object DataNode
       Data: {Data}
       """;
    }
