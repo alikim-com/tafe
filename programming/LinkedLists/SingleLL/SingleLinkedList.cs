@@ -1,4 +1,5 @@
 #define VERBOSE
+#define DEBUG
 
 using System.Collections;
 
@@ -100,9 +101,6 @@ class SLL<T> : IEnumerable<SLNode<T>>
          }
       }
 
-#if VERBOSE
-      cwl("SLL.FindFreePosition : no free position found");
-#endif
       index = -1;
       return false;
    }
@@ -132,62 +130,88 @@ class SLL<T> : IEnumerable<SLNode<T>>
    public T? Get(int index) => GetNodeByIndex(index).Data;
 
    /// <summary>
-   /// Adds new node and connects it to the last node as .Child
+   /// Inserts a node into the chain and reconnects parent/child, if nedeed
    /// </summary>
-   /// <param name="node"></param>
-   /// <exception cref="CustomException"></exception>
-   public void Add(SLNode<T> node)
+   /// <param name="parent">
+   /// A parent after which to insert node<br/>
+   /// null parent indicates either prepending or adding to the empty list
+   /// </param>
+   /// <param name="node">A node to insert after parent</param>
+   public void InsertAfter(SLNode<T>? parent, SLNode<T> node)
    {
       AssertCapacity();
-      if (!FindFreePosition(out int index))
+      if (!FindFreePosition(out int nodesIndex))
          throw new CustomException("SLL.FindFreePosition : no free position found");
 
-      nodes[index] = node;
-      node.position = index;
+      nodes[nodesIndex] = node;
+      node.position = nodesIndex;
 
-      firstNode ??= node; // initial Add to empty list
-
-      if (lastNode != null) lastNode.Child = node;
-      lastNode = node;
+      if (parent != null)
+      {
+         node.Child = parent.Child;
+         parent.Child = node;
+      }
+      else {
+         // works for prepend and empty list
+         node.Child = firstNode;
+         firstNode = node;
+      }
+      
+      // works for empty list as well, null = null
+      if (parent == lastNode) lastNode = node; 
 
       currentCapacity++;
+   }
+
+   /// <summary>
+   /// Adds node to the beginning of the list
+   /// </summary>
+   /// <param name="node">A node to prepend</param>
+   public void Prepend(SLNode<T> node)
+   {
+      InsertAfter(null, node);
+   }
+
+   /// <summary>
+   /// Adds new node to the end of the list
+   /// </summary>
+   /// <param name="node">A node to add</param>
+   public void Add(SLNode<T> node)
+   {
+      InsertAfter(lastNode, node);
    }
 
    public void Add(T data)
    {
-      AssertCapacity();
-      if (!FindFreePosition(out int index))
-         throw new CustomException("SLL.FindFreePosition : no free position found");
-
-      SLNode<T> node = new(data);
-
-      nodes[index] = node;
-      node.position = index;
-
-      firstNode ??= node;
-
-      if (lastNode != null) lastNode.Child = node;
-      lastNode = node;
-
-      currentCapacity++;
+      InsertAfter(lastNode, new SLNode<T>(data));
    }
 
-   public bool InsertAt(int index)
+   /// <summary>
+   /// Injects a node before child node,<br/>
+   /// null child indicates adding to the list
+   /// </summary>
+   /// <param name="child">A node before which to inject</param>
+   /// <param name="node">A node to inject</param>
+   public void InsertBefore(SLNode<T>? child, SLNode<T> node)
    {
+      SLNode<T>? parent = null;
 
-      AssertCapacity();
-      if (!FindFreePosition(out int nodeIndex))
-         throw new CustomException("SLL.FindFreePosition : no free position found");
+      var enmtor = GetEnumerator();
+      enmtor.Reset();
+      while (enmtor.MoveNext() && enmtor.Current != child) parent = enmtor.Current;
+
+      InsertAfter(parent, node);
    }
 
-   public void InsertBefore()
+   /// <summary>
+   /// Injects node at the specified position
+   /// </summary>
+   /// <param name="index">A list index to insert at</param>
+   /// <param name="node">A node to inject</param>
+   public void InsertAt(int index, SLNode<T> node)
    {
-
-   }
-
-   public void InsertAfter()
-   {
-
+      SLNode<T>? parent = index == 0 ? null : GetNodeByIndex(index - 1);
+      InsertAfter(parent, node);
    }
 
    /// <summary>
@@ -204,7 +228,7 @@ class SLL<T> : IEnumerable<SLNode<T>>
       nodes[node.position] = null;
 
       currentCapacity--;
-#if VERBOSE
+#if DEBUG
       if (currentCapacity < 0)
          throw new CustomException("SLL.Remove : negative capacity");
 #endif
@@ -268,10 +292,7 @@ class SLLEnum<T> : IEnumerator<SLNode<T>>
    readonly SLL<T> list;
    SLNode<T>? _current;
 
-   public SLLEnum(SLL<T> _list)
-   {
-      list = _list;
-   }
+   public SLLEnum(SLL<T> _list) => list = _list;
 
    public SLNode<T> Current
    {
@@ -289,7 +310,7 @@ class SLLEnum<T> : IEnumerator<SLNode<T>>
    public bool MoveNext()
    {
       _current = _current == null ? list.firstNode : _current.Child;
-      return _current == null;
+      return _current != null;
    }
 
    public void Dispose()
