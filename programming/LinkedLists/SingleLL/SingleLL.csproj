@@ -9,7 +9,7 @@
 
   <ItemGroup>
       <!-- https://github.com/alikim-com/tafe/tree/main/programming/__dll/vcode/utils -->
-      <Reference Include="..\..\..\__dll\vcode\utils\bin\Debug\net7.0\utils.dll" />
+      <Reference Include="..\..\__dll\vcode\utils\bin\Debug\net7.0\utils.dll" />
    </ItemGroup>
 
 </Project>

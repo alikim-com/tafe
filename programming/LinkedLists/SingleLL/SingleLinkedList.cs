@@ -82,10 +82,13 @@ class SLL<T> : IEnumerable<SLNode<T>>
    }
 
    /// <summary>
-   /// Finds the first empty cell in nodes array to place a node to
+   /// Finds the first empty (null) cell in nodes array
    /// </summary>
-   /// <param name="index">index in nodes array</param>
-   /// <returns></returns>
+   /// <param name="index">index in nodes array to place a node at</param>
+   /// <returns>
+   /// true - cell found<br/>
+   /// false - cell not found
+   /// </returns>
    bool FindFreePosition(out int index)
    {
       for (int i = 0; i < nodes.Length; i++)
@@ -169,9 +172,12 @@ class SLL<T> : IEnumerable<SLNode<T>>
       currentCapacity++;
    }
 
-   public void InsertAt()
+   public bool InsertAt(int index)
    {
 
+      AssertCapacity();
+      if (!FindFreePosition(out int nodeIndex))
+         throw new CustomException("SLL.FindFreePosition : no free position found");
    }
 
    public void InsertBefore()
@@ -185,47 +191,45 @@ class SLL<T> : IEnumerable<SLNode<T>>
    }
 
    /// <summary>
-   /// Removes a node and connects its parent to its child
+   /// Removes a node and connects its parent to its child, if possible
    /// </summary>
    /// <param name="node">A node to match</param>
-   /// <returns></returns>
+   void Remove(SLNode<T>? parent, SLNode<T> node)
+   {
+      if (parent != null) parent.Child = node.Child;
+
+      if (node == firstNode) firstNode = node.Child;
+      if (node == lastNode) lastNode = parent;
+
+      nodes[node.position] = null;
+
+      currentCapacity--;
+#if VERBOSE
+      if (currentCapacity < 0)
+         throw new CustomException("SLL.Remove : negative capacity");
+#endif
+   }
+
+   /// <summary>
+   /// Removes a node from the list
+   /// </summary>
+   /// <param name="node">A node to match</param>
+   /// <returns>
+   /// true - on success<br/>
+   /// false - on failure
+   /// </returns>
    public bool RemoveNode(SLNode<T> node)
    {
-      // first node removal
-      if (node == firstNode)
-      {
-         nodes[firstNode.position] = null;
-         firstNode = firstNode.Child;
-         currentCapacity--;
-         return true;
-      }
-
-      SLNode<T>? parent = firstNode;
+      SLNode<T>? parent = null;
 
       var enmtor = GetEnumerator();
       enmtor.Reset();
-      enmtor.MoveNext();
-      while (enmtor.MoveNext()) // start with second element
+      while (enmtor.MoveNext())
       {
          SLNode<T> current = enmtor.Current;
          if (node == current)
          {
-            if (parent == null)
-            {
-               throw new CustomException($"SLL.RemoveNode : null parent for node {node}");
-            }
-            nodes[current.position] = null;
-
-            if (current == lastNode)
-            {
-               lastNode = parent;
-               lastNode.Child = null;
-               currentCapacity--;
-               return true;
-            }
-
-            parent.Child = current.Child;
-            currentCapacity--;
+            Remove(parent, node);
             return true;
          }
          parent = current;
@@ -235,45 +239,27 @@ class SLL<T> : IEnumerable<SLNode<T>>
    }
 
    /// <summary>
-   /// Removes a node and connects its parent to its child
+   /// Removes a node from the list
    /// </summary>
    /// <param name="index">A node chain index to match</param>
-   /// <returns></returns>
-   public bool RemoveAt(int index)
+   public void RemoveAt(int index)
    {
-      // first node removal
+      SLNode<T> node;
+      SLNode<T>? parent;
+
       if (index == 0)
       {
-         if (firstNode == null)
-         {
-            throw new CustomException($"SLL.RemoveNode : null parent for index {index}");
-         }
-         nodes[firstNode.position] = null;
-         firstNode = firstNode.Child;
-         currentCapacity--;
-         return true;
+         parent = null;
+         node = firstNode ?? 
+            throw new CustomException("SLL.RemoveAt : the list is empty", new IndexOutOfRangeException());
       }
-
-      SLNode<T> parent = GetNodeByIndex(index - 1);
-      if (parent == lastNode)
-         throw new CustomException("SLL.RemoveAt : parent is last node", new IndexOutOfRangeException());
-
-      SLNode<T> node = parent.Child ??
-         throw new CustomException("SLL.RemoveAt : parent has no child", new IndexOutOfRangeException());
-
-      nodes[node.position] = null;
-
-      if (node == lastNode)
-      {
-         lastNode = parent;
-         lastNode.Child = null;
-         currentCapacity--;
-         return true;
+      else {
+         parent = GetNodeByIndex(index - 1);
+         node = parent.Child ??
+            throw new CustomException("SLL.RemoveAt : couldn't find parent.Child (null)");
       }
       
-      parent.Child = node.Child;
-
-      return false;
+      Remove(parent, node);
    }
 }
 
