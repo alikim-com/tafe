@@ -133,3 +133,21 @@ delete VM service - `sc delete gvm`<br/>
 
 General guide:<br/>
 https://developer.android.com/studio/run/emulator-acceleration#command-gpu
+
+
+### 6. Connecting the app to the emulator in real-time
+
+Bundle
+>npx react-native bundle ...
+
+Rename folder...
+
+Assemble...
+>./gradlew.bat assembleRelease
+
+Start gvm...
+
+Start emulator, wait for the OS to fully load
+
+In VS Code terminal, run:<br/>
+> MyFirstProject> npx react-native run-android
