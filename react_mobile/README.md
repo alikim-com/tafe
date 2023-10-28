@@ -1,7 +1,7 @@
 
 ### Creating a React Native app executable (.APK) for Android OS in VS Code under Win10 using only Android Command Line Tools (no installation of Android Studio required)
 
-#### 1. Downloads and setup the environment
+### 1. Downloads and setup the environment
 
 Create folder for Android SDK files:<br>
 `YourPath\android_sdk\`
@@ -37,7 +37,7 @@ Accept licenses, run:<br>
 
 (this should create folder YourPath\android_sdk\licenses)
 
-#### 2. Creating an app
+### 2. Creating an app
 
 Create folder for react native projects, e.g., `reactNative` and open it in VS Code
 
@@ -66,7 +66,7 @@ Android executable file (.apk) will be located in<br>
 
 This file can be uploaded online, opened in a browser on an android mobile, downloaded and installed.
 
-#### 3. Setting up emulator
+### 3. Setting up emulator
 
 To see the list of available system images, run:<br/>
 YourPath\android_sdk\cmdline-tools\latest\bin\sdkmanager.bat --list | findstr "system-images"
@@ -93,7 +93,7 @@ YourPath\android_sdk\cmdline-tools\latest\bin\avdmanager create avd -n PixelAVD 
 Start the emulator, run:<br/>
 YourPath\android_sdk\emulator\emulator.exe -avd PixelAVD
 
-#### 4. Virualisation setup (in case of errors)
+### 4. Virtualisation setup (in case of errors)
 
 https://developer.android.com/studio/run/emulator-acceleration#accel-vm
 
@@ -126,6 +126,6 @@ You can also:<br/>
 sc stop gvm<br/>
 sc delete gvm
 
-#### 5. Graphics acceleration
+### 5. Graphics acceleration
 
 https://developer.android.com/studio/run/emulator-acceleration#command-gpu
