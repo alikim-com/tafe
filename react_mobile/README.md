@@ -1,7 +1,7 @@
 
 ### Creating a React Native app executable (.APK) for Android OS in VS Code under Win10 using only Android Command Line Tools (no installation of Android Studio required)
 
-#### 1. Downloads and the environment
+#### 1. Downloads and setup the environment
 
 Create folder for Android SDK files:<br>
 `YourPath\android_sdk\`
@@ -65,3 +65,67 @@ Android executable file (.apk) will be located in<br>
 `reactNative/MyFirstProject\android\app\build\outputs\apk\release`
 
 This file can be uploaded online, opened in a browser on an android mobile, downloaded and installed.
+
+#### 3. Setting up emulator
+
+To see the list of available system images, run:<br/>
+YourPath\android_sdk\cmdline-tools\latest\bin\sdkmanager.bat --list | findstr "system-images"
+
+Choose an image, for example:<br/>
+`system-images;android-30;google_apis;x86_64`
+
+Download the chosen image (installs into `YourPath\android_sdk\system-images`), run:<br/>
+YourPath\android_sdk\cmdline-tools\latest\bin\sdkmanager.bat --install "system-images;android-30;google_apis;x86_64"
+
+Find the version of Android OS for the chosen API level, for example here:
+https://developer.android.com/tools/releases/platforms<br/>
+API level 30 -> Android 11<br/>
+
+Look up Android 11 devices or refer to this (possibly incomplete) chart:<br/>
+[Android 11 devices](./android_11_devices.png)
+
+Cross-reference the devices with the ones supported by avdmanager, run:<br/>
+YourPath\android_sdk\cmdline-tools\latest\bin\avdmanager.bat list device
+
+Create an avd for the chosen OS image and the device model (installs into `YourPath\android_sdk\avd`), run:<br/>
+YourPath\android_sdk\cmdline-tools\latest\bin\avdmanager create avd -n PixelAVD -k "system-images;android-30;google_apis;x86_64" -d "pixel_4" -p "../../../avd/"
+
+Start the emulator, run:<br/>
+YourPath\android_sdk\emulator\emulator.exe -avd PixelAVD
+
+#### 4. Virualisation setup (in case of errors)
+
+https://developer.android.com/studio/run/emulator-acceleration#accel-vm
+
+Check if CPU Virtualization Technology is enabled in BIOS (UEFI)
+
+Check if Hyper-V windows feature is disabled, run:<br/>
+YourPath\android_sdk\emulator\emulator-check.exe hyper-v
+
+Find a suitable hypervisor package, run:<br/>
+YourPath\android_sdk\cmdline-tools\latest\bin\sdkmanager.bat --list | findstr "extras"
+
+Install the package files, run:<br/>
+YourPath\android_sdk\cmdline-tools\latest\bin\sdkmanager --install "extras;google;Android_Emulator_Hypervisor_Driver"<br/>
+(installes into `YourPath\android_sdk\extras\google\Android_Emulator_Hypervisor_Driver`)
+
+Install the hypervisor service, run:
+YourPath\android_sdk\extras\google\Android_Emulator_Hypervisor_Driver\silent_install.bat
+
+In case that failes, run:<br/>
+YourPath\android_sdk\extras\google\Android_Emulator_Hypervisor_Driver/RUNDLL32.EXE SETUPAPI.DLL,InstallHinfSection DefaultInstall 132 .\gvm.Inf
+
+Start the service, run:<br/>
+sc start gvm
+
+Start the emulator, run:<br/>
+YourPath\android_sdk\emulator\emulator.exe -avd PixelAVD
+
+-----
+You can also:<br/>
+sc stop gvm<br/>
+sc delete gvm
+
+#### 5. Graphics acceleration
+
+https://developer.android.com/studio/run/emulator-acceleration#command-gpu
