@@ -32,7 +32,7 @@ partial class FormAspect
         tpl = new TableLayoutPanel();
         button1 = new TokenButton();
         tbox = new TextBox();
-        tpl.SuspendLayout();
+        panel = new Panel();
         SuspendLayout();
         // 
         // tpl
@@ -44,7 +44,6 @@ partial class FormAspect
         tpl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333F));
         tpl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333F));
         tpl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333F));
-        tpl.Controls.Add(button1, 0, 0);
         tpl.Location = new Point(40, 40);
         tpl.Name = "tpl";
         tpl.RowCount = 3;
@@ -53,7 +52,6 @@ partial class FormAspect
         tpl.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33333F));
         tpl.Size = new Size(324, 320);
         tpl.TabIndex = 0;
-        tpl.SizeChanged += tpl_SizeChanged;
         // 
         // button1
         // 
@@ -72,12 +70,21 @@ partial class FormAspect
         // 
         // tbox
         // 
-        tbox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        tbox.Anchor = AnchorStyles.Top;
         tbox.BackColor = SystemColors.Desktop;
-        tbox.Location = new Point(40, 540);
+        tbox.Location = new Point(40, 11);
         tbox.Name = "tbox";
         tbox.Size = new Size(324, 23);
         tbox.TabIndex = 1;
+        // 
+        // panel
+        // 
+        panel.Dock = DockStyle.Bottom;
+        panel.BackColor = Color.FromArgb(196, 0, 0, 0);
+        panel.Location = new Point(0, 500);
+        panel.Name = "panel";
+        panel.Size = new Size(400, 100);
+        panel.TabIndex = 2;
         // 
         // FormAspect
         // 
@@ -88,11 +95,11 @@ partial class FormAspect
         ClientSize = new Size(400, 600);
         Controls.Add(tbox);
         Controls.Add(tpl);
+        Controls.Add(panel);
         MaximizeBox = false;
         Name = "FormAspect";
         Text = "Tic-tac-toe";
         Load += FormAspect_Load;
-        tpl.ResumeLayout(false);
         ResumeLayout(false);
         PerformLayout();
     }
@@ -102,4 +109,5 @@ partial class FormAspect
     private TableLayoutPanel tpl;
     private TextBox tbox;
     private TokenButton button1;
+    private Panel panel;
 }

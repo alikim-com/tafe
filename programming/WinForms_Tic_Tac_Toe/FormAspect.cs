@@ -1,22 +1,34 @@
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace WinFormsApp1;
 
 public partial class FormAspect : Form
 {
-    double ratio;
-    Size marginSize;
+    double ratio; // main window
+    Size marginSize; // non-client area
+
+    double pRatio; // ratio for the bottom panel
 
     public FormAspect()
     {
         DoubleBuffered = true;
         InitializeComponent();
+        typeof(TableLayoutPanel).InvokeMember("DoubleBuffered",
+    BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+    null, tpl, new object[] { true });
+        typeof(Panel).InvokeMember("DoubleBuffered",
+    BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+    null, panel, new object[] { true });
+
     }
 
     void FormAspect_Load(object sender, EventArgs e)
     {
         marginSize = Size - ClientSize;
         ratio = (double)Size.Width / Size.Height;
+
+        pRatio = panel.Width / panel.Height;
 
     }
 
@@ -71,18 +83,17 @@ public partial class FormAspect : Form
                     break;
             }
             Marshal.StructureToPtr(rc, m.LParam, true);
+
+            // adjust components
+
+            var width = tpl.Size.Width;
+            tpl.Size = new Size(width, width);
+
+            panel.Height = (int)(panel.Width / pRatio);
+
+
         }
         base.WndProc(ref m);
-    }
-
-    bool tpl_lock = false;
-    void tpl_SizeChanged(object sender, EventArgs e)
-    {
-        if (tpl_lock) return;
-        tpl_lock = true;
-        var width = tpl.Size.Width;
-        tpl.Size = new Size(width, width);
-        tpl_lock = false;
     }
 
     private void button1_Click(object sender, EventArgs e)
