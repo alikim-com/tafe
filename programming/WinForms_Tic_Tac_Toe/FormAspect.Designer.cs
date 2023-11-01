@@ -30,7 +30,7 @@ partial class FormAspect
     {
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAspect));
         tpl = new TableLayoutPanel();
-        button1 = new TokenButton();
+        button1 = new Button();
         tbox = new TextBox();
         panel = new Panel();
         SuspendLayout();
@@ -38,7 +38,7 @@ partial class FormAspect
         // tpl
         // 
         tpl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        tpl.BackColor = Color.FromArgb(192, 0, 0, 0);
+        tpl.BackColor = Color.FromArgb(180, 0, 0, 0);
         tpl.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
         tpl.ColumnCount = 3;
         tpl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333F));
@@ -66,7 +66,7 @@ partial class FormAspect
         button1.Size = new Size(86, 85);
         button1.TabIndex = 0;
         button1.UseVisualStyleBackColor = true;
-        button1.Click += button1_Click;
+        //button1.Click += button1_Click;
         // 
         // tbox
         // 
@@ -79,8 +79,8 @@ partial class FormAspect
         // 
         // panel
         // 
-        panel.Dock = DockStyle.Bottom;
         panel.BackColor = Color.FromArgb(196, 0, 0, 0);
+        panel.Dock = DockStyle.Bottom;
         panel.Location = new Point(0, 500);
         panel.Name = "panel";
         panel.Size = new Size(400, 100);
@@ -93,6 +93,7 @@ partial class FormAspect
         BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(400, 600);
+        ControlAdded += FormAspect_ControlAdded;
         Controls.Add(tbox);
         Controls.Add(tpl);
         Controls.Add(panel);
@@ -108,6 +109,6 @@ partial class FormAspect
 
     private TableLayoutPanel tpl;
     private TextBox tbox;
-    private TokenButton button1;
+    private Button button1;
     private Panel panel;
 }

@@ -1,3 +1,4 @@
+using System.Drawing.Imaging;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -30,6 +31,59 @@ public partial class FormAspect : Form
 
         pRatio = panel.Width / panel.Height;
 
+    }
+
+    public static Image TransparentCopy(Image src, float opacity)
+    {
+        Bitmap dst = new(src.Width, src.Height);
+        using (Graphics g = Graphics.FromImage(dst))
+        {
+            ColorMatrix matrix = new()
+            {
+                Matrix33 = opacity
+            };
+            ImageAttributes attributes = new();
+            attributes.SetColorMatrix(
+                matrix,
+                ColorMatrixFlag.Default,
+                ColorAdjustType.Bitmap
+            );
+            g.DrawImage(
+                src,
+                new Rectangle(0, 0, dst.Width, dst.Height),
+                0, 0, src.Width, src.Height,
+                GraphicsUnit.Pixel,
+                attributes
+            );
+        }
+        return dst;
+    }
+
+    static void ExpandPanel(Control control, Dictionary<string, Image?> images)
+    {
+        control.MouseHover += (object? sender, EventArgs e) =>
+        {
+            if (!images.TryGetValue("MouseHover", out Image? image)) return;
+            if (control.BackgroundImage != image) control.BackgroundImage = image;
+        };
+        control.MouseLeave += (object? sender, EventArgs e) =>
+        {
+            if (!images.TryGetValue("MouseLeave", out Image? image)) return;
+            if (control.BackgroundImage != image) control.BackgroundImage = image;
+        };
+    }
+
+    private void FormAspect_ControlAdded(object sender, ControlEventArgs e)
+    {
+        if (e.Control?.Name == "panel")
+            ExpandPanel(
+                e.Control,
+                new Dictionary<string, Image?>() {
+                { "Default", Resource.FaceLeft },
+                { "MouseHover", Resource.FaceLeft },
+                { "MouseLeave", null },
+                }
+            );
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -91,13 +145,9 @@ public partial class FormAspect : Form
 
             panel.Height = (int)(panel.Width / pRatio);
 
-
         }
+
         base.WndProc(ref m);
     }
 
-    private void button1_Click(object sender, EventArgs e)
-    {
-        tbox.Text += "clicked ";
-    }
 }
