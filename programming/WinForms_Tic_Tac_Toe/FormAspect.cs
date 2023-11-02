@@ -10,14 +10,31 @@ public partial class FormAspect : Form
 
     double pRatio; // ratio for the bottom panel
 
-    public static readonly Dictionary<string, Image> ResourceEx = new()
+    struct SizeD
     {
-        { "FaceLeftDefault", ImageUtility.GetImageCopyWithAlpha(Resource.FaceLeft, 0.5f) },
-        { "FaceRightDefault", ImageUtility.GetImageCopyWithAlpha(Resource.FaceRight, 0.5f) },
-    };
+        public double Width;
+        public double Height;
+    }
+
+    readonly int labelChoiceWidth;
+    readonly float labelChoiceFontSize;
+    SizeD labelChoiceRatio; // size of the label as a fraction of the parent size
+
+
+    public static Dictionary<string, Image> ResourceEx = new(); // graphics assets
 
     public FormAspect()
     {
+        static void ApplyDoubleBuffer(Control control)
+        {
+            control.GetType().InvokeMember(
+                "DoubleBuffered",
+                BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+                null, control, new object[] { true }
+            );
+        }
+
+
         // to extend the behaviour of sub components
         ControlAdded += FormAspect_ControlAdded;
 
@@ -27,36 +44,63 @@ public partial class FormAspect : Form
         InitializeComponent();
 
         // prevent backgound flickering for components
-        typeof(TableLayoutPanel).InvokeMember(
-            "DoubleBuffered",
-            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-            null, tpl, new object[] { true }
-        );
-        typeof(Panel).InvokeMember(
-            "DoubleBuffered",
-            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-            null, panel, new object[] { true }
-        );
+        ApplyDoubleBuffer(panel);
+        ApplyDoubleBuffer(tpl);
+        ApplyDoubleBuffer(labelChoice);
+
+        // init
+        labelChoiceWidth = labelChoice.Width;
+        labelChoiceFontSize = labelChoice.Font.Size;
+        labelChoiceRatio = new SizeD
+        {
+            Width = (double)labelChoice.Width / panel.Width,
+            Height = (double)labelChoice.Height / panel.Height,
+        };
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
     {
+        static void CreateExtendedImage(Image src, Control control, Size offset, string name)
+        {
+            Image offsetImage =
+                ImageUtility.GetOverlayOnBackground(control.Size, src, offset);
+
+            ResourceEx.Add(name, offsetImage);
+            ResourceEx.Add(name + "Default", ImageUtility.GetImageCopyWithAlpha(offsetImage, 0.5f));
+        }
+
         if (e.Control == panel)
         {
+            // create left & right panel extended images
+            Size offsetLeft = new(0, 0);
+            Size offsetRight = pRight.Size - Resource.FaceRight.Size;
+            CreateExtendedImage(Resource.FaceLeft, pLeft, offsetLeft, "FaceLeft");
+            CreateExtendedImage(Resource.FaceRight, pRight, offsetRight, "FaceRight");
+
             AddControlBackgroundEvents(
                 pLeft,
                 new Dictionary<string, Image?>() {
                     { "Default", ResourceEx["FaceLeftDefault"] },
-                    { "MouseHover", Resource.FaceLeft },
+                    { "MouseEnter", ResourceEx["FaceLeft"] },
                     { "MouseLeave", ResourceEx["FaceLeftDefault"] },
+                },
+                new Dictionary<string, Color?>() {
+                    { "Default", Color.Transparent },
+                    { "MouseEnter", Color.FromArgb(12, 200, 104, 34) },
+                    { "MouseLeave", Color.Transparent },
                 }
             );
             AddControlBackgroundEvents(
                 pRight,
                 new Dictionary<string, Image?>() {
                     { "Default", ResourceEx["FaceRightDefault"] },
-                    { "MouseHover", Resource.FaceRight },
+                    { "MouseEnter", ResourceEx["FaceRight"] },
                     { "MouseLeave", ResourceEx["FaceRightDefault"] },
+                },
+                new Dictionary<string, Color?>() {
+                    { "Default", Color.Transparent },
+                    { "MouseEnter", Color.FromArgb(16, 185, 36, 199) },
+                    { "MouseLeave", Color.Transparent },
                 }
             );
         }
@@ -72,29 +116,35 @@ public partial class FormAspect : Form
 
     static void AddControlBackgroundEvents(
         Control control,
-        Dictionary<string, Image?> images)
+        Dictionary<string, Image?> images,
+        Dictionary<string, Color?> bgColors)
     {
-        if (
-            control is PictureBox box &&
-            images.TryGetValue("Default", out Image? image))
-        {
-            box.Image = image;
-        }
+        if (control is not PictureBox box) return;
 
-        control.MouseHover += (object? sender, EventArgs e) =>
+        if (images.TryGetValue("Default", out Image? image))
+            box.Image = image;
+
+        if (!bgColors.TryGetValue("Default", out Color? bgColor)) return;
+        box.BackColor = bgColor ?? Color.Transparent;
+
+        box.MouseEnter += (object? sender, EventArgs e) =>
         {
-            if (!images.TryGetValue("MouseHover", out Image? image)) return;
-            if (control.BackgroundImage != image) control.BackgroundImage = image;
+            if (!images.TryGetValue("MouseEnter", out Image? image)) return;
+            if (box.Image != image) box.Image = image;
+            if (!bgColors.TryGetValue("MouseEnter", out Color? bgColor)) return;
+            box.BackColor = bgColor ?? Color.Transparent;
         };
 
-        control.MouseLeave += (object? sender, EventArgs e) =>
+        box.MouseLeave += (object? sender, EventArgs e) =>
         {
             if (!images.TryGetValue("MouseLeave", out Image? image)) return;
-            if (control.BackgroundImage != image) control.BackgroundImage = image;
+            if (box.Image != image) box.Image = image;
+            if (!bgColors.TryGetValue("MouseLeave", out Color? bgColor)) return;
+            box.BackColor = bgColor ?? Color.Transparent;
         };
     }
 
-    // ----------------------------------------------------------------------
+    // ---------------   constant client aspect ratio   ---------------
 
     [StructLayout(LayoutKind.Sequential)]
     struct RECT
@@ -117,9 +167,6 @@ public partial class FormAspect : Form
         BOTTOMRIGHT = 8
     }
 
-    /// <summary>
-    /// Implementation of a constant client aspect ratio
-    /// </summary>
     protected override void WndProc(ref Message m)
     {
         if (m.Msg == WM_SIZING)
@@ -155,8 +202,31 @@ public partial class FormAspect : Form
 
             panel.Height = (int)(panel.Width / pRatio);
 
+            labelChoice.Size = new Size(
+                (int)(panel.Width * labelChoiceRatio.Width),
+                (int)(panel.Height * labelChoiceRatio.Height)
+            );
+            labelChoice.Location = new Point(
+                (panel.Width - labelChoice.Width) / 2,
+                (panel.Height - labelChoice.Height) / 2
+            );
+            float newFontSize = labelChoiceFontSize * labelChoice.Width / labelChoiceWidth;
+            labelChoice.Font = new Font(labelChoice.Font.FontFamily, newFontSize);
+
         }
 
         base.WndProc(ref m);
+    }
+
+    private void pLeft_SizeChanged(object sender, EventArgs e)
+    {
+        pLeft.Width = panel.Width / 2;
+    }
+
+    private void pRight_SizeChanged(object sender, EventArgs e)
+    {
+        int hw = panel.Width / 2;
+        pRight.Location = new Point(hw, pRight.Location.Y);
+        pRight.Width = hw;
     }
 }

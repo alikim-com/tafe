@@ -31,13 +31,14 @@ partial class FormAspect
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAspect));
         tpl = new TableLayoutPanel();
         button1 = new Button();
-        tbox = new TextBox();
         panel = new Panel();
-        pLeft = new PictureBox();
+        labelChoice = new Label();
         pRight = new PictureBox();
+        pLeft = new PictureBox();
+        tb1 = new TextBox();
         panel.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)pLeft).BeginInit();
         ((System.ComponentModel.ISupportInitialize)pRight).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)pLeft).BeginInit();
         SuspendLayout();
         // 
         // tpl
@@ -72,49 +73,60 @@ partial class FormAspect
         button1.TabIndex = 0;
         button1.UseVisualStyleBackColor = true;
         // 
-        // tbox
-        // 
-        tbox.Anchor = AnchorStyles.Top;
-        tbox.BackColor = SystemColors.Desktop;
-        tbox.Location = new Point(40, 11);
-        tbox.Name = "tbox";
-        tbox.Size = new Size(324, 23);
-        tbox.TabIndex = 1;
-        // 
         // panel
         // 
         panel.BackColor = Color.FromArgb(196, 0, 0, 0);
-        panel.Controls.Add(pLeft);
+        panel.Controls.Add(labelChoice);
         panel.Controls.Add(pRight);
+        panel.Controls.Add(pLeft);
         panel.Dock = DockStyle.Bottom;
-        panel.Location = new Point(0, 390);
+        panel.Location = new Point(0, 391);
         panel.Name = "panel";
-        panel.Size = new Size(400, 210);
+        panel.Size = new Size(400, 209);
         panel.TabIndex = 2;
         // 
-        // pLeft
+        // labelChoice
         // 
-        pLeft.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        pLeft.BackColor = Color.FromArgb(0, 0, 0, 0);
-        pLeft.BackgroundImageLayout = ImageLayout.None;
-        pLeft.Cursor = Cursors.Hand;
-        pLeft.Location = new Point(0, 0);
-        pLeft.Name = "pLeft";
-        pLeft.Size = new Size(200, 210);
-        pLeft.TabIndex = 0;
-        pLeft.TabStop = false;
+        labelChoice.BackColor = Color.Transparent;
+        labelChoice.Font = new Font("Segoe UI", 14F, FontStyle.Regular, GraphicsUnit.Point);
+        labelChoice.ForeColor = Color.FromArgb(0, 255, 255, 255);
+        labelChoice.Location = new Point(157, 67);
+        labelChoice.Name = "labelChoice";
+        labelChoice.Size = new Size(100, 100);
+        labelChoice.TabIndex = 2;
+        labelChoice.Text = "CHOOSE\nYOUR\nSIDE";
+        labelChoice.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // pRight
         // 
-        pRight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        pRight.BackColor = Color.FromArgb(0, 0, 0, 0);
-        pRight.BackgroundImageLayout = ImageLayout.None;
+        pRight.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
         pRight.Cursor = Cursors.Hand;
         pRight.Location = new Point(200, 0);
         pRight.Name = "pRight";
-        pRight.Size = new Size(200, 210);
+        pRight.Size = new Size(200, 209);
+        pRight.SizeMode = PictureBoxSizeMode.StretchImage;
         pRight.TabIndex = 1;
         pRight.TabStop = false;
+        pRight.SizeChanged += pRight_SizeChanged;
+        // 
+        // pLeft
+        // 
+        pLeft.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+        pLeft.Cursor = Cursors.Hand;
+        pLeft.Location = new Point(0, 0);
+        pLeft.Name = "pLeft";
+        pLeft.Size = new Size(200, 209);
+        pLeft.SizeMode = PictureBoxSizeMode.StretchImage;
+        pLeft.TabIndex = 0;
+        pLeft.TabStop = false;
+        pLeft.SizeChanged += pLeft_SizeChanged;
+        // 
+        // tb1
+        // 
+        tb1.Location = new Point(40, 11);
+        tb1.Name = "tb1";
+        tb1.Size = new Size(324, 23);
+        tb1.TabIndex = 3;
         // 
         // FormAspect
         // 
@@ -123,7 +135,7 @@ partial class FormAspect
         BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(400, 600);
-        Controls.Add(tbox);
+        Controls.Add(tb1);
         Controls.Add(tpl);
         Controls.Add(panel);
         MaximizeBox = false;
@@ -132,8 +144,8 @@ partial class FormAspect
         Text = "Tic-tac-toe";
         Load += FormAspect_Load;
         panel.ResumeLayout(false);
-        ((System.ComponentModel.ISupportInitialize)pLeft).EndInit();
         ((System.ComponentModel.ISupportInitialize)pRight).EndInit();
+        ((System.ComponentModel.ISupportInitialize)pLeft).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -141,9 +153,10 @@ partial class FormAspect
     #endregion
 
     private TableLayoutPanel tpl;
-    private TextBox tbox;
     private Button button1;
     private Panel panel;
     private PictureBox pLeft;
     private PictureBox pRight;
+    private Label labelChoice;
+    private TextBox tb1;
 }

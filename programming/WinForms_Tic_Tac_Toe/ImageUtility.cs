@@ -11,7 +11,7 @@ internal class ImageUtility
         using (Graphics g = Graphics.FromImage(dst))
         {
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(src, offsetTL.Width, offsetTL.Height, dst.Width, dst.Height);
+            g.DrawImage(src, offsetTL.Width, offsetTL.Height, src.Width, src.Height);
             g.Save();
         }
         return dst; // size vs point
