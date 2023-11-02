@@ -33,6 +33,11 @@ partial class FormAspect
         button1 = new Button();
         tbox = new TextBox();
         panel = new Panel();
+        pLeft = new PictureBox();
+        pRight = new PictureBox();
+        panel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)pLeft).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)pRight).BeginInit();
         SuspendLayout();
         // 
         // tpl
@@ -66,7 +71,6 @@ partial class FormAspect
         button1.Size = new Size(86, 85);
         button1.TabIndex = 0;
         button1.UseVisualStyleBackColor = true;
-        //button1.Click += button1_Click;
         // 
         // tbox
         // 
@@ -80,11 +84,37 @@ partial class FormAspect
         // panel
         // 
         panel.BackColor = Color.FromArgb(196, 0, 0, 0);
+        panel.Controls.Add(pLeft);
+        panel.Controls.Add(pRight);
         panel.Dock = DockStyle.Bottom;
-        panel.Location = new Point(0, 500);
+        panel.Location = new Point(0, 390);
         panel.Name = "panel";
-        panel.Size = new Size(400, 100);
+        panel.Size = new Size(400, 210);
         panel.TabIndex = 2;
+        // 
+        // pLeft
+        // 
+        pLeft.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        pLeft.BackColor = Color.FromArgb(0, 0, 0, 0);
+        pLeft.BackgroundImageLayout = ImageLayout.None;
+        pLeft.Cursor = Cursors.Hand;
+        pLeft.Location = new Point(0, 0);
+        pLeft.Name = "pLeft";
+        pLeft.Size = new Size(200, 210);
+        pLeft.TabIndex = 0;
+        pLeft.TabStop = false;
+        // 
+        // pRight
+        // 
+        pRight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        pRight.BackColor = Color.FromArgb(0, 0, 0, 0);
+        pRight.BackgroundImageLayout = ImageLayout.None;
+        pRight.Cursor = Cursors.Hand;
+        pRight.Location = new Point(200, 0);
+        pRight.Name = "pRight";
+        pRight.Size = new Size(200, 210);
+        pRight.TabIndex = 1;
+        pRight.TabStop = false;
         // 
         // FormAspect
         // 
@@ -93,14 +123,17 @@ partial class FormAspect
         BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(400, 600);
-        ControlAdded += FormAspect_ControlAdded;
         Controls.Add(tbox);
         Controls.Add(tpl);
         Controls.Add(panel);
         MaximizeBox = false;
         Name = "FormAspect";
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Tic-tac-toe";
         Load += FormAspect_Load;
+        panel.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)pLeft).EndInit();
+        ((System.ComponentModel.ISupportInitialize)pRight).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -111,4 +144,6 @@ partial class FormAspect
     private TextBox tbox;
     private Button button1;
     private Panel panel;
+    private PictureBox pLeft;
+    private PictureBox pRight;
 }

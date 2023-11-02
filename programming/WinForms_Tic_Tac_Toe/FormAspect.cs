@@ -1,4 +1,3 @@
-using System.Drawing.Imaging;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -11,17 +10,56 @@ public partial class FormAspect : Form
 
     double pRatio; // ratio for the bottom panel
 
+    public static readonly Dictionary<string, Image> ResourceEx = new()
+    {
+        { "FaceLeftDefault", ImageUtility.GetImageCopyWithAlpha(Resource.FaceLeft, 0.5f) },
+        { "FaceRightDefault", ImageUtility.GetImageCopyWithAlpha(Resource.FaceRight, 0.5f) },
+    };
+
     public FormAspect()
     {
-        DoubleBuffered = true;
-        InitializeComponent();
-        typeof(TableLayoutPanel).InvokeMember("DoubleBuffered",
-    BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-    null, tpl, new object[] { true });
-        typeof(Panel).InvokeMember("DoubleBuffered",
-    BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-    null, panel, new object[] { true });
+        // to extend the behaviour of sub components
+        ControlAdded += FormAspect_ControlAdded;
 
+        // prevent main window flickering
+        DoubleBuffered = true;
+
+        InitializeComponent();
+
+        // prevent backgound flickering for components
+        typeof(TableLayoutPanel).InvokeMember(
+            "DoubleBuffered",
+            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+            null, tpl, new object[] { true }
+        );
+        typeof(Panel).InvokeMember(
+            "DoubleBuffered",
+            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+            null, panel, new object[] { true }
+        );
+    }
+
+    void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
+    {
+        if (e.Control == panel)
+        {
+            AddControlBackgroundEvents(
+                pLeft,
+                new Dictionary<string, Image?>() {
+                    { "Default", ResourceEx["FaceLeftDefault"] },
+                    { "MouseHover", Resource.FaceLeft },
+                    { "MouseLeave", ResourceEx["FaceLeftDefault"] },
+                }
+            );
+            AddControlBackgroundEvents(
+                pRight,
+                new Dictionary<string, Image?>() {
+                    { "Default", ResourceEx["FaceRightDefault"] },
+                    { "MouseHover", Resource.FaceRight },
+                    { "MouseLeave", ResourceEx["FaceRightDefault"] },
+                }
+            );
+        }
     }
 
     void FormAspect_Load(object sender, EventArgs e)
@@ -29,43 +67,26 @@ public partial class FormAspect : Form
         marginSize = Size - ClientSize;
         ratio = (double)Size.Width / Size.Height;
 
-        pRatio = panel.Width / panel.Height;
-
+        pRatio = (double)panel.Width / panel.Height;
     }
 
-    public static Image TransparentCopy(Image src, float opacity)
+    static void AddControlBackgroundEvents(
+        Control control,
+        Dictionary<string, Image?> images)
     {
-        Bitmap dst = new(src.Width, src.Height);
-        using (Graphics g = Graphics.FromImage(dst))
+        if (
+            control is PictureBox box &&
+            images.TryGetValue("Default", out Image? image))
         {
-            ColorMatrix matrix = new()
-            {
-                Matrix33 = opacity
-            };
-            ImageAttributes attributes = new();
-            attributes.SetColorMatrix(
-                matrix,
-                ColorMatrixFlag.Default,
-                ColorAdjustType.Bitmap
-            );
-            g.DrawImage(
-                src,
-                new Rectangle(0, 0, dst.Width, dst.Height),
-                0, 0, src.Width, src.Height,
-                GraphicsUnit.Pixel,
-                attributes
-            );
+            box.Image = image;
         }
-        return dst;
-    }
 
-    static void ExpandPanel(Control control, Dictionary<string, Image?> images)
-    {
         control.MouseHover += (object? sender, EventArgs e) =>
         {
             if (!images.TryGetValue("MouseHover", out Image? image)) return;
             if (control.BackgroundImage != image) control.BackgroundImage = image;
         };
+
         control.MouseLeave += (object? sender, EventArgs e) =>
         {
             if (!images.TryGetValue("MouseLeave", out Image? image)) return;
@@ -73,18 +94,7 @@ public partial class FormAspect : Form
         };
     }
 
-    private void FormAspect_ControlAdded(object sender, ControlEventArgs e)
-    {
-        if (e.Control?.Name == "panel")
-            ExpandPanel(
-                e.Control,
-                new Dictionary<string, Image?>() {
-                { "Default", Resource.FaceLeft },
-                { "MouseHover", Resource.FaceLeft },
-                { "MouseLeave", null },
-                }
-            );
-    }
+    // ----------------------------------------------------------------------
 
     [StructLayout(LayoutKind.Sequential)]
     struct RECT
@@ -149,5 +159,4 @@ public partial class FormAspect : Form
 
         base.WndProc(ref m);
     }
-
 }

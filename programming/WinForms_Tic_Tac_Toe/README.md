@@ -4,6 +4,6 @@ Addressed problems:
 - Preserving the aspect ratio of the main window
 - Loading background images
 - Image flickering when resizing the main window and controls (double buffer)
-- Custom button class with data binding and dynamic background
+- Creating transparent images dynamically and applying them to controls on mouse events
 - AI logic for playing the game
 - 
