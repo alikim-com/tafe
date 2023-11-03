@@ -5,7 +5,7 @@ internal class PanelWrapper
 {
     readonly Panel box;
 
-    readonly Size bgOffset;
+    readonly string bgAlign;
     readonly Image bgResource;
     readonly Dictionary<string, Image> backgr = new();
 
@@ -16,24 +16,26 @@ internal class PanelWrapper
     public PanelWrapper(
         Panel _box,
         Image _bgResource,
-        Size _bgOffset,
+        string _bgAlign,
         Dictionary<string, Color?> _bgColor)
     {
         box = _box;
         bgResource = _bgResource;
-        bgOffset = _bgOffset;
+        bgAlign = _bgAlign;
         bgColor = _bgColor;
 
         CreateBgSet();
         CreateEventHandlers();
 
-        // evtDetail["Default"](this, new EventArgs()); // set default state
+        AddEventHandlers();
+
+        evtDetail["Default"](this, new EventArgs()); // set default state
     }
 
     void CreateBgSet()
     {
         Image offsetImage =
-            ImageUtility.GetOverlayOnBackground(box.Size, bgResource, bgOffset);
+            ImageUtility.GetOverlayOnBackground(box.Size, bgResource, bgAlign);
 
         backgr.Add("MouseEnter", offsetImage);
         backgr.Add("Default", ImageUtility.GetImageCopyWithAlpha(offsetImage, 0.5f));
@@ -54,11 +56,14 @@ internal class PanelWrapper
 
     void CreateEventHandlers()
     {
-        foreach(var evtName in new string[] { "Default", "MouseEnter", "MouseLeave" })
+        foreach (var evtName in new string[] { "Default", "MouseEnter", "MouseLeave" })
             evtDetail.Add(evtName, CreateEventHandler(evtName));
     }
 
-//        box.MouseEnter += AssertDetail("MouseEnter");
-//        box.MouseLeave += AssertDetail("MouseLeave");
+    void AddEventHandlers()
+    {
+        box.MouseEnter += evtDetail["MouseEnter"];
+        box.MouseLeave += evtDetail["MouseLeave"];
+    }
 
 }

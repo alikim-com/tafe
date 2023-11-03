@@ -64,9 +64,10 @@ partial class AppForm
         pLeft.BackgroundImageLayout = ImageLayout.Stretch;
         pLeft.Cursor = Cursors.Hand;
         pLeft.Dock = DockStyle.Fill;
-        pLeft.Location = new Point(4, 423);
+        pLeft.Location = new Point(1, 420);
+        pLeft.Margin = new Padding(0);
         pLeft.Name = "pLeft";
-        pLeft.Size = new Size(125, 139);
+        pLeft.Size = new Size(131, 145);
         pLeft.TabIndex = 0;
         pLeft.Click += pLeft_Click;
         // 
@@ -75,25 +76,26 @@ partial class AppForm
         pRight.BackgroundImageLayout = ImageLayout.Stretch;
         pRight.Cursor = Cursors.Hand;
         pRight.Dock = DockStyle.Fill;
-        pRight.Location = new Point(269, 423);
+        pRight.Location = new Point(266, 420);
+        pRight.Margin = new Padding(0);
         pRight.Name = "pRight";
-        pRight.Size = new Size(127, 139);
+        pRight.Size = new Size(133, 145);
         pRight.TabIndex = 1;
         pRight.Click += pRight_Click;
         // 
-        // FormAspect
+        // AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(255, 0, 0, 0);
+        BackColor = Color.FromArgb(0, 0, 0);
         BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(400, 600);
         Controls.Add(tLayout);
         MaximizeBox = false;
-        Name = "FormAspect";
+        Name = "AppForm";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "Tic-tac-toe";
+        Text = "Tic-Tac-Toe";
         Load += FormAspect_Load;
         tLayout.ResumeLayout(false);
         ResumeLayout(false);

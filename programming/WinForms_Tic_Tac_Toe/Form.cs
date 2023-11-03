@@ -20,8 +20,8 @@ public partial class AppForm : Form
     //readonly float labelChoiceFontSize;
     //SizeD labelChoiceRatio; // size of the label as a fraction of the parent size
 
-    PanelWrapper pwLeft;
-    PanelWrapper pwRight;
+    PanelWrapper? pwLeft;
+    PanelWrapper? pwRight;
 
     public AppForm()
     {
@@ -62,43 +62,21 @@ public partial class AppForm : Form
     {
         if (e.Control == tLayout)
         {
-            Size offsetLeft = new(0, 0);
-            Size offsetRight = pLeft.Size - Resource.FaceRight.Size;
-            
             Color defColor = Color.FromArgb(16, 0, 0, 0);
+            Dictionary<string, Color?> colorsLeft = new() {
+                { "Default", defColor },
+                { "MouseEnter", Color.FromArgb(12, 200, 104, 34) },
+                { "MouseLeave", defColor }
+            };
+            Dictionary<string, Color?> colorsRight = new() {
+                { "Default", defColor },
+                { "MouseEnter", Color.FromArgb(16, 185, 36, 199) },
+                { "MouseLeave", defColor }
+            };
 
-            PanelWrapper(
-        Panel _box,
-        Image _bgResource,
-        Size _bgOffset,
-        Dictionary<string, Color?> _bgColor)
+            pwLeft = new PanelWrapper(pLeft, Resource.FaceLeft, "left", colorsLeft);
+            pwRight = new PanelWrapper(pRight, Resource.FaceRight, "right", colorsRight);
 
-            AddControlBackgroundEvents(
-                pLeft,
-                new Dictionary<string, Image?>() {
-                    { "Default", ResourceEx["FaceLeftDefault"] },
-                    { "MouseEnter", ResourceEx["FaceLeft"] },
-                    { "MouseLeave", ResourceEx["FaceLeftDefault"] },
-                },
-                new Dictionary<string, Color?>() {
-                    { "Default", defColor },
-                    { "MouseEnter", Color.FromArgb(12, 200, 104, 34) },
-                    { "MouseLeave", defColor },
-                }
-            );
-            AddControlBackgroundEvents(
-                pLeft,
-                new Dictionary<string, Image?>() {
-                    { "Default", ResourceEx["FaceRightDefault"] },
-                    { "MouseEnter", ResourceEx["FaceRight"] },
-                    { "MouseLeave", ResourceEx["FaceRightDefault"] },
-                },
-                new Dictionary<string, Color?>() {
-                    { "Default", defColor },
-                    { "MouseEnter", Color.FromArgb(16, 185, 36, 199) },
-                    { "MouseLeave", defColor },
-                }
-            );
         }
     }
 
