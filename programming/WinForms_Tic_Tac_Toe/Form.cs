@@ -43,9 +43,10 @@ public partial class AppForm : Form
         InitializeComponent();
 
         // prevent backgound flickering for components
-        ApplyDoubleBuffer(pLeft);
-        ApplyDoubleBuffer(pRight);
-        ApplyDoubleBuffer(tLayout);
+        Control[] dbuffed = 
+            new Control[] { pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice };
+        
+        foreach(var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
         //// init
         //labelChoiceWidth = labelChoice.Width;
@@ -65,34 +66,46 @@ public partial class AppForm : Form
             Color defColor = Color.FromArgb(128, 0, 0, 0);
             Dictionary<string, Color?> colorsLeft = new() {
                 { "Default", defColor },
-                { "MouseEnter", 
+                { "MouseEnter",
                   ColorExtensions.BlendOver(Color.FromArgb(12, 200, 104, 34), defColor) },
                 { "MouseLeave", defColor }
             };
             Dictionary<string, Color?> colorsRight = new() {
                 { "Default", defColor },
-                { "MouseEnter", 
+                { "MouseEnter",
                   ColorExtensions.BlendOver(Color.FromArgb(16, 185, 36, 199), defColor) },
                 { "MouseLeave", defColor }
             };
 
-            pwLeft = new PanelWrapper(pLeft, Resource.FaceLeft, "left", colorsLeft);
-            pwRight = new PanelWrapper(pRight, Resource.FaceRight, "right", colorsRight);
+            pwLeft = new PanelWrapper(
+                pLeft, 
+                Resource.FaceLeft, 
+                "left", 
+                colorsLeft, 
+                new Panel[] { sTL, sBL }
+            );
+            pwRight = new PanelWrapper(
+                pRight, 
+                Resource.FaceRight, 
+                "right", 
+                colorsRight,
+                new Panel[] { sTR, sBR }
+            );
         }
     }
 
     private void pLeft_Click(object sender, EventArgs e)
     {
-        //RemoveControlBackgroundEvents(pLeft);
-        //RemoveControlBackgroundEvents(pLeft);
         // TODO remove click, 2 more labels, "you won\n reset"
+        pwLeft?.RemoveEventHandlers();
+        pwRight?.RemoveEventHandlers();
         Player = "playerLeft";
     }
 
     private void pRight_Click(object sender, EventArgs e)
     {
-        //RemoveControlBackgroundEvents(pLeft);
-        //RemoveControlBackgroundEvents(pLeft);
+        pwLeft?.RemoveEventHandlers();
+        pwRight?.RemoveEventHandlers();
         Player = "playerRight";
     }
 
@@ -100,8 +113,6 @@ public partial class AppForm : Form
     {
         marginSize = Size - ClientSize;
         cRatio = (double)ClientSize.Width / ClientSize.Height;
-
-        //pRatio = (double)panel.Width / panel.Height;
     }
 
 

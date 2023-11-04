@@ -82,7 +82,7 @@ public class ImageUtility
         );
     }
 
-    public static Image GetOverlayOnBackground(Size dstSize, Image src, string align)
+    public static Image GetOverlayOnBackground(Size dstSize, Image src, Color? bg, string align)
     {
         Size scaledSrc = FitRect(dstSize, src.Size);
         Size offsetTL = align switch
@@ -95,6 +95,7 @@ public class ImageUtility
         Bitmap dst = new(dstSize.Width, dstSize.Height);
         using (Graphics g = Graphics.FromImage(dst))
         {
+            g.Clear(bg ?? Color.Transparent);
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.DrawImage(src, offsetTL.Width, offsetTL.Height, scaledSrc.Width, scaledSrc.Height);
             g.Save();

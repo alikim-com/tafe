@@ -4,6 +4,7 @@ namespace WinFormsApp1;
 internal class PanelWrapper
 {
     readonly Panel box;
+    readonly Panel[] extra;
 
     readonly string bgAlign;
     readonly Image bgResource;
@@ -17,12 +18,14 @@ internal class PanelWrapper
         Panel _box,
         Image _bgResource,
         string _bgAlign,
-        Dictionary<string, Color?> _bgColor)
+        Dictionary<string, Color?> _bgColor,
+        Panel[] _extra)
     {
         box = _box;
         bgResource = _bgResource;
         bgAlign = _bgAlign;
         bgColor = _bgColor;
+        extra = _extra;
 
         CreateBgSet();
         CreateEventHandlers();
@@ -34,12 +37,25 @@ internal class PanelWrapper
 
     void CreateBgSet()
     {
-        Image offsetImage =
-            ImageUtility.GetOverlayOnBackground(box.Size, bgResource, bgAlign);
+        Image bgResourceDef = ImageUtility.GetImageCopyWithAlpha(bgResource, 0.66f);
 
-        backgr.Add("MouseEnter", offsetImage);
-        backgr.Add("Default", ImageUtility.GetImageCopyWithAlpha(offsetImage, 0.5f));
-        backgr.Add("MouseLeave", backgr["Default"]);
+        Image bgDef = ImageUtility.GetOverlayOnBackground(
+            box.Size,
+            bgResourceDef,
+            bgColor["Default"], 
+            bgAlign
+        );
+
+        Image bgEnter = ImageUtility.GetOverlayOnBackground(
+            box.Size,
+            bgResource,
+            bgColor["MouseEnter"],
+            bgAlign
+        );
+
+        backgr.Add("MouseEnter", bgEnter);
+        backgr.Add("Default", bgDef);
+        backgr.Add("MouseLeave", bgDef);
 
     }
 
@@ -50,7 +66,7 @@ internal class PanelWrapper
             if (!backgr.TryGetValue(evtName, out Image? image)) return;
             if (box.BackgroundImage != image) box.BackgroundImage = image;
             if (!bgColor.TryGetValue(evtName, out Color? color)) return;
-            box.BackColor = color ?? Color.Transparent;
+            foreach(var ex in extra) ex.BackColor = color ?? Color.Transparent;
         };
     }
 
@@ -60,10 +76,18 @@ internal class PanelWrapper
             evtDetail.Add(evtName, CreateEventHandler(evtName));
     }
 
-    void AddEventHandlers()
+    public void AddEventHandlers()
     {
         box.MouseEnter += evtDetail["MouseEnter"];
         box.MouseLeave += evtDetail["MouseLeave"];
+        box.Cursor = Cursors.Hand;
+    }
+
+    public void RemoveEventHandlers()
+    {
+        box.MouseEnter -= evtDetail["MouseEnter"];
+        box.MouseLeave -= evtDetail["MouseLeave"];
+        box.Cursor = Cursors.Default;
     }
 
 }
