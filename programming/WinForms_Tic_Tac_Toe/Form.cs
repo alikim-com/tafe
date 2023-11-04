@@ -62,24 +62,24 @@ public partial class AppForm : Form
     {
         if (e.Control == tLayout)
         {
-            Color defColor = Color.FromArgb(16, 0, 0, 0);
+            Color defColor = Color.FromArgb(128, 0, 0, 0);
             Dictionary<string, Color?> colorsLeft = new() {
                 { "Default", defColor },
-                { "MouseEnter", Color.FromArgb(12, 200, 104, 34) },
+                { "MouseEnter", 
+                  ColorExtensions.BlendOver(Color.FromArgb(12, 200, 104, 34), defColor) },
                 { "MouseLeave", defColor }
             };
             Dictionary<string, Color?> colorsRight = new() {
                 { "Default", defColor },
-                { "MouseEnter", Color.FromArgb(16, 185, 36, 199) },
+                { "MouseEnter", 
+                  ColorExtensions.BlendOver(Color.FromArgb(16, 185, 36, 199), defColor) },
                 { "MouseLeave", defColor }
             };
 
             pwLeft = new PanelWrapper(pLeft, Resource.FaceLeft, "left", colorsLeft);
             pwRight = new PanelWrapper(pRight, Resource.FaceRight, "right", colorsRight);
-
         }
     }
-
 
     private void pLeft_Click(object sender, EventArgs e)
     {
