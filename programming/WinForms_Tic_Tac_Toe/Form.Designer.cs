@@ -106,9 +106,9 @@ partial class AppForm
         tSplit.Margin = new Padding(0);
         tSplit.Name = "tSplit";
         tSplit.RowCount = 3;
-        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333F));
-        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333F));
-        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333F));
+        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
+        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 40F));
+        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
         tSplit.Size = new Size(133, 179);
         tSplit.TabIndex = 2;
         // 
@@ -133,35 +133,33 @@ partial class AppForm
         // sBL
         // 
         sBL.Dock = DockStyle.Fill;
-        sBL.Location = new Point(0, 0);
+        sBL.Location = new Point(0, 118);
         sBL.Margin = new Padding(0);
-        sBL.Name = "sTL";
-        sBL.Size = new Size(66, 59);
+        sBL.Name = "sBL";
+        sBL.Size = new Size(66, 61);
         sBL.TabIndex = 2;
         // 
         // sBR
         // 
         sBR.Dock = DockStyle.Fill;
-        sBR.Location = new Point(66, 0);
+        sBR.Location = new Point(66, 118);
         sBR.Margin = new Padding(0);
-        sBR.Name = "sTR";
-        sBR.Size = new Size(67, 59);
+        sBR.Name = "sBR";
+        sBR.Size = new Size(67, 61);
         sBR.TabIndex = 3;
         // 
         // choice
         // 
-        choice.AutoSize = true;
         choice.BackColor = Color.FromArgb(128, 0, 0, 0);
         tSplit.SetColumnSpan(choice, 2);
         choice.Dock = DockStyle.Fill;
-        choice.Font = new Font("Segoe UI", 14F, FontStyle.Regular, GraphicsUnit.Point);
+        choice.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
         choice.ForeColor = Color.FromArgb(0, 255, 255, 255);
         choice.Location = new Point(0, 59);
         choice.Margin = new Padding(0);
         choice.Name = "choice";
         choice.Size = new Size(133, 59);
         choice.TabIndex = 2;
-        choice.Text = "CHOOSE\nYOUR\nSIDE";
         choice.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // AppForm
@@ -180,7 +178,6 @@ partial class AppForm
         Load += FormAspect_Load;
         tLayout.ResumeLayout(false);
         tSplit.ResumeLayout(false);
-        tSplit.PerformLayout();
         ResumeLayout(false);
     }
 

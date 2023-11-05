@@ -4,7 +4,7 @@ namespace WinFormsApp1;
 internal class PanelWrapper
 {
     readonly Panel box;
-    readonly Panel[] extra;
+    readonly Control[] extra;
 
     readonly string bgAlign;
     readonly Image bgResource;
@@ -19,7 +19,7 @@ internal class PanelWrapper
         Image _bgResource,
         string _bgAlign,
         Dictionary<string, Color?> _bgColor,
-        Panel[] _extra)
+        Control[] _extra)
     {
         box = _box;
         bgResource = _bgResource;
@@ -40,14 +40,14 @@ internal class PanelWrapper
         Image bgResourceDef = ImageUtility.GetImageCopyWithAlpha(bgResource, 0.66f);
 
         Image bgDef = ImageUtility.GetOverlayOnBackground(
-            box.Size,
+            box.Size * 2, // to improve quality in bigger app window
             bgResourceDef,
             bgColor["Default"], 
             bgAlign
         );
 
         Image bgEnter = ImageUtility.GetOverlayOnBackground(
-            box.Size,
+            box.Size * 2,
             bgResource,
             bgColor["MouseEnter"],
             bgAlign

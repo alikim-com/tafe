@@ -8,17 +8,8 @@ public partial class AppForm : Form
     double cRatio; // main window
     Size marginSize; // non-client area
 
-    //double pRatio; // ratio for the bottom panel
-
-    //struct SizeD
-    //{
-    //    public double Width;
-    //    public double Height;
-    //}
-
-    //readonly int labelChoiceWidth;
-    //readonly float labelChoiceFontSize;
-    //SizeD labelChoiceRatio; // size of the label as a fraction of the parent size
+    readonly int lChoiceWidth;
+    readonly float lChoiceFontSize;
 
     PanelWrapper? pwLeft;
     PanelWrapper? pwRight;
@@ -42,20 +33,18 @@ public partial class AppForm : Form
 
         InitializeComponent();
 
-        // prevent backgound flickering for components
-        Control[] dbuffed = 
-            new Control[] { pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice };
-        
-        foreach(var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
+        // for scaling font
+        lChoiceWidth = choice.Width;
+        lChoiceFontSize = choice.Font.Size;
 
-        //// init
-        //labelChoiceWidth = labelChoice.Width;
-        //labelChoiceFontSize = labelChoice.Font.Size;
-        //labelChoiceRatio = new SizeD
-        //{
-        //    Width = (double)labelChoice.Width / panel.Width,
-        //    Height = (double)labelChoice.Height / panel.Height,
-        //};
+        // prevent backgound flickering for components
+        Control[] dbuffed =
+            new Control[] { pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice };
+
+        foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
+
+        // init game
+        Game.Init(sBL, sBR, choice);
 
     }
 
@@ -67,29 +56,29 @@ public partial class AppForm : Form
             Dictionary<string, Color?> colorsLeft = new() {
                 { "Default", defColor },
                 { "MouseEnter",
-                  ColorExtensions.BlendOver(Color.FromArgb(12, 200, 104, 34), defColor) },
+                  ColorExtensions.BlendOver(Color.FromArgb(15, 200, 104, 34), defColor) },
                 { "MouseLeave", defColor }
             };
             Dictionary<string, Color?> colorsRight = new() {
                 { "Default", defColor },
                 { "MouseEnter",
-                  ColorExtensions.BlendOver(Color.FromArgb(16, 185, 36, 199), defColor) },
+                  ColorExtensions.BlendOver(Color.FromArgb(20, 185, 36, 199), defColor) },
                 { "MouseLeave", defColor }
             };
 
             pwLeft = new PanelWrapper(
-                pLeft, 
-                Resource.FaceLeft, 
-                "left", 
-                colorsLeft, 
-                new Panel[] { sTL, sBL }
+                pLeft,
+                Resource.FaceLeft,
+                "left",
+                colorsLeft,
+                new Control[] { sTL, sBL }
             );
             pwRight = new PanelWrapper(
-                pRight, 
-                Resource.FaceRight, 
-                "right", 
+                pRight,
+                Resource.FaceRight,
+                "right",
                 colorsRight,
-                new Panel[] { sTR, sBR }
+                new Control[] { sTR, sBR }
             );
         }
     }
@@ -99,14 +88,14 @@ public partial class AppForm : Form
         // TODO remove click, 2 more labels, "you won\n reset"
         pwLeft?.RemoveEventHandlers();
         pwRight?.RemoveEventHandlers();
-        Player = "playerLeft";
+        Game.State = "playerLeft";
     }
 
     private void pRight_Click(object sender, EventArgs e)
     {
         pwLeft?.RemoveEventHandlers();
         pwRight?.RemoveEventHandlers();
-        Player = "playerRight";
+        Game.State = "playerRight";
     }
 
     void FormAspect_Load(object sender, EventArgs e)
@@ -184,8 +173,8 @@ public partial class AppForm : Form
             //    (panel.Width - labelChoice.Width) / 2,
             //    (panel.Height - labelChoice.Height) / 2
             //);
-            //float newFontSize = labelChoiceFontSize * labelChoice.Width / labelChoiceWidth;
-            //labelChoice.Font = new Font(labelChoice.Font.FontFamily, newFontSize);
+            float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
+            choice.Font = new Font(choice.Font.FontFamily, newFontSize);
         }
 
         base.WndProc(ref m);
