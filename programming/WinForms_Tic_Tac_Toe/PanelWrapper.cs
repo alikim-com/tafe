@@ -12,6 +12,8 @@ internal class PanelWrapper
 
     readonly Dictionary<string, Color?> bgColor;
 
+    Game.State gState;
+
     readonly Dictionary<string, EventHandler> evtDetail = new();
 
     public PanelWrapper(
@@ -19,13 +21,15 @@ internal class PanelWrapper
         Image _bgResource,
         string _bgAlign,
         Dictionary<string, Color?> _bgColor,
-        Control[] _extra)
+        Control[] _extra,
+        Game.State _gState)
     {
         box = _box;
         bgResource = _bgResource;
         bgAlign = _bgAlign;
         bgColor = _bgColor;
         extra = _extra;
+        gState = _gState;
 
         CreateBgSet();
         CreateEventHandlers();
@@ -40,14 +44,18 @@ internal class PanelWrapper
         Image bgResourceDef = ImageUtility.GetImageCopyWithAlpha(bgResource, 0.66f);
 
         Image bgDef = ImageUtility.GetOverlayOnBackground(
-            box.Size * 2, // to improve quality in bigger app window
+            new Size( // to improve quality in bigger app window
+                (int)(box.Size.Width * 1.5), 
+                (int)(box.Size.Height * 1.5)), 
             bgResourceDef,
             bgColor["Default"], 
             bgAlign
         );
 
         Image bgEnter = ImageUtility.GetOverlayOnBackground(
-            box.Size * 2,
+            new Size( // to improve quality in bigger app window
+                (int)(box.Size.Width * 1.5),
+                (int)(box.Size.Height * 1.5)),
             bgResource,
             bgColor["MouseEnter"],
             bgAlign
@@ -80,6 +88,7 @@ internal class PanelWrapper
     {
         box.MouseEnter += evtDetail["MouseEnter"];
         box.MouseLeave += evtDetail["MouseLeave"];
+
         box.Cursor = Cursors.Hand;
     }
 
@@ -87,7 +96,7 @@ internal class PanelWrapper
     {
         box.MouseEnter -= evtDetail["MouseEnter"];
         box.MouseLeave -= evtDetail["MouseLeave"];
+
         box.Cursor = Cursors.Default;
     }
-
 }

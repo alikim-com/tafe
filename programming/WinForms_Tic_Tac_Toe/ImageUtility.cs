@@ -4,6 +4,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
+public class BDND
+{
+    public string Bind { get; set; } = "";
+}
+
 public static class ColorExtensions
 {
     public struct _argb

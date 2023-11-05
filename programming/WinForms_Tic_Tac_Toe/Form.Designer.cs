@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-
+﻿
 namespace WinFormsApp1;
 
 partial class AppForm
@@ -40,6 +39,7 @@ partial class AppForm
         sBL = new Panel();
         sBR = new Panel();
         choice = new Label();
+        cell00 = new Panel();
         tLayout.SuspendLayout();
         tSplit.SuspendLayout();
         SuspendLayout();
@@ -54,6 +54,7 @@ partial class AppForm
         tLayout.Controls.Add(pLeft, 0, 4);
         tLayout.Controls.Add(pRight, 2, 4);
         tLayout.Controls.Add(tSplit, 1, 4);
+        tLayout.Controls.Add(cell00, 0, 0);
         tLayout.Dock = DockStyle.Fill;
         tLayout.Location = new Point(0, 0);
         tLayout.Margin = new Padding(0);
@@ -77,7 +78,6 @@ partial class AppForm
         pLeft.Name = "pLeft";
         pLeft.Size = new Size(133, 179);
         pLeft.TabIndex = 0;
-        pLeft.Click += pLeft_Click;
         // 
         // pRight
         // 
@@ -89,7 +89,6 @@ partial class AppForm
         pRight.Name = "pRight";
         pRight.Size = new Size(134, 179);
         pRight.TabIndex = 1;
-        pRight.Click += pRight_Click;
         // 
         // tSplit
         // 
@@ -118,7 +117,7 @@ partial class AppForm
         sTL.Location = new Point(0, 0);
         sTL.Margin = new Padding(0);
         sTL.Name = "sTL";
-        sTL.Size = new Size(66, 59);
+        sTL.Size = new Size(66, 53);
         sTL.TabIndex = 0;
         // 
         // sTR
@@ -127,25 +126,25 @@ partial class AppForm
         sTR.Location = new Point(66, 0);
         sTR.Margin = new Padding(0);
         sTR.Name = "sTR";
-        sTR.Size = new Size(67, 59);
+        sTR.Size = new Size(67, 53);
         sTR.TabIndex = 1;
         // 
         // sBL
         // 
         sBL.Dock = DockStyle.Fill;
-        sBL.Location = new Point(0, 118);
+        sBL.Location = new Point(0, 124);
         sBL.Margin = new Padding(0);
         sBL.Name = "sBL";
-        sBL.Size = new Size(66, 61);
+        sBL.Size = new Size(66, 55);
         sBL.TabIndex = 2;
         // 
         // sBR
         // 
         sBR.Dock = DockStyle.Fill;
-        sBR.Location = new Point(66, 118);
+        sBR.Location = new Point(66, 124);
         sBR.Margin = new Padding(0);
         sBR.Name = "sBR";
-        sBR.Size = new Size(67, 61);
+        sBR.Size = new Size(67, 55);
         sBR.TabIndex = 3;
         // 
         // choice
@@ -155,12 +154,21 @@ partial class AppForm
         choice.Dock = DockStyle.Fill;
         choice.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
         choice.ForeColor = Color.FromArgb(0, 255, 255, 255);
-        choice.Location = new Point(0, 59);
+        choice.Location = new Point(0, 53);
         choice.Margin = new Padding(0);
         choice.Name = "choice";
-        choice.Size = new Size(133, 59);
+        choice.Size = new Size(133, 71);
         choice.TabIndex = 2;
         choice.TextAlign = ContentAlignment.MiddleCenter;
+        // 
+        // cell00
+        // 
+        cell00.Dock = DockStyle.Fill;
+        cell00.Location = new Point(16, 16);
+        cell00.Margin = new Padding(16);
+        cell00.Name = "cell00";
+        cell00.Size = new Size(101, 89);
+        cell00.TabIndex = 3;
         // 
         // AppForm
         // 
@@ -192,4 +200,5 @@ partial class AppForm
     private Panel sBL;
     private Panel sBR;
     private Label choice;
+    private Panel cell00;
 }

@@ -16,6 +16,9 @@ public partial class AppForm : Form
 
     public AppForm()
     {
+        // init game engine
+        Game.Init();
+
         static void ApplyDoubleBuffer(Control control)
         {
             control.GetType().InvokeMember(
@@ -43,9 +46,6 @@ public partial class AppForm : Form
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
-        // init game
-        Game.Init(sBL, sBR, choice);
-
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -71,31 +71,34 @@ public partial class AppForm : Form
                 Resource.FaceLeft,
                 "left",
                 colorsLeft,
-                new Control[] { sTL, sBL }
+                new Control[] { sTL, sBL },
+                Game.State.PlayerLeft
             );
             pwRight = new PanelWrapper(
                 pRight,
                 Resource.FaceRight,
                 "right",
                 colorsRight,
-                new Control[] { sTR, sBR }
+                new Control[] { sTR, sBR },
+                Game.State.PlayerRight
             );
+
+            choice.DataBindings.Add(new Binding("Text", Game.boundData, "Choice"));
+
+            pLeft.Click += (object? sender, EventArgs e) =>
+            {
+                pwLeft.RemoveEventHandlers();
+                pwRight.RemoveEventHandlers();
+                Game.CurState = Game.State.PlayerLeft;
+            };
+
+            pRight.Click += (object? sender, EventArgs e) =>
+            {
+                pwLeft.RemoveEventHandlers();
+                pwRight.RemoveEventHandlers();
+                Game.CurState = Game.State.PlayerRight;
+            };
         }
-    }
-
-    private void pLeft_Click(object sender, EventArgs e)
-    {
-        // TODO remove click, 2 more labels, "you won\n reset"
-        pwLeft?.RemoveEventHandlers();
-        pwRight?.RemoveEventHandlers();
-        Game.State = "playerLeft";
-    }
-
-    private void pRight_Click(object sender, EventArgs e)
-    {
-        pwLeft?.RemoveEventHandlers();
-        pwRight?.RemoveEventHandlers();
-        Game.State = "playerRight";
     }
 
     void FormAspect_Load(object sender, EventArgs e)
@@ -163,20 +166,11 @@ public partial class AppForm : Form
             var width = tLayout.Size.Width;
             tLayout.Size = new Size(width, width);
 
-            //panel.Size = new Size(panel.Width, (int)(panel.Width / pRatio));
-
-            //labelChoice.Size = new Size(
-            //    (int)(panel.Width * labelChoiceRatio.Width),
-            //    (int)(panel.Height * labelChoiceRatio.Height)
-            //);
-            //labelChoice.Location = new Point(
-            //    (panel.Width - labelChoice.Width) / 2,
-            //    (panel.Height - labelChoice.Height) / 2
-            //);
             float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
             choice.Font = new Font(choice.Font.FontFamily, newFontSize);
         }
 
         base.WndProc(ref m);
     }
+
 }
