@@ -1,11 +1,13 @@
-﻿namespace WinFormsApp1;
+﻿using System.ComponentModel;
+
+namespace WinFormsApp1;
 
 public class LabelTexts
 {
     public string Choice { get; set; } = "";
 }
 
-static public class Game
+public class Game : INotifyPropertyChanged
 {
     public enum State
     {
@@ -21,21 +23,34 @@ static public class Game
         { State.PlayerRight, new LabelTexts { Choice = "   AI  -vs-  YOU" } },
     };
 
-    static public LabelTexts boundData = new();
+    string _choice = "";
+    public string Choice
+    {
+        get => _choice;
+        set
+        {
+            _choice = value;
+            OnPropertyChanged(nameof(Choice));
+        }
+    }
 
-    static public State CurState
+    public State CurState
     {
         set => SetLabels(value);
     }
 
-    static public void Init()
+    public Game() => CurState = State.Start;
+
+    void SetLabels(State state)
     {
-        CurState = State.Start;
+        Choice = stateInfo[state].Choice;
+        OnPropertyChanged(nameof(Choice));
     }
 
-    static void SetLabels(State state)
+    public event PropertyChangedEventHandler? PropertyChanged;
+    void OnPropertyChanged(string property)
     {
-        boundData.Choice = stateInfo[state].Choice;
+        var handler = PropertyChanged; // multi-thread safety
+        handler?.Invoke(this, new PropertyChangedEventArgs(property));
     }
-
 }

@@ -12,7 +12,7 @@ internal class PanelWrapper
 
     readonly Dictionary<string, Color?> bgColor;
 
-    Game.State gState;
+    readonly Game.State gState;
 
     readonly Dictionary<string, EventHandler> evtDetail = new();
 
@@ -34,29 +34,27 @@ internal class PanelWrapper
         CreateBgSet();
         CreateEventHandlers();
 
-        AddEventHandlers();
+        AddHoverEventHandlers();
 
         evtDetail["Default"](this, new EventArgs()); // set default state
     }
 
     void CreateBgSet()
     {
-        Image bgResourceDef = ImageUtility.GetImageCopyWithAlpha(bgResource, 0.66f);
+        Image bgResourceDef = bgResource.GetImageCopyWithAlpha(0.66f);
 
-        Image bgDef = ImageUtility.GetOverlayOnBackground(
+        Image bgDef = bgResourceDef.GetOverlayOnBackground(
             new Size( // to improve quality in bigger app window
                 (int)(box.Size.Width * 1.5), 
                 (int)(box.Size.Height * 1.5)), 
-            bgResourceDef,
             bgColor["Default"], 
             bgAlign
         );
 
-        Image bgEnter = ImageUtility.GetOverlayOnBackground(
+        Image bgEnter = bgResource.GetOverlayOnBackground(
             new Size( // to improve quality in bigger app window
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
-            bgResource,
             bgColor["MouseEnter"],
             bgAlign
         );
@@ -84,7 +82,7 @@ internal class PanelWrapper
             evtDetail.Add(evtName, CreateEventHandler(evtName));
     }
 
-    public void AddEventHandlers()
+    public void AddHoverEventHandlers()
     {
         box.MouseEnter += evtDetail["MouseEnter"];
         box.MouseLeave += evtDetail["MouseLeave"];
@@ -92,7 +90,7 @@ internal class PanelWrapper
         box.Cursor = Cursors.Hand;
     }
 
-    public void RemoveEventHandlers()
+    public void RemoveHoverEventHandlers()
     {
         box.MouseEnter -= evtDetail["MouseEnter"];
         box.MouseLeave -= evtDetail["MouseLeave"];

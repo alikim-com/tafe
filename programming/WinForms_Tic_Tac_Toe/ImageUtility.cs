@@ -4,11 +4,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-public class BDND
-{
-    public string Bind { get; set; } = "";
-}
-
 public static class ColorExtensions
 {
     public struct _argb
@@ -65,31 +60,11 @@ public static class ColorExtensions
     }
 }
 
-public class ImageUtility
+public static class ImageExtensions
 {
-    /// <summary>
-    /// Fit small rectangle into a large one,<br/>
-    /// while preserving small box's aspect ratio and maximising its area
-    /// </summary>
-    /// <param name="large">Size of a larger rectangle</param>
-    /// <param name="small">Size of a smaller rectangle</param>
-    /// <returns>The new size of a scaled small box</returns>
-    public static Size FitRect(Size large, Size small)
+    public static Image GetOverlayOnBackground(this Image src, Size dstSize, Color? bg, string align)
     {
-        double widthRatio = (double)large.Width / small.Width;
-        double heightRatio = (double)large.Height / small.Height;
-
-        double scale = Math.Min(widthRatio, heightRatio);
-
-        return new Size(
-            (int)(small.Width * scale), 
-            (int)(small.Height * scale)
-        );
-    }
-
-    public static Image GetOverlayOnBackground(Size dstSize, Image src, Color? bg, string align)
-    {
-        Size scaledSrc = FitRect(dstSize, src.Size);
+        Size scaledSrc = GeomUtility.FitRect(dstSize, src.Size);
         Size offsetTL = align switch
         {
             "left" => new(0, 0),
@@ -108,7 +83,7 @@ public class ImageUtility
         return dst;
     }
 
-    public static Image GetImageCopyWithAlpha(Image src, float opacity)
+    public static Image GetImageCopyWithAlpha(this Image src, float opacity)
     {
         Bitmap dst = new(src.Width, src.Height);
         using (Graphics g = Graphics.FromImage(dst))
@@ -131,6 +106,30 @@ public class ImageUtility
                 attributes
             );
         }
+        return dst;
+    }
+
+    public static Image Desaturate(this Image src, string mode)
+    {
+        if (mode != "PS") 
+            throw new NotImplementedException($"Image.Desaturate : mode '{mode}'");
+
+        int w = src.Width, h = src.Height;
+        Bitmap srcBmp = new Bitmap(src);
+        Bitmap dst = new Bitmap(w, h);
+
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                Color sRGB = srcBmp.GetPixel(x, y);
+                // photoshop desaturate
+                int avr = (
+                    Math.Min(sRGB.R, Math.Min(sRGB.G, sRGB.B)) + 
+                    Math.Max(sRGB.R, Math.Max(sRGB.G, sRGB.B))
+                ) / 2;
+                dst.SetPixel(x, y, Color.FromArgb(sRGB.A, avr, avr, avr));
+            }
+
         return dst;
     }
 }

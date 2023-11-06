@@ -14,10 +14,12 @@ public partial class AppForm : Form
     PanelWrapper? pwLeft;
     PanelWrapper? pwRight;
 
+    readonly Game game;
+
     public AppForm()
     {
         // init game engine
-        Game.Init();
+        game = new();
 
         static void ApplyDoubleBuffer(Control control)
         {
@@ -83,21 +85,30 @@ public partial class AppForm : Form
                 Game.State.PlayerRight
             );
 
-            choice.DataBindings.Add(new Binding("Text", Game.boundData, "Choice"));
+            // data bindings
+            choice.DataBindings.Add(new Binding("Text", game, "Choice"));
 
-            pLeft.Click += (object? sender, EventArgs e) =>
+            // mouse click events
+            void plOnClick(object? sender, EventArgs e)
             {
-                pwLeft.RemoveEventHandlers();
-                pwRight.RemoveEventHandlers();
-                Game.CurState = Game.State.PlayerLeft;
+                pLeft.Click -= plOnClick;
+                pRight.Click -= prOnClick;
+                pwLeft.RemoveHoverEventHandlers();
+                pwRight.RemoveHoverEventHandlers();
+                game.CurState = Game.State.PlayerLeft;
             };
 
-            pRight.Click += (object? sender, EventArgs e) =>
+            void prOnClick(object? sender, EventArgs e)
             {
-                pwLeft.RemoveEventHandlers();
-                pwRight.RemoveEventHandlers();
-                Game.CurState = Game.State.PlayerRight;
+                pLeft.Click -= plOnClick;
+                pRight.Click -= prOnClick;
+                pwLeft.RemoveHoverEventHandlers();
+                pwRight.RemoveHoverEventHandlers();
+                game.CurState = Game.State.PlayerRight;
             };
+
+            pLeft.Click += plOnClick;
+            pRight.Click += prOnClick;
         }
     }
 
