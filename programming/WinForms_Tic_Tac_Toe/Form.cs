@@ -13,22 +13,23 @@ public partial class AppForm : Form
 
     PanelWrapper? pwLeft;
     PanelWrapper? pwRight;
+    readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
     readonly Game game;
+
+    static void ApplyDoubleBuffer(Control control)
+    {
+        control.GetType().InvokeMember(
+            "DoubleBuffered",
+            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+            null, control, new object[] { true }
+        );
+    }
 
     public AppForm()
     {
         // init game engine
         game = new();
-
-        static void ApplyDoubleBuffer(Control control)
-        {
-            control.GetType().InvokeMember(
-                "DoubleBuffered",
-                BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-                null, control, new object[] { true }
-            );
-        }
 
         // to extend the behaviour of sub components
         ControlAdded += FormAspect_ControlAdded;
@@ -44,7 +45,10 @@ public partial class AppForm : Form
 
         // prevent backgound flickering for components
         Control[] dbuffed =
-            new Control[] { pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice };
+            new Control[]
+            {
+                pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice
+            };
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
@@ -55,34 +59,34 @@ public partial class AppForm : Form
         if (e.Control == tLayout)
         {
             Color defColor = Color.FromArgb(128, 0, 0, 0);
-            Dictionary<string, Color?> colorsLeft = new() {
-                { "Default", defColor },
-                { "MouseEnter",
+            Dictionary<PanelWrapper.State, Color?> colorsLeft = new() {
+                { PanelWrapper.State.Default, defColor },
+                { PanelWrapper.State.MouseEnter,
                   ColorExtensions.BlendOver(Color.FromArgb(15, 200, 104, 34), defColor) },
-                { "MouseLeave", defColor }
+                { PanelWrapper.State.MouseLeave, defColor }
             };
-            Dictionary<string, Color?> colorsRight = new() {
-                { "Default", defColor },
-                { "MouseEnter",
+            Dictionary<PanelWrapper.State, Color?> colorsRight = new() {
+                { PanelWrapper.State.Default, defColor },
+                { PanelWrapper.State.MouseEnter,
                   ColorExtensions.BlendOver(Color.FromArgb(20, 185, 36, 199), defColor) },
-                { "MouseLeave", defColor }
+                { PanelWrapper.State.MouseLeave, defColor }
             };
 
             pwLeft = new PanelWrapper(
                 pLeft,
                 Resource.FaceLeft,
                 "left",
+                "top",
                 colorsLeft,
-                new Control[] { sTL, sBL },
-                Game.State.PlayerLeft
+                new Control[] { sTL, sBL }
             );
             pwRight = new PanelWrapper(
                 pRight,
                 Resource.FaceRight,
                 "right",
+                "top",
                 colorsRight,
-                new Control[] { sTR, sBR },
-                Game.State.PlayerRight
+                new Control[] { sTR, sBR }
             );
 
             // data bindings
@@ -109,6 +113,28 @@ public partial class AppForm : Form
 
             pLeft.Click += plOnClick;
             pRight.Click += prOnClick;
+
+            /* * * * * cells * * * * */
+
+            int tabInd = 3;
+            cells = new Panel[3, 3];
+            for (int row = 0; row < 3; row++)
+                for (int col = 0; col < 3; col++)
+                {
+                    Panel p = cells[row, col] = new Panel();
+                    p.BackgroundImageLayout = ImageLayout.Stretch;
+                    p.Dock = DockStyle.Fill;
+                    p.Margin = new Padding(24);
+                    p.Name = $"cell{row}{col}";
+                    p.Size = new Size(85, 73);
+                    p.TabIndex = tabInd++;
+
+                    tLayout.Controls.Add(p, col, row);
+
+                    ApplyDoubleBuffer(p);
+
+                    cellWrap[row, col] = new CellWrapper(p);
+                }
         }
     }
 

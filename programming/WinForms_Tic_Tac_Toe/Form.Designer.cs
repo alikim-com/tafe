@@ -39,7 +39,6 @@ partial class AppForm
         sBL = new Panel();
         sBR = new Panel();
         choice = new Label();
-        cell00 = new Panel();
         tLayout.SuspendLayout();
         tSplit.SuspendLayout();
         SuspendLayout();
@@ -54,7 +53,6 @@ partial class AppForm
         tLayout.Controls.Add(pLeft, 0, 4);
         tLayout.Controls.Add(pRight, 2, 4);
         tLayout.Controls.Add(tSplit, 1, 4);
-        tLayout.Controls.Add(cell00, 0, 0);
         tLayout.Dock = DockStyle.Fill;
         tLayout.Location = new Point(0, 0);
         tLayout.Margin = new Padding(0);
@@ -161,15 +159,6 @@ partial class AppForm
         choice.TabIndex = 2;
         choice.TextAlign = ContentAlignment.MiddleCenter;
         // 
-        // cell00
-        // 
-        cell00.Dock = DockStyle.Fill;
-        cell00.Location = new Point(16, 16);
-        cell00.Margin = new Padding(16);
-        cell00.Name = "cell00";
-        cell00.Size = new Size(101, 89);
-        cell00.TabIndex = 3;
-        // 
         // AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -200,5 +189,5 @@ partial class AppForm
     private Panel sBL;
     private Panel sBR;
     private Label choice;
-    private Panel cell00;
+    private Panel[,] cells;
 }

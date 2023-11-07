@@ -47,7 +47,7 @@ public static class ColorExtensions
         var t = top.Normalise();
         var b = bot.Normalise();
         double f = 1 - t.a;
-        
+
         double a = t.a + b.a * f;
         if (a == 0) return Color.FromArgb(0, 0, 0, 0);
 
@@ -62,14 +62,26 @@ public static class ColorExtensions
 
 public static class ImageExtensions
 {
-    public static Image GetOverlayOnBackground(this Image src, Size dstSize, Color? bg, string align)
+    public static Image GetOverlayOnBackground(this Image src,
+        Size dstSize,
+        Color? bg,
+        string hAlign,
+        string vAlign)
     {
         Size scaledSrc = GeomUtility.FitRect(dstSize, src.Size);
-        Size offsetTL = align switch
+        int offsetLeft = hAlign switch
         {
-            "left" => new(0, 0),
-            "right" => new(dstSize.Width - scaledSrc.Width, 0),
-            _ => throw new NotImplementedException($"GetOverlayOnBackground : align '{align}'"),
+            "left" => 0,
+            "right" => dstSize.Width - scaledSrc.Width,
+            "center" => (dstSize.Width - scaledSrc.Width) / 2,
+            _ => throw new NotImplementedException($"GetOverlayOnBackground : hAlign '{hAlign}'"),
+        };
+        int offsetTop = vAlign switch
+        {
+            "top" => 0,
+            "bottom" => dstSize.Height - scaledSrc.Height,
+            "center" => (dstSize.Height - scaledSrc.Height) / 2,
+            _ => throw new NotImplementedException($"GetOverlayOnBackground : vAlign '{vAlign}'"),
         };
 
         Bitmap dst = new(dstSize.Width, dstSize.Height);
@@ -77,7 +89,7 @@ public static class ImageExtensions
         {
             g.Clear(bg ?? Color.Transparent);
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(src, offsetTL.Width, offsetTL.Height, scaledSrc.Width, scaledSrc.Height);
+            g.DrawImage(src, offsetLeft, offsetTop, scaledSrc.Width, scaledSrc.Height);
             g.Save();
         }
         return dst;
@@ -111,7 +123,7 @@ public static class ImageExtensions
 
     public static Image Desaturate(this Image src, string mode)
     {
-        if (mode != "PS") 
+        if (mode != "PS")
             throw new NotImplementedException($"Image.Desaturate : mode '{mode}'");
 
         int w = src.Width, h = src.Height;
@@ -124,7 +136,7 @@ public static class ImageExtensions
                 Color sRGB = srcBmp.GetPixel(x, y);
                 // photoshop desaturate
                 int avr = (
-                    Math.Min(sRGB.R, Math.Min(sRGB.G, sRGB.B)) + 
+                    Math.Min(sRGB.R, Math.Min(sRGB.G, sRGB.B)) +
                     Math.Max(sRGB.R, Math.Max(sRGB.G, sRGB.B))
                 ) / 2;
                 dst.SetPixel(x, y, Color.FromArgb(sRGB.A, avr, avr, avr));
