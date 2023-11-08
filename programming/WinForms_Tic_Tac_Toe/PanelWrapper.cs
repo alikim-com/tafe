@@ -1,6 +1,10 @@
 ﻿
 namespace WinFormsApp1;
 
+/// <summary>
+/// Controls bottom panels backgrounds and associated mouse events<br/>
+/// Player visualisation choice.
+/// </summary>
 internal class PanelWrapper
 {
     readonly Panel box;

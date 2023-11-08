@@ -1,11 +1,25 @@
 ﻿
 namespace WinFormsApp1;
 
+/// <summary>
+/// Controls board cells backgrounds and associated mouse events
+/// </summary>
 internal class CellWrapper
 {
     readonly Panel box;
+    readonly int row, col;
     readonly Dictionary<BgMode, Image> backgr = new();
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
+
+    /// <summary>
+    /// Event driven readable state
+    /// </summary>
+    BgMode _curBgMode;
+    public BgMode CurBgMode
+    {
+        get => _curBgMode;
+        private set => _curBgMode = value;
+    }
 
     public enum BgMode
     {
@@ -21,14 +35,40 @@ internal class CellWrapper
         LostRight
     }
 
-    public CellWrapper(Panel _box)
+    public CellWrapper(Panel _box, int _row, int _col)
     {
         box = _box;
+        row = _row;
+        col = _col;
         CreateBgSet();
         CreateEventHandlers();
-
-        SetBgMode(BgMode.Default);
     }
+
+    public void Settle(BgMode mode)
+    {
+        RemoveHoverEventHandlers();
+        SetBg(mode);
+    } 
+
+    /// <summary>
+    /// Subscribed EM.EvtReset event
+    /// </summary>
+    public void ResetHandler(object? s, EventArgs e)
+    {
+        RemoveHoverEventHandlers();
+        AddHoverEventHandlers();
+        SetBg(BgMode.Default);
+    }
+
+    /// <summary>
+    /// Raises EM.EvtPlayerMoved event
+    /// </summary>
+    void OnClick(object? s, EventArgs e)
+    {
+        EM.RaiseEvtPlayerMoved(this, new Point(row, col));
+    }
+
+    void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());
 
     void CreateBgSet()
     {
@@ -77,7 +117,11 @@ internal class CellWrapper
         return (object? sender, EventArgs e) =>
         {
             if (!backgr.TryGetValue(evtName, out Image? image)) return;
-            if (box.BackgroundImage != image) box.BackgroundImage = image;
+            if (box.BackgroundImage != image)
+            {
+                box.BackgroundImage = image;
+                CurBgMode = evtName;
+            }
         };
     }
 
@@ -87,23 +131,21 @@ internal class CellWrapper
             evtDetail.Add(evtName, CreateEventHandler(evtName));
     }
 
-    public void AddHoverEventHandlers()
+    void AddHoverEventHandlers()
     {
         box.MouseEnter += evtDetail[BgMode.MouseEnter];
         box.MouseLeave += evtDetail[BgMode.MouseLeave];
 
+        box.Click += OnClick;
         box.Cursor = Cursors.Hand;
     }
 
-    public void RemoveHoverEventHandlers()
+    void RemoveHoverEventHandlers()
     {
         box.MouseEnter -= evtDetail[BgMode.MouseEnter];
         box.MouseLeave -= evtDetail[BgMode.MouseLeave];
 
+        box.Click -= OnClick;
         box.Cursor = Cursors.Default;
     }
-
-    public void SetBgMode(BgMode mode) => evtDetail[mode](this, new EventArgs());
-
-    public EventHandler? OnClick;
 }

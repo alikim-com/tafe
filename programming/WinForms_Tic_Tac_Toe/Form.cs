@@ -16,6 +16,7 @@ public partial class AppForm : Form
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
     readonly Game game;
+    readonly LabelManager labMgr;
 
     static void ApplyDoubleBuffer(Control control)
     {
@@ -29,7 +30,9 @@ public partial class AppForm : Form
     public AppForm()
     {
         // init game engine
-        game = new(Game.Turn.Player);
+        game = new();
+        // init label manager
+        labMgr = new();
 
         // to extend the behaviour of sub components
         ControlAdded += FormAspect_ControlAdded;
@@ -51,6 +54,14 @@ public partial class AppForm : Form
             };
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
+
+        // events subscriptions
+        EM.EvtReset += game.ResetHandler;
+        EM.EvtReset += labMgr.ResetHandler;
+        foreach (var cw in cellWrap) EM.EvtReset += cw.ResetHandler;
+
+        // start game
+        EM.RaiseEvtReset(this, new EventArgs());
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -89,7 +100,7 @@ public partial class AppForm : Form
             );
 
             // data bindings
-            choice.DataBindings.Add(new Binding("Text", game, "Choice"));
+            choice.DataBindings.Add(new Binding("Text", labMgr, "CurState"));
 
             // mouse click events
             void plOnClick(object? sender, EventArgs e)
@@ -98,7 +109,7 @@ public partial class AppForm : Form
                 pRight.Click -= prOnClick;
                 pwLeft.RemoveHoverEventHandlers();
                 pwRight.RemoveHoverEventHandlers();
-                game.CurState = Game.State.PlayerLeft;
+ //               game.CurState = Game.State.PlayerLeft;
             };
 
             void prOnClick(object? sender, EventArgs e)
@@ -107,7 +118,7 @@ public partial class AppForm : Form
                 pRight.Click -= prOnClick;
                 pwLeft.RemoveHoverEventHandlers();
                 pwRight.RemoveHoverEventHandlers();
-                game.CurState = Game.State.PlayerRight;
+ //               game.CurState = Game.State.PlayerRight;
             };
 
             pLeft.Click += plOnClick;
@@ -132,14 +143,14 @@ public partial class AppForm : Form
 
                     ApplyDoubleBuffer(p);
 
-                    CellWrapper cw = cellWrap[row, col] = new CellWrapper(p);
+                    CellWrapper cw = cellWrap[row, col] = new CellWrapper(p, row, col);
 
-                    cw.OnClick = (object? sender, EventArgs e) => 
-                    {
-                        p.Click -= cw.OnClick;
-                        cw.RemoveHoverEventHandlers();
-                        cw.SetBgMode(CellWrapper.BgMode.Default);
-                    };
+                    //cw.OnClick = (object? sender, EventArgs e) => 
+                    //{
+                    //    p.Click -= cw.OnClick;
+                    //    cw.RemoveHoverEventHandlers();
+                    //    //cw.CurBgMode = CellWrapper.BgMode.Default;
+                    //};
                 }
 
         }

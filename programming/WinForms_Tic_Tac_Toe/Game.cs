@@ -1,94 +1,46 @@
-﻿using System.ComponentModel;
-
+﻿
 namespace WinFormsApp1;
 
-public class LabelTexts
+/// <summary>
+/// Game engine, controls players, moves and the board
+/// </summary>
+internal class Game
 {
-    public string Choice { get; set; } = "";
-}
-
-public class Game : INotifyPropertyChanged
-{
-    public enum Turn
+    public enum Roster
     {
-        Player,
+        None,
+        Human,
         AI
     }
 
-    readonly Turn?[,] board = new Turn?[3, 3];
+    static readonly Roster[] players = (Roster[])Enum.GetValues(typeof(Roster));
 
-    Turn? _turn = null;
-    Turn? CurTurn 
+    Roster curPlayer = players[0];
+
+    Roster[,] board = new Roster[3,3];
+
+    /// <summary>
+    /// Subscribed to EM.EvtReset event
+    /// </summary>
+    public void ResetHandler(object? s, EventArgs e)
     {
-        get => _turn;
-        set
-        {   
-            _turn = value;
-            if(value == Turn.AI)
-            {
-                // new Thread, wait, change labels, UpdateBoard
-            }
-        }
+        ResetBoard();
     }
 
-    public void ResetBoard()
+    void ResetBoard()
     {
         for (int i = 0; i < board.GetLength(0); i++)
             for (int j = 0; j < board.GetLength(1); j++)
-                board[i, j] = null;
+                board[i, j] = Roster.None;
     }
 
-    public void UpdateBoard(int row, int col)
+    void UpdateBoard(int row, int col)
     {
-        board[row, col] = CurTurn;
+       // board[row, col] = CurTurn;
     }
 
-    public enum State
-    {
-        Start,
-        PlayerLeft,
-        PlayerRight
-    }
 
-    static public readonly Dictionary<State, LabelTexts> stateInfo = new()
-    {
-        { State.Start, new LabelTexts { Choice = "CHOOSE\nYOUR\nSIDE" } },
-        { State.PlayerLeft, new LabelTexts { Choice = "YOU  -vs-  AI   " } },
-        { State.PlayerRight, new LabelTexts { Choice = "   AI  -vs-  YOU" } },
-    };
 
-    string _choice = "";
-    public string Choice
-    {
-        get => _choice;
-        set
-        {
-            _choice = value;
-            OnPropertyChanged(nameof(Choice));
-        }
-    }
 
-    public State CurState
-    {
-        set => SetLabels(value);
-    }
 
-    public Game(Turn turn)
-    {
-        CurTurn = turn;
-        CurState = State.Start;
-    }
-
-    void SetLabels(State state)
-    {
-        Choice = stateInfo[state].Choice;
-        OnPropertyChanged(nameof(Choice));
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    void OnPropertyChanged(string property)
-    {
-        var handler = PropertyChanged; // multi-thread safety
-        handler?.Invoke(this, new PropertyChangedEventArgs(property));
-    }
 }
