@@ -9,6 +9,40 @@ public class LabelTexts
 
 public class Game : INotifyPropertyChanged
 {
+    public enum Turn
+    {
+        Player,
+        AI
+    }
+
+    readonly Turn?[,] board = new Turn?[3, 3];
+
+    Turn? _turn = null;
+    Turn? CurTurn 
+    {
+        get => _turn;
+        set
+        {   
+            _turn = value;
+            if(value == Turn.AI)
+            {
+                // new Thread, wait, change labels, UpdateBoard
+            }
+        }
+    }
+
+    public void ResetBoard()
+    {
+        for (int i = 0; i < board.GetLength(0); i++)
+            for (int j = 0; j < board.GetLength(1); j++)
+                board[i, j] = null;
+    }
+
+    public void UpdateBoard(int row, int col)
+    {
+        board[row, col] = CurTurn;
+    }
+
     public enum State
     {
         Start,
@@ -39,7 +73,11 @@ public class Game : INotifyPropertyChanged
         set => SetLabels(value);
     }
 
-    public Game() => CurState = State.Start;
+    public Game(Turn turn)
+    {
+        CurTurn = turn;
+        CurState = State.Start;
+    }
 
     void SetLabels(State state)
     {

@@ -9,13 +9,13 @@ internal class PanelWrapper
     readonly string hAlign;
     readonly string vAlign;
     readonly Image bgResource;
-    readonly Dictionary<State, Image> backgr = new();
+    readonly Dictionary<BgMode, Image> backgr = new();
 
-    readonly Dictionary<State, Color?> bgColor;
+    readonly Dictionary<BgMode, Color?> bgColor;
 
-    readonly Dictionary<State, EventHandler> evtDetail = new();
+    readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
-    public enum State
+    public enum BgMode
     {
         Default,
         MouseEnter,
@@ -27,7 +27,7 @@ internal class PanelWrapper
         Image _bgResource,
         string _hAlign,
         string _vAlign,
-        Dictionary<State, Color?> _bgColor,
+        Dictionary<BgMode, Color?> _bgColor,
         Control[] _extra)
     {
         box = _box;
@@ -42,7 +42,7 @@ internal class PanelWrapper
 
         AddHoverEventHandlers();
 
-        evtDetail[State.Default](this, new EventArgs()); // set default state
+        SetBgMode(BgMode.Default);
     }
 
     void CreateBgSet()
@@ -53,7 +53,7 @@ internal class PanelWrapper
             new Size( // to improve quality in bigger app window
                 (int)(box.Size.Width * 1.5), 
                 (int)(box.Size.Height * 1.5)),
-            bgColor[State.Default],
+            bgColor[BgMode.Default],
             hAlign,
             vAlign
         );
@@ -62,18 +62,18 @@ internal class PanelWrapper
             new Size( // to improve quality in bigger app window
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
-            bgColor[State.MouseEnter],
+            bgColor[BgMode.MouseEnter],
             hAlign,
             vAlign
         );
 
-        backgr.Add(State.MouseEnter, bgEnter);
-        backgr.Add(State.Default, bgDef);
-        backgr.Add(State.MouseLeave, bgDef);
+        backgr.Add(BgMode.MouseEnter, bgEnter);
+        backgr.Add(BgMode.Default, bgDef);
+        backgr.Add(BgMode.MouseLeave, bgDef);
 
     }
 
-    EventHandler CreateEventHandler(State evtName)
+    EventHandler CreateEventHandler(BgMode evtName)
     {
         return (object? sender, EventArgs e) =>
         {
@@ -86,23 +86,25 @@ internal class PanelWrapper
 
     void CreateEventHandlers()
     {
-        foreach (State evtName in Enum.GetValues(typeof(State)))
+        foreach (BgMode evtName in Enum.GetValues(typeof(BgMode)))
             evtDetail.Add(evtName, CreateEventHandler(evtName));
     }
 
     public void AddHoverEventHandlers()
     {
-        box.MouseEnter += evtDetail[State.MouseEnter];
-        box.MouseLeave += evtDetail[State.MouseLeave];
+        box.MouseEnter += evtDetail[BgMode.MouseEnter];
+        box.MouseLeave += evtDetail[BgMode.MouseLeave];
 
         box.Cursor = Cursors.Hand;
     }
 
     public void RemoveHoverEventHandlers()
     {
-        box.MouseEnter -= evtDetail[State.MouseEnter];
-        box.MouseLeave -= evtDetail[State.MouseLeave];
+        box.MouseEnter -= evtDetail[BgMode.MouseEnter];
+        box.MouseLeave -= evtDetail[BgMode.MouseLeave];
 
         box.Cursor = Cursors.Default;
     }
+
+    void SetBgMode(BgMode mode) => evtDetail[mode](this, new EventArgs());
 }

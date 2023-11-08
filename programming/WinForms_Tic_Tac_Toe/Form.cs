@@ -29,7 +29,7 @@ public partial class AppForm : Form
     public AppForm()
     {
         // init game engine
-        game = new();
+        game = new(Game.Turn.Player);
 
         // to extend the behaviour of sub components
         ControlAdded += FormAspect_ControlAdded;
@@ -58,17 +58,17 @@ public partial class AppForm : Form
         if (e.Control == tLayout)
         {
             Color defColor = Color.FromArgb(128, 0, 0, 0);
-            Dictionary<PanelWrapper.State, Color?> colorsLeft = new() {
-                { PanelWrapper.State.Default, defColor },
-                { PanelWrapper.State.MouseEnter,
+            Dictionary<PanelWrapper.BgMode, Color?> colorsLeft = new() {
+                { PanelWrapper.BgMode.Default, defColor },
+                { PanelWrapper.BgMode.MouseEnter,
                   ColorExtensions.BlendOver(Color.FromArgb(15, 200, 104, 34), defColor) },
-                { PanelWrapper.State.MouseLeave, defColor }
+                { PanelWrapper.BgMode.MouseLeave, defColor }
             };
-            Dictionary<PanelWrapper.State, Color?> colorsRight = new() {
-                { PanelWrapper.State.Default, defColor },
-                { PanelWrapper.State.MouseEnter,
+            Dictionary<PanelWrapper.BgMode, Color?> colorsRight = new() {
+                { PanelWrapper.BgMode.Default, defColor },
+                { PanelWrapper.BgMode.MouseEnter,
                   ColorExtensions.BlendOver(Color.FromArgb(20, 185, 36, 199), defColor) },
-                { PanelWrapper.State.MouseLeave, defColor }
+                { PanelWrapper.BgMode.MouseLeave, defColor }
             };
 
             pwLeft = new PanelWrapper(
@@ -113,7 +113,7 @@ public partial class AppForm : Form
             pLeft.Click += plOnClick;
             pRight.Click += prOnClick;
 
-            /* * * * * cells * * * * */
+            // --------- board cells ----------
 
             int tabInd = 0;
             cells = new Panel[3, 3];
@@ -127,14 +127,21 @@ public partial class AppForm : Form
                     p.Name = $"cell{row}{col}";
                     p.Size = new Size(109, 108);
                     p.TabIndex = tabInd++;
-                    //p.BorderStyle = BorderStyle.FixedSingle;
 
                     tLayout.Controls.Add(p, col, row);
 
                     ApplyDoubleBuffer(p);
 
-                    cellWrap[row, col] = new CellWrapper(p);
+                    CellWrapper cw = cellWrap[row, col] = new CellWrapper(p);
+
+                    cw.OnClick = (object? sender, EventArgs e) => 
+                    {
+                        p.Click -= cw.OnClick;
+                        cw.RemoveHoverEventHandlers();
+                        cw.SetBgMode(CellWrapper.BgMode.Default);
+                    };
                 }
+
         }
     }
 
@@ -179,10 +186,6 @@ public partial class AppForm : Form
             {
                 case WMSZ.LEFT:
                 case WMSZ.RIGHT:
-                case WMSZ.TOPLEFT:
-                case WMSZ.TOPRIGHT:
-                case WMSZ.BOTTOMLEFT:
-                case WMSZ.BOTTOMRIGHT:
                     // width has changed, adjust height
                     newWidth = rc.Right - rc.Left - marginSize.Width;
                     newHeight = (int)(newWidth / cRatio) + marginSize.Height;
@@ -190,6 +193,10 @@ public partial class AppForm : Form
                     break;
                 case WMSZ.TOP:
                 case WMSZ.BOTTOM:
+                case WMSZ.TOPLEFT:
+                case WMSZ.TOPRIGHT:
+                case WMSZ.BOTTOMLEFT:
+                case WMSZ.BOTTOMRIGHT:
                     // height has changed, adjust width
                     newHeight = rc.Bottom - rc.Top - marginSize.Height;
                     newWidth = (int)(newHeight * cRatio) + marginSize.Width;
@@ -200,8 +207,8 @@ public partial class AppForm : Form
 
             // adjust components
 
-            float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
-            choice.Font = new Font(choice.Font.FontFamily, newFontSize);
+           float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
+           choice.Font = new Font(choice.Font.FontFamily, newFontSize);
         }
 
         base.WndProc(ref m);

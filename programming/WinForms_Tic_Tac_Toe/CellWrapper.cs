@@ -4,10 +4,10 @@ namespace WinFormsApp1;
 internal class CellWrapper
 {
     readonly Panel box;
-    readonly Dictionary<State, Image> backgr = new();
-    readonly Dictionary<State, EventHandler> evtDetail = new();
+    readonly Dictionary<BgMode, Image> backgr = new();
+    readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
-    enum State
+    public enum BgMode
     {
         // star
         Default,
@@ -27,9 +27,7 @@ internal class CellWrapper
         CreateBgSet();
         CreateEventHandlers();
 
-        AddHoverEventHandlers();
-
-        evtDetail[State.Default](this, new EventArgs()); // set default state
+        SetBgMode(BgMode.Default);
     }
 
     void CreateBgSet()
@@ -44,28 +42,37 @@ internal class CellWrapper
         );
         Image bgDef = bgHover.GetImageCopyWithAlpha(0.70f);
 
-        backgr.Add(State.Default, Resource.TokenLeft.GetOverlayOnBackground(
-            new Size( // to improve quality in bigger app window
+        backgr.Add(BgMode.Default, bgDef);
+        backgr.Add(BgMode.MouseEnter, bgHover);
+        backgr.Add(BgMode.MouseLeave, bgDef);
+
+        Image tokenLeft = Resource.TokenLeft.GetOverlayOnBackground(
+            new Size(
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
             null,
             "center",
             "center"
-        )
-            
-            );// bgDef);
-        backgr.Add(State.MouseEnter, bgHover);
-        backgr.Add(State.MouseLeave, bgDef);
+        );
 
-        backgr.Add(State.PlayerLeft, Resource.TokenLeft);
-        backgr.Add(State.PlayerRight, Resource.TokenRight);
+        Image tokenRight = Resource.TokenRight.GetOverlayOnBackground(
+            new Size(
+                (int)(box.Size.Width * 1.5),
+                (int)(box.Size.Height * 1.5)),
+            null,
+            "center",
+            "center"
+        );
 
-        backgr.Add(State.LostLeft, Resource.TokenLeft.Desaturate("PS"));
-        backgr.Add(State.LostRight, Resource.TokenRight.Desaturate("PS"));
+        backgr.Add(BgMode.PlayerLeft, tokenLeft);
+        backgr.Add(BgMode.PlayerRight, tokenRight);
+
+        backgr.Add(BgMode.LostLeft, tokenLeft.Desaturate("PS"));
+        backgr.Add(BgMode.LostRight, tokenRight.Desaturate("PS"));
 
     }
 
-    EventHandler CreateEventHandler(State evtName)
+    EventHandler CreateEventHandler(BgMode evtName)
     {
         return (object? sender, EventArgs e) =>
         {
@@ -76,23 +83,27 @@ internal class CellWrapper
 
     void CreateEventHandlers()
     {
-        foreach (State evtName in Enum.GetValues(typeof(State)))
+        foreach (BgMode evtName in Enum.GetValues(typeof(BgMode)))
             evtDetail.Add(evtName, CreateEventHandler(evtName));
     }
 
     public void AddHoverEventHandlers()
     {
-        box.MouseEnter += evtDetail[State.MouseEnter];
-        box.MouseLeave += evtDetail[State.MouseLeave];
+        box.MouseEnter += evtDetail[BgMode.MouseEnter];
+        box.MouseLeave += evtDetail[BgMode.MouseLeave];
 
         box.Cursor = Cursors.Hand;
     }
 
     public void RemoveHoverEventHandlers()
     {
-        box.MouseEnter -= evtDetail[State.MouseEnter];
-        box.MouseLeave -= evtDetail[State.MouseLeave];
+        box.MouseEnter -= evtDetail[BgMode.MouseEnter];
+        box.MouseLeave -= evtDetail[BgMode.MouseLeave];
 
         box.Cursor = Cursors.Default;
     }
+
+    public void SetBgMode(BgMode mode) => evtDetail[mode](this, new EventArgs());
+
+    public EventHandler? OnClick;
 }
