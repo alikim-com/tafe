@@ -58,11 +58,11 @@ partial class AppForm
         tLayout.Margin = new Padding(0);
         tLayout.Name = "tLayout";
         tLayout.RowCount = 5;
-        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 20.19608F));
-        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 20.19608F));
-        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 20.19608F));
-        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 9.803922F));
-        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 29.6078033F));
+        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 22F));
+        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 22F));
+        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 22F));
+        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 6F));
+        tLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
         tLayout.Size = new Size(400, 600);
         tLayout.TabIndex = 0;
         // 
@@ -71,10 +71,10 @@ partial class AppForm
         pLeft.BackgroundImageLayout = ImageLayout.Stretch;
         pLeft.Cursor = Cursors.Hand;
         pLeft.Dock = DockStyle.Fill;
-        pLeft.Location = new Point(0, 421);
+        pLeft.Location = new Point(1, 430);
         pLeft.Margin = new Padding(0);
         pLeft.Name = "pLeft";
-        pLeft.Size = new Size(133, 179);
+        pLeft.Size = new Size(131, 169);
         pLeft.TabIndex = 0;
         // 
         // pRight
@@ -82,10 +82,10 @@ partial class AppForm
         pRight.BackgroundImageLayout = ImageLayout.Stretch;
         pRight.Cursor = Cursors.Hand;
         pRight.Dock = DockStyle.Fill;
-        pRight.Location = new Point(266, 421);
+        pRight.Location = new Point(266, 430);
         pRight.Margin = new Padding(0);
         pRight.Name = "pRight";
-        pRight.Size = new Size(134, 179);
+        pRight.Size = new Size(133, 169);
         pRight.TabIndex = 1;
         // 
         // tSplit
@@ -99,14 +99,14 @@ partial class AppForm
         tSplit.Controls.Add(sBR, 1, 2);
         tSplit.Controls.Add(choice, 0, 1);
         tSplit.Dock = DockStyle.Fill;
-        tSplit.Location = new Point(133, 421);
+        tSplit.Location = new Point(133, 430);
         tSplit.Margin = new Padding(0);
         tSplit.Name = "tSplit";
         tSplit.RowCount = 3;
-        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
-        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 40F));
-        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
-        tSplit.Size = new Size(133, 179);
+        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
+        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 44F));
+        tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
+        tSplit.Size = new Size(132, 169);
         tSplit.TabIndex = 2;
         // 
         // sTL
@@ -115,7 +115,7 @@ partial class AppForm
         sTL.Location = new Point(0, 0);
         sTL.Margin = new Padding(0);
         sTL.Name = "sTL";
-        sTL.Size = new Size(66, 53);
+        sTL.Size = new Size(66, 47);
         sTL.TabIndex = 0;
         // 
         // sTR
@@ -124,25 +124,25 @@ partial class AppForm
         sTR.Location = new Point(66, 0);
         sTR.Margin = new Padding(0);
         sTR.Name = "sTR";
-        sTR.Size = new Size(67, 53);
+        sTR.Size = new Size(66, 47);
         sTR.TabIndex = 1;
         // 
         // sBL
         // 
         sBL.Dock = DockStyle.Fill;
-        sBL.Location = new Point(0, 124);
+        sBL.Location = new Point(0, 121);
         sBL.Margin = new Padding(0);
         sBL.Name = "sBL";
-        sBL.Size = new Size(66, 55);
+        sBL.Size = new Size(66, 48);
         sBL.TabIndex = 2;
         // 
         // sBR
         // 
         sBR.Dock = DockStyle.Fill;
-        sBR.Location = new Point(66, 124);
+        sBR.Location = new Point(66, 121);
         sBR.Margin = new Padding(0);
         sBR.Name = "sBR";
-        sBR.Size = new Size(67, 55);
+        sBR.Size = new Size(66, 48);
         sBR.TabIndex = 3;
         // 
         // choice
@@ -152,10 +152,10 @@ partial class AppForm
         choice.Dock = DockStyle.Fill;
         choice.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
         choice.ForeColor = Color.FromArgb(0, 255, 255, 255);
-        choice.Location = new Point(0, 53);
+        choice.Location = new Point(0, 47);
         choice.Margin = new Padding(0);
         choice.Name = "choice";
-        choice.Size = new Size(133, 71);
+        choice.Size = new Size(132, 74);
         choice.TabIndex = 2;
         choice.TextAlign = ContentAlignment.MiddleCenter;
         // 

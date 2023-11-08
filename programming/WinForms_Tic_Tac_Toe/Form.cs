@@ -51,7 +51,6 @@ public partial class AppForm : Form
             };
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
-
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -116,7 +115,7 @@ public partial class AppForm : Form
 
             /* * * * * cells * * * * */
 
-            int tabInd = 3;
+            int tabInd = 0;
             cells = new Panel[3, 3];
             for (int row = 0; row < 3; row++)
                 for (int col = 0; col < 3; col++)
@@ -124,10 +123,11 @@ public partial class AppForm : Form
                     Panel p = cells[row, col] = new Panel();
                     p.BackgroundImageLayout = ImageLayout.Stretch;
                     p.Dock = DockStyle.Fill;
-                    p.Margin = new Padding(24);
+                    p.Margin = new Padding(12);
                     p.Name = $"cell{row}{col}";
-                    p.Size = new Size(85, 73);
+                    p.Size = new Size(109, 108);
                     p.TabIndex = tabInd++;
+                    //p.BorderStyle = BorderStyle.FixedSingle;
 
                     tLayout.Controls.Add(p, col, row);
 
@@ -199,9 +199,6 @@ public partial class AppForm : Form
             Marshal.StructureToPtr(rc, m.LParam, true);
 
             // adjust components
-
-            var width = tLayout.Size.Width;
-            tLayout.Size = new Size(width, width);
 
             float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
             choice.Font = new Font(choice.Font.FontFamily, newFontSize);

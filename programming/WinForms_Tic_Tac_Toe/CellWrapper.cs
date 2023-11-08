@@ -40,11 +40,20 @@ internal class CellWrapper
                 (int)(box.Size.Height * 1.5)),
             null,
             "center",
-            "top"
+            "center"
         );
         Image bgDef = bgHover.GetImageCopyWithAlpha(0.70f);
 
-        backgr.Add(State.Default, Resource.TokenLeft);// bgDef);
+        backgr.Add(State.Default, Resource.TokenLeft.GetOverlayOnBackground(
+            new Size( // to improve quality in bigger app window
+                (int)(box.Size.Width * 1.5),
+                (int)(box.Size.Height * 1.5)),
+            null,
+            "center",
+            "center"
+        )
+            
+            );// bgDef);
         backgr.Add(State.MouseEnter, bgHover);
         backgr.Add(State.MouseLeave, bgDef);
 
