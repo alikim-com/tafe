@@ -23,6 +23,23 @@ internal class EM
     /// </summary>
     static public event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
+    /// Confirms a player visual appearance
+    /// </summary>
+    static public event EventHandler<string[]>EvtPlayerConfirmed = delegate { };
+
+    // ----- wrappers -----
+
+    /// <summary>
+    /// EvtPlayerConfirmed wrapper, multi-thread safe
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public static void RaiseEvtPlayerConfirmed(object sender, string[] e)
+    {
+        var handler = EvtPlayerConfirmed;
+        handler?.Invoke(sender, e);
+    }
+    /// <summary>
     /// EvtReset wrapper, multi-thread safe
     /// </summary>
     public static void RaiseEvtReset(object sender, EventArgs e)

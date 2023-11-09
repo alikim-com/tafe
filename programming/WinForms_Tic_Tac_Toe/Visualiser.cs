@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace WinFormsApp1;
 
 /// <summary>
@@ -10,8 +9,6 @@ internal class VBridge
     public static Dictionary<Game.Roster, CellWrapper.BgMode> toCellDef = new()
     {
         { Game.Roster.None, CellWrapper.BgMode.Default },
-     { Game.Roster.Human, CellWrapper.BgMode.PlayerLeft},
-     { Game.Roster.AI, CellWrapper.BgMode.PlayerRight},
     };
 
     public static Dictionary<Game.Roster, CellWrapper.BgMode> toCell = new(toCellDef);
@@ -30,11 +27,20 @@ internal class VBridge
         Dictionary<Point, CellWrapper.BgMode> t = new();
         foreach (var rec in e) {
             if (!toCell.TryGetValue(rec.Value, out CellWrapper.BgMode bg))
-                throw new Exception("VBridge.SyncBoardHandler : can't translate '{rec.Value}'");
+                throw new Exception($"VBridge.SyncBoardHandler : can't translate '{rec.Value}'");
             t.Add(rec.Key, bg);
         }
 
-        EM.RaiseEvtSyncBoardUI(s, t);
+        EM.RaiseEvtSyncBoardUI(s ?? new { }, t);
+    }
+
+    internal static void PlayerConfirmedHandler(object? sender, string[] e)
+    {
+        if (!Enum.TryParse(e[0], out Game.Roster player))
+            throw new Exception($"VBridge.PlayerConfirmedHandler : unknown player '{e[0]}'");
+        if (!Enum.TryParse(e[1], out CellWrapper.BgMode cellBg))
+            throw new Exception($"VBridge.PlayerConfirmedHandler : unknown cell bg '{e[1]}'");
+        toCell.Add(player, cellBg);
     }
 }
 

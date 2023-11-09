@@ -57,12 +57,13 @@ public partial class AppForm : Form
 
         // events subscriptions
         EM.EvtReset += labMgr.ResetHandler;
-        //EM.EvtReset += pwLeft.ResetHandler;
-        //EM.EvtReset += pwRight.ResetHandler;
+        if(pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
+        if(pwRight != null) EM.EvtReset += pwRight.ResetHandler;
 
         EM.EvtSyncBoard += VBridge.SyncBoardHandler;
-
         foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
+
+        EM.EvtPlayerConfirmed += VBridge.PlayerConfirmedHandler;
 
         // reset game engine
         game.Reset();
@@ -106,22 +107,13 @@ public partial class AppForm : Form
             // data bindings
             choice.DataBindings.Add(new Binding("Text", labMgr, "CurState"));
 
-            // mouse click events
-            void plOnClick(object? sender, EventArgs e)
-            {
-                //pLeft.Click -= plOnClick;
-                //pRight.Click -= prOnClick;
-                //pwLeft.RemoveHoverEventHandlers();
-                //pwRight.RemoveHoverEventHandlers();
-            };
+            // bot panel mouse click events
+            // strings must connect existing Game.Roster player to a 
+            void plOnClick(object? sender, EventArgs e) => 
+                EM.RaiseEvtPlayerConfirmed(this, new string[] { "Human", "PlayerLeft" });
 
-            void prOnClick(object? sender, EventArgs e)
-            {
-                //pLeft.Click -= plOnClick;
-                //pRight.Click -= prOnClick;
-                //pwLeft.RemoveHoverEventHandlers();
-                //pwRight.RemoveHoverEventHandlers();
-            };
+            void prOnClick(object? sender, EventArgs e) =>
+                EM.RaiseEvtPlayerConfirmed(this, new string[] { "Human", "PlayerRight" });
 
             pLeft.Click += plOnClick;
             pRight.Click += prOnClick;

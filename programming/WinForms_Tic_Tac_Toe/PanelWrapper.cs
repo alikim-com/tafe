@@ -46,6 +46,16 @@ internal class PanelWrapper
 
     }
 
+    /// <summary>
+    /// Subscribed to EM.EvtReset event
+    /// </summary>
+    public void ResetHandler(object? s, EventArgs e)
+    {
+        SetBgMode(BgMode.Default);
+        RemoveHoverEventHandlers();
+        AddHoverEventHandlers();
+    }
+
     void CreateBgSet()
     {
         Image bgResourceDef = bgResource.GetImageCopyWithAlpha(0.66f);

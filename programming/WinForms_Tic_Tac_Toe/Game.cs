@@ -34,9 +34,6 @@ internal class Game
         CurPlayer = Roster.None;
         ResetBoard();
 
-        board[1, 1] = Roster.Human;
-        board[0, 2] = Roster.AI;
-
         // add all the board cells to the update
         var update = new Dictionary<Point, Roster>();
         for (int i = 0; i < board.GetLength(0); i++)
