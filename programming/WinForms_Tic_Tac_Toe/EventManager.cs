@@ -1,4 +1,5 @@
-﻿namespace WinFormsApp1;
+﻿
+namespace WinFormsApp1;
 
 /// <summary>
 /// Manages events
@@ -6,7 +7,15 @@
 internal class EM
 {
     /// <summary>
-    /// Resets the game
+    /// Translates game states into UI states in VBridge
+    /// </summary>
+    static public event EventHandler<Dictionary<Point, Game.Roster>> EvtSyncBoard = delegate { };
+    /// <summary>
+    /// Sync the board with EvtSyncBoard translation done by VBridge
+    /// </summary>
+    static public event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
+    /// <summary>
+    /// Resets UI, except the board
     /// </summary>
     static public event EventHandler EvtReset = delegate { };
     /// <summary>
@@ -28,6 +37,26 @@ internal class EM
     public static void RaiseEvtPlayerMoved(object sender, Point e)
     {
         var handler = EvtPlayerMoved;
+        handler?.Invoke(sender, e);
+    }
+    /// <summary>
+    /// EvtSyncBoard wrapper, multi-thread safe
+    /// </summary>
+    /// <param name="e">List of cells to update,<br/>
+    /// containing row(X) and column(Y) of a cell and the player occupying it</param>
+    public static void RaiseEvtSyncBoard(object sender, Dictionary<Point, Game.Roster> e)
+    {
+        var handler = EvtSyncBoard;
+        handler?.Invoke(sender, e);
+    }
+    /// <summary>
+    /// EvtSyncBoardUI wrapper, multi-thread safe
+    /// </summary>
+    /// <param name="e">List of cells to update,<br/>
+    /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
+    public static void RaiseEvtSyncBoardUI(object sender, Dictionary<Point, CellWrapper.BgMode> e)
+    {
+        var handler = EvtSyncBoardUI;
         handler?.Invoke(sender, e);
     }
 }

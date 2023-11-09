@@ -56,12 +56,16 @@ public partial class AppForm : Form
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
         // events subscriptions
-        EM.EvtReset += game.ResetHandler;
         EM.EvtReset += labMgr.ResetHandler;
-        foreach (var cw in cellWrap) EM.EvtReset += cw.ResetHandler;
+        //EM.EvtReset += pwLeft.ResetHandler;
+        //EM.EvtReset += pwRight.ResetHandler;
 
-        // start game
-        EM.RaiseEvtReset(this, new EventArgs());
+        EM.EvtSyncBoard += VBridge.SyncBoardHandler;
+
+        foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
+
+        // reset game engine
+        game.Reset();
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -105,20 +109,18 @@ public partial class AppForm : Form
             // mouse click events
             void plOnClick(object? sender, EventArgs e)
             {
-                pLeft.Click -= plOnClick;
-                pRight.Click -= prOnClick;
-                pwLeft.RemoveHoverEventHandlers();
-                pwRight.RemoveHoverEventHandlers();
- //               game.CurState = Game.State.PlayerLeft;
+                //pLeft.Click -= plOnClick;
+                //pRight.Click -= prOnClick;
+                //pwLeft.RemoveHoverEventHandlers();
+                //pwRight.RemoveHoverEventHandlers();
             };
 
             void prOnClick(object? sender, EventArgs e)
             {
-                pLeft.Click -= plOnClick;
-                pRight.Click -= prOnClick;
-                pwLeft.RemoveHoverEventHandlers();
-                pwRight.RemoveHoverEventHandlers();
- //               game.CurState = Game.State.PlayerRight;
+                //pLeft.Click -= plOnClick;
+                //pRight.Click -= prOnClick;
+                //pwLeft.RemoveHoverEventHandlers();
+                //pwRight.RemoveHoverEventHandlers();
             };
 
             pLeft.Click += plOnClick;
@@ -145,12 +147,6 @@ public partial class AppForm : Form
 
                     CellWrapper cw = cellWrap[row, col] = new CellWrapper(p, row, col);
 
-                    //cw.OnClick = (object? sender, EventArgs e) => 
-                    //{
-                    //    p.Click -= cw.OnClick;
-                    //    cw.RemoveHoverEventHandlers();
-                    //    //cw.CurBgMode = CellWrapper.BgMode.Default;
-                    //};
                 }
 
         }
@@ -218,8 +214,8 @@ public partial class AppForm : Form
 
             // adjust components
 
-           float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
-           choice.Font = new Font(choice.Font.FontFamily, newFontSize);
+            float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
+            choice.Font = new Font(choice.Font.FontFamily, newFontSize);
         }
 
         base.WndProc(ref m);

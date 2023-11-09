@@ -7,7 +7,7 @@ namespace WinFormsApp1;
 internal class CellWrapper
 {
     readonly Panel box;
-    readonly int row, col;
+    readonly Point rc;
     readonly Dictionary<BgMode, Image> backgr = new();
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
@@ -38,26 +38,18 @@ internal class CellWrapper
     public CellWrapper(Panel _box, int _row, int _col)
     {
         box = _box;
-        row = _row;
-        col = _col;
+        rc = new Point(_row, _col);
         CreateBgSet();
         CreateEventHandlers();
     }
 
-    public void Settle(BgMode mode)
-    {
-        RemoveHoverEventHandlers();
-        SetBg(mode);
-    } 
-
     /// <summary>
-    /// Subscribed EM.EvtReset event
+    /// Subscribed EM.EvtSyncBoardUI event
     /// </summary>
-    public void ResetHandler(object? s, EventArgs e)
+    public void SyncBoardUIHandler(object? s, Dictionary<Point, BgMode> e)
     {
-        RemoveHoverEventHandlers();
-        AddHoverEventHandlers();
-        SetBg(BgMode.Default);
+        if (!e.TryGetValue(rc, out BgMode val)) return;
+        SetBg(val);        
     }
 
     /// <summary>
@@ -65,7 +57,7 @@ internal class CellWrapper
     /// </summary>
     void OnClick(object? s, EventArgs e)
     {
-        EM.RaiseEvtPlayerMoved(this, new Point(row, col));
+        EM.RaiseEvtPlayerMoved(this, rc);
     }
 
     void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());

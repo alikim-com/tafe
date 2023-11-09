@@ -44,9 +44,6 @@ internal class PanelWrapper
         CreateBgSet();
         CreateEventHandlers();
 
-        AddHoverEventHandlers();
-
-        SetBgMode(BgMode.Default);
     }
 
     void CreateBgSet()

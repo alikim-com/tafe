@@ -20,14 +20,14 @@ internal class LabelManager : INotifyPropertyChanged
 
     public enum State
     {
-        Start,
+        None,
         PlayerLeft,
         PlayerRight
     }
 
     static public readonly Dictionary<State, string> stateInfo = new()
     {
-        { State.Start, "CHOOSE\nYOUR\nSIDE" },
+        { State.None, "CHOOSE\nYOUR\nSIDE" },
         { State.PlayerLeft, "YOU  -vs-  AI   " },
         { State.PlayerRight, "   AI  -vs-  YOU" },
     };
@@ -37,7 +37,7 @@ internal class LabelManager : INotifyPropertyChanged
     /// </summary>
     public void ResetHandler(object? s, EventArgs e)
     {
-        SetLabels(State.Start);
+        SetLabels(State.None);
     }
 
     void SetLabels(State state)

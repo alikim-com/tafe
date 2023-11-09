@@ -69,23 +69,21 @@ partial class AppForm
         // pLeft
         // 
         pLeft.BackgroundImageLayout = ImageLayout.Stretch;
-        pLeft.Cursor = Cursors.Hand;
         pLeft.Dock = DockStyle.Fill;
-        pLeft.Location = new Point(1, 430);
+        pLeft.Location = new Point(0, 432);
         pLeft.Margin = new Padding(0);
         pLeft.Name = "pLeft";
-        pLeft.Size = new Size(131, 169);
+        pLeft.Size = new Size(133, 168);
         pLeft.TabIndex = 0;
         // 
         // pRight
         // 
         pRight.BackgroundImageLayout = ImageLayout.Stretch;
-        pRight.Cursor = Cursors.Hand;
         pRight.Dock = DockStyle.Fill;
-        pRight.Location = new Point(266, 430);
+        pRight.Location = new Point(266, 432);
         pRight.Margin = new Padding(0);
         pRight.Name = "pRight";
-        pRight.Size = new Size(133, 169);
+        pRight.Size = new Size(134, 168);
         pRight.TabIndex = 1;
         // 
         // tSplit
@@ -99,14 +97,14 @@ partial class AppForm
         tSplit.Controls.Add(sBR, 1, 2);
         tSplit.Controls.Add(choice, 0, 1);
         tSplit.Dock = DockStyle.Fill;
-        tSplit.Location = new Point(133, 430);
+        tSplit.Location = new Point(133, 432);
         tSplit.Margin = new Padding(0);
         tSplit.Name = "tSplit";
         tSplit.RowCount = 3;
         tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
         tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 44F));
         tSplit.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
-        tSplit.Size = new Size(132, 169);
+        tSplit.Size = new Size(133, 168);
         tSplit.TabIndex = 2;
         // 
         // sTL
@@ -124,13 +122,13 @@ partial class AppForm
         sTR.Location = new Point(66, 0);
         sTR.Margin = new Padding(0);
         sTR.Name = "sTR";
-        sTR.Size = new Size(66, 47);
+        sTR.Size = new Size(67, 47);
         sTR.TabIndex = 1;
         // 
         // sBL
         // 
         sBL.Dock = DockStyle.Fill;
-        sBL.Location = new Point(0, 121);
+        sBL.Location = new Point(0, 120);
         sBL.Margin = new Padding(0);
         sBL.Name = "sBL";
         sBL.Size = new Size(66, 48);
@@ -139,10 +137,10 @@ partial class AppForm
         // sBR
         // 
         sBR.Dock = DockStyle.Fill;
-        sBR.Location = new Point(66, 121);
+        sBR.Location = new Point(66, 120);
         sBR.Margin = new Padding(0);
         sBR.Name = "sBR";
-        sBR.Size = new Size(66, 48);
+        sBR.Size = new Size(67, 48);
         sBR.TabIndex = 3;
         // 
         // choice
@@ -155,7 +153,7 @@ partial class AppForm
         choice.Location = new Point(0, 47);
         choice.Margin = new Padding(0);
         choice.Name = "choice";
-        choice.Size = new Size(132, 74);
+        choice.Size = new Size(133, 73);
         choice.TabIndex = 2;
         choice.TextAlign = ContentAlignment.MiddleCenter;
         // 
