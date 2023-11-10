@@ -25,18 +25,18 @@ internal class EM
     /// <summary>
     /// Confirms a player visual appearance
     /// </summary>
-    static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfirmed = delegate { };
+    static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfigured = delegate { };
 
     // ----- wrappers -----
 
     /// <summary>
-    /// EvtPlayerConfirmed wrapper, multi-thread safe
+    /// EvtPlayerConfigured wrapper, multi-thread safe
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public static void RaiseEvtPlayerConfirmed(object sender, CellWrapper.BgMode e)
+    public static void RaiseEvtPlayerConfigured(object sender, CellWrapper.BgMode e)
     {
-        var handler = EvtPlayerConfirmed;
+        var handler = EvtPlayerConfigured;
         handler?.Invoke(sender, e);
     }
     /// <summary>

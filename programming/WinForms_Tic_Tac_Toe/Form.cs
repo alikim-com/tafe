@@ -67,10 +67,12 @@ public partial class AppForm : Form
         EM.EvtSyncBoard += VBridge.SyncBoardHandler;
         foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
 
-        EM.EvtPlayerConfirmed += PlayerConfig.PlayerConfirmedHandler;
+        EM.EvtPlayerConfigured += PlayerConfig.PlayerConfiguredHandler;
 
-        // reset game engine (start game)
+        // raise reset event
         Game.Reset();
+        // start listening to players config choices
+        TurnWheel.Start(new List<IComponent?>() { pwLeft, pwRight }, TurnWheel.Mode.Once);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)

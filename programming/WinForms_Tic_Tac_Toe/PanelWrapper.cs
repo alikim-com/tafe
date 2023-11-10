@@ -5,7 +5,7 @@ namespace WinFormsApp1;
 /// Controls bottom panels backgrounds and associated mouse events<br/>
 /// Player visualisation choice.
 /// </summary>
-internal class PanelWrapper
+internal class PanelWrapper : IComponent
 {
     readonly Panel box;
     readonly Control[] extra;
@@ -56,11 +56,6 @@ internal class PanelWrapper
     public void ResetHandler(object? s, EventArgs e)
     {
         SetBgMode(BgMode.Default);
-
-        RemoveHoverEventHandlers();
-        AddHoverEventHandlers();
-
-        box.Click += OnClick;
     }
 
     void CreateBgSet()
@@ -112,19 +107,23 @@ internal class PanelWrapper
     {
         box.MouseEnter += evtDetail[BgMode.MouseEnter];
         box.MouseLeave += evtDetail[BgMode.MouseLeave];
-
-        box.Cursor = Cursors.Hand;
     }
 
     public void RemoveHoverEventHandlers()
     {
         box.MouseEnter -= evtDetail[BgMode.MouseEnter];
         box.MouseLeave -= evtDetail[BgMode.MouseLeave];
-
-        box.Cursor = Cursors.Default;
     }
 
-    void Disable()
+    public void Enable()
+    {
+        RemoveHoverEventHandlers();
+        AddHoverEventHandlers();
+        box.Click += OnClick;
+        box.Cursor = Cursors.Hand;
+    }
+
+    public void Disable()
     {
         box.Click -= OnClick;
         RemoveHoverEventHandlers();
@@ -134,8 +133,10 @@ internal class PanelWrapper
     void OnClick(object? sender, EventArgs e)
     {
         Disable();
-        // set bg to the current player in PlayerConfig
-        EM.RaiseEvtPlayerConfirmed(this, playerBg);
+        SetBgMode(BgMode.MouseEnter);
+
+        // associate bg with the current player & turn the wheel
+        EM.RaiseEvtPlayerConfigured(this, playerBg);
     }
 
     void SetBgMode(BgMode mode) => evtDetail[mode](this, new EventArgs());

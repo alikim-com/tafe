@@ -21,10 +21,9 @@ internal class PlayerConfig
     /// <summary>
     /// Adds an association between a player and a cell's visual to the dictionary
     /// </summary>
-    public static void PlayerConfirmedHandler(object? s, CellWrapper.BgMode e)
+    public static void PlayerConfiguredHandler(object? s, CellWrapper.BgMode e)
     {
         toCellCfg.Add(Game.TurnList[head], e);
-        AdvancePlayer();
     }
 
     static void AdvancePlayer()

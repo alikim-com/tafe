@@ -4,7 +4,7 @@ namespace WinFormsApp1;
 /// <summary>
 /// Controls board cells backgrounds and associated mouse events
 /// </summary>
-internal class CellWrapper
+internal class CellWrapper : IComponent
 {
     readonly Panel box;
     readonly Point rc;
@@ -127,17 +127,26 @@ internal class CellWrapper
     {
         box.MouseEnter += evtDetail[BgMode.MouseEnter];
         box.MouseLeave += evtDetail[BgMode.MouseLeave];
-
-        box.Click += OnClick;
-        box.Cursor = Cursors.Hand;
     }
 
     void RemoveHoverEventHandlers()
     {
         box.MouseEnter -= evtDetail[BgMode.MouseEnter];
         box.MouseLeave -= evtDetail[BgMode.MouseLeave];
+    }
 
+    public void Enable()
+    {
+        RemoveHoverEventHandlers();
+        AddHoverEventHandlers();
+        box.Click += OnClick;
+        box.Cursor = Cursors.Hand;
+    }
+
+    public void Disable()
+    {
         box.Click -= OnClick;
+        RemoveHoverEventHandlers();
         box.Cursor = Cursors.Default;
     }
 }
