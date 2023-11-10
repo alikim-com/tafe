@@ -11,11 +11,13 @@ public partial class AppForm : Form
     readonly int lChoiceWidth;
     readonly float lChoiceFontSize;
 
+    // player cfg panels bg manager
     PanelWrapper? pwLeft;
     PanelWrapper? pwRight;
+
+    // board cell bg manager
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
-    readonly Game game;
     readonly LabelManager labMgr;
 
     static void ApplyDoubleBuffer(Control control)
@@ -29,8 +31,9 @@ public partial class AppForm : Form
 
     public AppForm()
     {
-        // init game engine
-        game = new();
+        // set the order of players turns, needed before clicking on cfg panels
+        Game.SetTurns("random");
+
         // init label manager
         labMgr = new();
 
@@ -56,6 +59,7 @@ public partial class AppForm : Form
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
         // events subscriptions
+        EM.EvtReset += PlayerConfig.ResetHandler;
         EM.EvtReset += labMgr.ResetHandler;
         if(pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
         if(pwRight != null) EM.EvtReset += pwRight.ResetHandler;
@@ -63,10 +67,10 @@ public partial class AppForm : Form
         EM.EvtSyncBoard += VBridge.SyncBoardHandler;
         foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
 
-        EM.EvtPlayerConfirmed += VBridge.PlayerConfirmedHandler;
+        EM.EvtPlayerConfirmed += PlayerConfig.PlayerConfirmedHandler;
 
-        // reset game engine
-        game.Reset();
+        // reset game engine (start game)
+        Game.Reset();
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -93,7 +97,8 @@ public partial class AppForm : Form
                 "left",
                 "top",
                 colorsLeft,
-                new Control[] { sTL, sBL }
+                new Control[] { sTL, sBL },
+                CellWrapper.BgMode.Player1
             );
             pwRight = new PanelWrapper(
                 pRight,
@@ -101,22 +106,12 @@ public partial class AppForm : Form
                 "right",
                 "top",
                 colorsRight,
-                new Control[] { sTR, sBR }
+                new Control[] { sTR, sBR },
+                CellWrapper.BgMode.Player2
             );
 
             // data bindings
             choice.DataBindings.Add(new Binding("Text", labMgr, "CurState"));
-
-            // bot panel mouse click events
-            // strings must connect existing Game.Roster player to a 
-            void plOnClick(object? sender, EventArgs e) => 
-                EM.RaiseEvtPlayerConfirmed(this, new string[] { "Human", "PlayerLeft" });
-
-            void prOnClick(object? sender, EventArgs e) =>
-                EM.RaiseEvtPlayerConfirmed(this, new string[] { "Human", "PlayerRight" });
-
-            pLeft.Click += plOnClick;
-            pRight.Click += prOnClick;
 
             // --------- board cells ----------
 
@@ -140,7 +135,6 @@ public partial class AppForm : Form
                     CellWrapper cw = cellWrap[row, col] = new CellWrapper(p, row, col);
 
                 }
-
         }
     }
 

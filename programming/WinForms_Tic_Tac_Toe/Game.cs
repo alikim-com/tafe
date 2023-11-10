@@ -12,24 +12,29 @@ internal class Game
         Human,
         AI
     }
+    /// <summary>
+    /// Players from Roster in the order of their turns;<br/>
+    /// can be overwritten by SetTurns()
+    /// </summary>
+    static Roster[] _turnList = 
+        ((IEnumerable<Roster>)Enum.GetValues(typeof(Roster)))
+        .Where(e => e != Roster.None).ToArray(); // exclude None
+    static public Roster[] TurnList
+    {
+        get => _turnList;
+        set => _turnList = value;
+    }
 
-    static readonly Roster[] roster = (Roster[])Enum.GetValues(typeof(Roster));
-
-    public Roster _curPlayer;
-    public Roster CurPlayer
+    public static Roster _curPlayer;
+    public static Roster CurPlayer
     {
         get => _curPlayer;
         private set => _curPlayer = value;
     }
 
-    public Roster[,] board = new Roster[3, 3];
+    public static Roster[,] board = new Roster[3, 3];
 
-    public Game()
-    {
-        CurPlayer = Roster.None;
-    }
-
-    public void Reset()
+    public static void Reset()
     {
         CurPlayer = Roster.None;
         ResetBoard();
@@ -41,26 +46,34 @@ internal class Game
                 update.Add(new Point(i, j), board[i, j]);
 
         // sync the board
-        EM.RaiseEvtSyncBoard(this, update);
+        EM.RaiseEvtSyncBoard(new { }, update);
         
-        // reset panels
-        EM.RaiseEvtReset(this, new EventArgs());
+        // reset everything, new game
+        EM.RaiseEvtReset(new { }, new EventArgs());
     }
 
-    void ResetBoard()
+    /// <summary>
+    /// Sets the order of players turns
+    /// </summary>
+    public static void SetTurns(string mode)
+    {
+        switch (mode)
+        {
+            case "random":
+                // random shuffle
+                Array.Sort(_turnList, (x, y) => Guid.NewGuid().CompareTo(Guid.NewGuid()));
+                break;
+            default:
+                throw new NotImplementedException($"Game.SetTurns : mode '{mode}'");
+        }
+    }
+
+    static void ResetBoard()
     {
         for (int i = 0; i < board.GetLength(0); i++)
             for (int j = 0; j < board.GetLength(1); j++)
                 board[i, j] = Roster.None;
     }
-
-    //void UpdateBoard(int row, int col)
-    //{
-    //    // board[row, col] = CurTurn;
-    //}
-
-
-
 
 
 }

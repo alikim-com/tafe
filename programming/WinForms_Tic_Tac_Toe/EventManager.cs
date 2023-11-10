@@ -25,7 +25,7 @@ internal class EM
     /// <summary>
     /// Confirms a player visual appearance
     /// </summary>
-    static public event EventHandler<string[]>EvtPlayerConfirmed = delegate { };
+    static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfirmed = delegate { };
 
     // ----- wrappers -----
 
@@ -34,7 +34,7 @@ internal class EM
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public static void RaiseEvtPlayerConfirmed(object sender, string[] e)
+    public static void RaiseEvtPlayerConfirmed(object sender, CellWrapper.BgMode e)
     {
         var handler = EvtPlayerConfirmed;
         handler?.Invoke(sender, e);

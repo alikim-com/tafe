@@ -19,6 +19,8 @@ internal class PanelWrapper
 
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
+    readonly CellWrapper.BgMode playerBg;
+
     public enum BgMode
     {
         Default,
@@ -32,7 +34,8 @@ internal class PanelWrapper
         string _hAlign,
         string _vAlign,
         Dictionary<BgMode, Color?> _bgColor,
-        Control[] _extra)
+        Control[] _extra,
+        CellWrapper.BgMode _playerBg)
     {
         box = _box;
         bgResource = _bgResource;
@@ -40,6 +43,7 @@ internal class PanelWrapper
         vAlign = _vAlign;
         bgColor = _bgColor;
         extra = _extra;
+        playerBg = _playerBg;
 
         CreateBgSet();
         CreateEventHandlers();
@@ -52,8 +56,11 @@ internal class PanelWrapper
     public void ResetHandler(object? s, EventArgs e)
     {
         SetBgMode(BgMode.Default);
+
         RemoveHoverEventHandlers();
         AddHoverEventHandlers();
+
+        box.Click += OnClick;
     }
 
     void CreateBgSet()
@@ -115,6 +122,20 @@ internal class PanelWrapper
         box.MouseLeave -= evtDetail[BgMode.MouseLeave];
 
         box.Cursor = Cursors.Default;
+    }
+
+    void Disable()
+    {
+        box.Click -= OnClick;
+        RemoveHoverEventHandlers();
+        box.Cursor = Cursors.Default;
+    }
+
+    void OnClick(object? sender, EventArgs e)
+    {
+        Disable();
+        // set bg to the current player in PlayerConfig
+        EM.RaiseEvtPlayerConfirmed(this, playerBg);
     }
 
     void SetBgMode(BgMode mode) => evtDetail[mode](this, new EventArgs());

@@ -27,12 +27,12 @@ internal class CellWrapper
         Default,
         MouseEnter,
         MouseLeave,
-        // token
-        PlayerLeft,
-        PlayerRight,
-        // grey token
-        LostLeft,
-        LostRight
+        // tokens
+        Player1,
+        Player2,
+        // grey tokens
+        Lost1,
+        Lost2
     }
 
     public CellWrapper(Panel _box, int _row, int _col)
@@ -96,11 +96,11 @@ internal class CellWrapper
             "center"
         );
 
-        backgr.Add(BgMode.PlayerLeft, tokenLeft);
-        backgr.Add(BgMode.PlayerRight, tokenRight);
+        backgr.Add(BgMode.Player1, tokenLeft);
+        backgr.Add(BgMode.Player2, tokenRight);
 
-        backgr.Add(BgMode.LostLeft, tokenLeft.Desaturate("PS"));
-        backgr.Add(BgMode.LostRight, tokenRight.Desaturate("PS"));
+        backgr.Add(BgMode.Lost1, tokenLeft.Desaturate("PS"));
+        backgr.Add(BgMode.Lost2, tokenRight.Desaturate("PS"));
 
     }
 
