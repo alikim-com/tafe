@@ -46,6 +46,7 @@ internal class Game
                 update.Add(new Point(i, j), board[i, j]);
 
         // sync the board
+        // also allows to save/load games
         EM.RaiseEvtSyncBoard(new { }, update);
         
         // reset everything, new game

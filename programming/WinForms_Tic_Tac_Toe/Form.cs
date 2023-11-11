@@ -59,7 +59,6 @@ public partial class AppForm : Form
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
         // events subscriptions
-        EM.EvtReset += PlayerConfig.ResetHandler;
         EM.EvtReset += labMgr.ResetHandler;
         if(pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
         if(pwRight != null) EM.EvtReset += pwRight.ResetHandler;
@@ -67,12 +66,13 @@ public partial class AppForm : Form
         EM.EvtSyncBoard += VBridge.SyncBoardHandler;
         foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
 
-        EM.EvtPlayerConfigured += PlayerConfig.PlayerConfiguredHandler;
+        EM.EvtPlayerConfigured += VBridge.PlayerConfiguredHandler;
 
         // raise reset event
         Game.Reset();
         // start listening to players config choices
-        TurnWheel.Start(new List<IComponent?>() { pwLeft, pwRight }, TurnWheel.Mode.Once);
+        if (pwLeft != null && pwRight != null)
+            TurnWheel.Start(new List<IComponent>() { pwLeft, pwRight }, TurnWheel.Mode.Once);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)

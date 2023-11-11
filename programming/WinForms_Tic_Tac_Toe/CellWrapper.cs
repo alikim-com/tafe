@@ -137,7 +137,7 @@ internal class CellWrapper : IComponent
 
     public void Enable()
     {
-        RemoveHoverEventHandlers();
+        Disable(); // to prevent double enabling
         AddHoverEventHandlers();
         box.Click += OnClick;
         box.Cursor = Cursors.Hand;
@@ -149,4 +149,11 @@ internal class CellWrapper : IComponent
         RemoveHoverEventHandlers();
         box.Cursor = Cursors.Default;
     }
+
+    /// <summary>
+    /// Called from TurnWheel.OnClickHandler
+    /// Empty here, cells are controlled by EM.EvtSyncBoardUI
+    /// </summary>
+    public void Highlight() { }
 }
+

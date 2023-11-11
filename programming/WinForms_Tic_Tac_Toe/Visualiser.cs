@@ -16,10 +16,8 @@ internal class VBridge
     /// <summary>
     /// Adds all players choices from clicking on cfg panels to the dictionary
     /// </summary>
-    static public void AddCfg(Dictionary<Game.Roster, CellWrapper.BgMode> toCellCfg)
-    {
-        foreach(var rec in toCellCfg) toCell.Add(rec.Key, rec.Value);
-    }
+    static public void PlayerConfiguredHandler(object? _, CellWrapper.BgMode e) => 
+        toCell.Add(TurnWheel.CurPlayer, e);
 
     /// <summary>
     /// Subscribed to EM.EvtReset event

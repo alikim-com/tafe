@@ -5,4 +5,5 @@ internal interface IComponent
 {
     void Enable();
     void Disable();
+    void Highlight();
 }

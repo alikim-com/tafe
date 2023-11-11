@@ -117,7 +117,7 @@ internal class PanelWrapper : IComponent
 
     public void Enable()
     {
-        RemoveHoverEventHandlers();
+        Disable(); // to prevent double enabling
         AddHoverEventHandlers();
         box.Click += OnClick;
         box.Cursor = Cursors.Hand;
@@ -130,11 +130,13 @@ internal class PanelWrapper : IComponent
         box.Cursor = Cursors.Default;
     }
 
+    /// <summary>
+    /// Called from TurnWheel.OnClickHandler
+    /// </summary>
+    public void Highlight() => SetBgMode(BgMode.MouseEnter);
+
     void OnClick(object? sender, EventArgs e)
     {
-        Disable();
-        SetBgMode(BgMode.MouseEnter);
-
         // associate bg with the current player & turn the wheel
         EM.RaiseEvtPlayerConfigured(this, playerBg);
     }
