@@ -76,5 +76,4 @@ internal class Game
                 board[i, j] = Roster.None;
     }
 
-
 }

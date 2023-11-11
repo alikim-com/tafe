@@ -26,9 +26,23 @@ internal class EM
     /// Confirms a player visual appearance
     /// </summary>
     static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfigured = delegate { };
+    /// <summary>
+    /// AI choice of a config panel for TurnWheel to "click" on
+    /// </summary>
+    static public event EventHandler<int>EvtAIConfigMoved = delegate { };
 
     // ----- wrappers -----
 
+    /// <summary>
+    /// EvtPlayerConfigured wrapper, multi-thread safe
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public static void RaiseEvtAIConfigMoved(object sender, int e)
+    {
+        var handler = EvtAIConfigMoved;
+        handler?.Invoke(sender, e);
+    }
     /// <summary>
     /// EvtPlayerConfigured wrapper, multi-thread safe
     /// </summary>

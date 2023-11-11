@@ -135,11 +135,16 @@ internal class PanelWrapper : IComponent
     /// </summary>
     public void Highlight() => SetBgMode(BgMode.MouseEnter);
 
-    void OnClick(object? sender, EventArgs e)
+    void OnClick(object? _, EventArgs __)
     {
         // associate bg with the current player & turn the wheel
         EM.RaiseEvtPlayerConfigured(this, playerBg);
     }
+
+    /// <summary>
+    /// AI mouse clicks
+    /// </summary>
+    public void SimulateOnClick() => OnClick(null, new EventArgs());
 
     void SetBgMode(BgMode mode) => evtDetail[mode](this, new EventArgs());
 }

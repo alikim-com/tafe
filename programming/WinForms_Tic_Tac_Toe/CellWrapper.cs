@@ -55,7 +55,7 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// Raises EM.EvtPlayerMoved event
     /// </summary>
-    void OnClick(object? s, EventArgs e)
+    void OnClick(object? _, EventArgs __)
     {
         EM.RaiseEvtPlayerMoved(this, rc);
     }
@@ -155,5 +155,10 @@ internal class CellWrapper : IComponent
     /// Empty here, cells are controlled by EM.EvtSyncBoardUI
     /// </summary>
     public void Highlight() { }
+
+    /// <summary>
+    /// AI mouse clicks
+    /// </summary>
+    public void SimulateOnClick() => OnClick(null, new EventArgs());
 }
 

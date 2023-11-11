@@ -72,7 +72,11 @@ public partial class AppForm : Form
         Game.Reset();
         // start listening to players config choices
         if (pwLeft != null && pwRight != null)
-            TurnWheel.Start(new List<IComponent>() { pwLeft, pwRight }, TurnWheel.Mode.Once);
+            TurnWheel.Start(
+                this, 
+                new List<IComponent>() { pwLeft, pwRight }, 
+                TurnWheel.Mode.Config
+            );
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
