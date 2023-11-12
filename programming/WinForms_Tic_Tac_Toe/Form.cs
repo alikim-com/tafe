@@ -58,25 +58,39 @@ public partial class AppForm : Form
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
-        // events subscriptions
+        // events subscriptions to reset from Game.Reset()
         EM.EvtReset += labMgr.ResetHandler;
-        if(pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
-        if(pwRight != null) EM.EvtReset += pwRight.ResetHandler;
+        if (pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
+        if (pwRight != null) EM.EvtReset += pwRight.ResetHandler;
 
+        // issued after Game board changes 
         EM.EvtSyncBoard += VBridge.SyncBoardHandler;
+        // translation to cell bgs
         foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
 
+        // cfg panels clicks
         EM.EvtPlayerConfigured += VBridge.PlayerConfiguredHandler;
 
         // raise reset event
         Game.Reset();
+
         // start listening to players config choices
         if (pwLeft != null && pwRight != null)
             TurnWheel.Start(
-                this, 
-                new List<IComponent>() { pwLeft, pwRight }, 
-                TurnWheel.Mode.Config
+                new List<IComponent>() { pwLeft, pwRight },
+                AI.Logic.Config
             );
+
+        // config is done, start game
+        EM.EvtConfigFinished += OnConfigFinished;
+    }
+
+    void OnConfigFinished(object? _, EventArgs __)
+    {
+        TurnWheel.Start(
+            cellWrap.Cast<IComponent>().ToList(),
+            AI.Logic.Board
+        );
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -117,7 +131,8 @@ public partial class AppForm : Form
             );
 
             // data bindings
-            choice.DataBindings.Add(new Binding("Text", labMgr, "CurState"));
+            choice.DataBindings.Add(new Binding("Text", labMgr, "ChoicePanel"));
+            info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanel"));
 
             // --------- board cells ----------
 

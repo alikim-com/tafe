@@ -23,31 +23,39 @@ internal class EM
     /// </summary>
     static public event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
-    /// Confirms a player visual appearance
+    /// Confirms a player visual appearance from PanelWrapper
     /// </summary>
     static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfigured = delegate { };
     /// <summary>
     /// AI choice of a config panel for TurnWheel to "click" on
     /// </summary>
-    static public event EventHandler<int>EvtAIConfigMoved = delegate { };
+    static public event EventHandler<int>EvtAIMoved = delegate { };
+    /// <summary>
+    /// Issued by TurnWheel when the game is ready to be played
+    /// </summary>
+    static public event EventHandler EvtConfigFinished = delegate { };
 
     // ----- wrappers -----
 
     /// <summary>
-    /// EvtPlayerConfigured wrapper, multi-thread safe
+    /// EvtConfigFinished wrapper, multi-thread safe
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public static void RaiseEvtAIConfigMoved(object sender, int e)
+    public static void RaiseEvtConfigFinished(object sender, EventArgs e)
     {
-        var handler = EvtAIConfigMoved;
+        var handler = EvtConfigFinished;
         handler?.Invoke(sender, e);
     }
     /// <summary>
     /// EvtPlayerConfigured wrapper, multi-thread safe
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
+    public static void RaiseEvtAIMoved(object sender, int e)
+    {
+        var handler = EvtAIMoved;
+        handler?.Invoke(sender, e);
+    }
+    /// <summary>
+    /// EvtPlayerConfigured wrapper, multi-thread safe
+    /// </summary>
     public static void RaiseEvtPlayerConfigured(object sender, CellWrapper.BgMode e)
     {
         var handler = EvtPlayerConfigured;

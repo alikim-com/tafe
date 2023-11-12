@@ -6,6 +6,9 @@ namespace WinFormsApp1;
 /// </summary>
 internal class Game
 {
+    /// <summary>
+    /// Pattern for human players Human*, for AI players - AI*
+    /// </summary>
     public enum Roster
     {
         None,

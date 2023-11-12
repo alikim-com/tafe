@@ -8,15 +8,7 @@ namespace WinFormsApp1;
 /// </summary>
 internal class TurnWheel
 {
-    static AppForm? AppFormInstance;
-
     static int head;
-
-    public enum Mode
-    {
-        Config, // AI chooses panels
-        Play // AI plays the game
-    }
 
     public enum Repeat // go thru TurnList
     {
@@ -24,7 +16,7 @@ internal class TurnWheel
         Loop, // for playing game
     }
 
-    static Mode mode;
+    static AI.Logic mode;
     static Repeat repeat;
 
     static List<IComponent> uiChoice = new();
@@ -37,29 +29,28 @@ internal class TurnWheel
         uiChoice = new();
     }
 
-    static public void Start(AppForm _inst, List<IComponent> _uiChoice, Mode _mode)
+    static public void Start(List<IComponent> _uiChoice, AI.Logic _mode)
     {
-        AppFormInstance = _inst;
         uiChoice = _uiChoice;
         mode = _mode;
-        repeat = _mode == Mode.Config ? Repeat.Once : Repeat.Loop;
+        repeat = _mode == AI.Logic.Config ? Repeat.Once : Repeat.Loop;
 
         AssertPlayer();
 
         EM.EvtPlayerConfigured += Next;
-        EM.EvtAIConfigMoved += AIConfigMoved;
+        EM.EvtAIMoved += AIMoved;
     }
 
     /// <summary>
     /// Handles EM.EvtAIConfigMoved event sent when AI chose a panel to click on
     /// </summary>
     /// <param name="e">index in the range [0, uiChoice.Count)</param>
-    private static void AIConfigMoved(object? sender, int e) => uiChoice[e].SimulateOnClick();
+    private static void AIMoved(object? sender, int e) => uiChoice[e].SimulateOnClick();
 
     static public void Stop()
     {
         EM.EvtPlayerConfigured -= Next;
-        EM.EvtAIConfigMoved -= AIConfigMoved;
+        EM.EvtAIMoved -= AIMoved;
     }
 
     static void EnableAll()
@@ -86,7 +77,7 @@ internal class TurnWheel
 
         if (uiChoice.Count == 0)
         {
-            Ended(); // outside call
+            Ended("no ui"); // outside call
             return;
         }
 
@@ -110,7 +101,7 @@ internal class TurnWheel
         if (head == Game.TurnList.Length - 1)
             if (repeat == Repeat.Once)
             {
-                Ended();
+                Ended("no players");
                 return;
             }
             else if (repeat == Repeat.Loop)
@@ -132,10 +123,7 @@ internal class TurnWheel
         {
             DisableAll();
 
-            if (mode == Mode.Config)
-                AI.MakeConfigMove(uiChoice.Count);
-            else
-                AI.MakePlayMove();
+            AI.MakeMove(mode, uiChoice.Count);
         }
         else
         { // Human*
@@ -144,9 +132,10 @@ internal class TurnWheel
         }
     }
 
-    static void Ended()
+    static void Ended(string msg)
     {
-
+        MessageBox.Show(msg);
+        EM.RaiseEvtConfigFinished(new { }, new EventArgs());
     }
 
 }

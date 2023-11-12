@@ -1,4 +1,6 @@
 ﻿
+using static WinFormsApp1.LabelManager;
+
 namespace WinFormsApp1;
 
 partial class AppForm
@@ -39,6 +41,7 @@ partial class AppForm
         sBL = new Panel();
         sBR = new Panel();
         choice = new Label();
+        info = new Label();
         tLayout.SuspendLayout();
         tSplit.SuspendLayout();
         SuspendLayout();
@@ -53,6 +56,7 @@ partial class AppForm
         tLayout.Controls.Add(pLeft, 0, 4);
         tLayout.Controls.Add(pRight, 2, 4);
         tLayout.Controls.Add(tSplit, 1, 4);
+        tLayout.Controls.Add(info, 0, 3);
         tLayout.Dock = DockStyle.Fill;
         tLayout.Location = new Point(0, 0);
         tLayout.Margin = new Padding(0);
@@ -157,6 +161,19 @@ partial class AppForm
         choice.TabIndex = 2;
         choice.TextAlign = ContentAlignment.MiddleCenter;
         // 
+        // info
+        // 
+        tSplit.SetColumnSpan(info, 3);
+        info.Dock = DockStyle.Fill;
+        info.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
+        info.ForeColor = Color.FromArgb(0, 255, 255, 255);
+        info.Location = new Point(0, 396);
+        info.Margin = new Padding(0);
+        info.Name = "info";
+        info.Size = new Size(0, 15);
+        info.TabIndex = 3;
+        info.TextAlign = ContentAlignment.MiddleCenter;
+        // 
         // AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -172,6 +189,7 @@ partial class AppForm
         Text = "Tic-Tac-Toe";
         Load += FormAspect_Load;
         tLayout.ResumeLayout(false);
+        tLayout.PerformLayout();
         tSplit.ResumeLayout(false);
         ResumeLayout(false);
     }
@@ -188,4 +206,5 @@ partial class AppForm
     private Panel sBR;
     private Label choice;
     private Panel[,] cells;
+    private Label info;
 }

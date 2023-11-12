@@ -9,27 +9,30 @@ namespace WinFormsApp1;
 internal class LabelManager : INotifyPropertyChanged
 {
     /// <summary>
-    /// Event driven readable state
+    /// Data bindings
     /// </summary>
-    string _curState = "";
-    public string CurState
-    {
-        get => _curState;
-        private set => _curState = value;
-    }
+    public string ChoicePanel { get; private set; } = "";
+    public string InfoPanel { get; private set; } = "";
 
-    public enum State
+    public enum Choice
     {
         None,
-        PlayerLeft,
-        PlayerRight
+        HumanLeft,
+        HumanRight
+    }
+    public enum Info
+    {
+        None,
+
     }
 
-    static public readonly Dictionary<State, string> stateInfo = new()
+    static public readonly Dictionary<Enum, string> labels = new()
     {
-        { State.None, "CHOOSE\nYOUR\nSIDE" },
-        { State.PlayerLeft, "YOU  -vs-  AI   " },
-        { State.PlayerRight, "   AI  -vs-  YOU" },
+        { Choice.None, "CHOOSE\nYOUR\nSIDE" },
+        { Choice.HumanLeft, "YOU  -vs-  AI   " },
+        { Choice.HumanRight, "   AI  -vs-  YOU" },
+        //
+        { Info.None, "" },
     };
 
     /// <summary>
@@ -37,13 +40,25 @@ internal class LabelManager : INotifyPropertyChanged
     /// </summary>
     public void ResetHandler(object? s, EventArgs e)
     {
-        SetLabels(State.None);
+        SetLabels(Choice.None);
+        SetLabels(Info.None);
     }
 
-    void SetLabels(State state)
+    void SetLabels(Enum state)
     {
-        CurState = stateInfo[state];
-        OnPropertyChanged(nameof(CurState));
+        switch (state)
+        {
+            case Choice:
+                ChoicePanel = labels[state];
+                OnPropertyChanged(nameof(ChoicePanel));
+                break;
+            case Info:
+                InfoPanel = labels[state];
+                OnPropertyChanged(nameof(InfoPanel));
+                break;
+            default:
+                throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
