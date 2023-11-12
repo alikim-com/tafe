@@ -34,9 +34,21 @@ internal class EM
     /// Issued by TurnWheel when the game is ready to be played
     /// </summary>
     static public event EventHandler EvtConfigFinished = delegate { };
+    /// <summary>
+    /// 
+    /// </summary>
+    static public event EventHandler<Enum[]>EvtUpdateLabels = delegate { };
 
     // ----- wrappers -----
 
+    /// <summary>
+    /// EvtUpdateLabels wrapper, multi-thread safe
+    /// </summary>
+    public static void RaiseEvtUpdateLabels(object sender, Enum[] e)
+    {
+        var handler = EvtUpdateLabels;
+        handler?.Invoke(sender, e);
+    }
     /// <summary>
     /// EvtConfigFinished wrapper, multi-thread safe
     /// </summary>

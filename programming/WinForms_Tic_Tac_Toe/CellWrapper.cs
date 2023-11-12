@@ -46,7 +46,7 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// Subscribed EM.EvtSyncBoardUI event
     /// </summary>
-    public void SyncBoardUIHandler(object? s, Dictionary<Point, BgMode> e)
+    public void SyncBoardUIHandler(object? _, Dictionary<Point, BgMode> e)
     {
         if (!e.TryGetValue(rc, out BgMode val)) return;
         SetBg(val);        

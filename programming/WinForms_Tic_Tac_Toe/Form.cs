@@ -59,17 +59,22 @@ public partial class AppForm : Form
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
 
         // events subscriptions to reset from Game.Reset()
-        EM.EvtReset += labMgr.ResetHandler;
+        EM.EvtReset += LabelManager.ResetHandler;
         if (pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
         if (pwRight != null) EM.EvtReset += pwRight.ResetHandler;
 
+        // update labels
+        EM.EvtUpdateLabels += LabelManager.UpdateLabelsHandler;
+
         // issued after Game board changes 
         EM.EvtSyncBoard += VBridge.SyncBoardHandler;
-        // translation to cell bgs
+        // translation to board cell bgs
         foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
 
         // cfg panels clicks
         EM.EvtPlayerConfigured += VBridge.PlayerConfiguredHandler;
+
+        // board cell clicks ---------- TODO ------------
 
         // raise reset event
         Game.Reset();
@@ -81,7 +86,7 @@ public partial class AppForm : Form
                 AI.Logic.Config
             );
 
-        // config is done, start game
+        // when config is done, start game
         EM.EvtConfigFinished += OnConfigFinished;
     }
 
@@ -153,8 +158,7 @@ public partial class AppForm : Form
 
                     ApplyDoubleBuffer(p);
 
-                    CellWrapper cw = cellWrap[row, col] = new CellWrapper(p, row, col);
-
+                    cellWrap[row, col] = new CellWrapper(p, row, col);
                 }
         }
     }

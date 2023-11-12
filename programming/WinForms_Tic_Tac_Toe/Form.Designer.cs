@@ -163,16 +163,16 @@ partial class AppForm
         // 
         // info
         // 
-        tSplit.SetColumnSpan(info, 3);
+        tLayout.SetColumnSpan(info, 3);
         info.Dock = DockStyle.Fill;
         info.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
         info.ForeColor = Color.FromArgb(0, 255, 255, 255);
         info.Location = new Point(0, 396);
         info.Margin = new Padding(0);
         info.Name = "info";
-        info.Size = new Size(0, 15);
+        info.Size = new Size(400, 36);
         info.TabIndex = 3;
-        info.TextAlign = ContentAlignment.MiddleCenter;
+        info.TextAlign = ContentAlignment.TopCenter;
         // 
         // AppForm
         // 
@@ -189,7 +189,6 @@ partial class AppForm
         Text = "Tic-Tac-Toe";
         Load += FormAspect_Load;
         tLayout.ResumeLayout(false);
-        tLayout.PerformLayout();
         tSplit.ResumeLayout(false);
         ResumeLayout(false);
     }

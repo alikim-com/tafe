@@ -4,67 +4,104 @@ using System.ComponentModel;
 namespace WinFormsApp1;
 
 /// <summary>
-/// 
+/// Updates UI labels based on subscribed events
 /// </summary>
 internal class LabelManager : INotifyPropertyChanged
 {
     /// <summary>
-    /// Data bindings
+    /// Bottom config panel states
     /// </summary>
-    public string ChoicePanel { get; private set; } = "";
-    public string InfoPanel { get; private set; } = "";
-
     public enum Choice
     {
         None,
         HumanLeft,
-        HumanRight
+        HumanRight,
+        // two player case
+        HumanFirst,
+        AIFirst,
     }
+    /// <summary>
+    /// Middle info panel states
+    /// </summary>
     public enum Info
     {
         None,
-
+        HumanTurn,
+        AITurn,
     }
 
     static public readonly Dictionary<Enum, string> labels = new()
     {
-        { Choice.None, "CHOOSE\nYOUR\nSIDE" },
+        { Choice.None, "" },
         { Choice.HumanLeft, "YOU  -vs-  AI   " },
         { Choice.HumanRight, "   AI  -vs-  YOU" },
+        { Choice.HumanFirst, "CHOOSE\nYOUR\nSIDE" },
+        { Choice.AIFirst, "TAKE\nYOUR\nSIDE" },
         //
         { Info.None, "" },
+        { Info.HumanTurn, "Your turn..." },
+        { Info.AITurn, "AI is moving..." },
     };
+
+    /// <summary>
+    /// Subscribed to EM.EvtUpdateLabels event
+    /// </summary>
+    /// <param name="e">An array of states to set for each panel</param>
+    static public void UpdateLabelsHandler(object? _, Enum[] e)
+    {
+        foreach(Enum state in e) SetLabel(state);
+    }
 
     /// <summary>
     /// Subscribed to EM.EvtReset event
     /// </summary>
-    public void ResetHandler(object? s, EventArgs e)
+    static public void ResetHandler(object? _, EventArgs __)
     {
-        SetLabels(Choice.None);
-        SetLabels(Info.None);
+        SetLabel(Choice.None);
+        SetLabel(Info.None);
     }
 
-    void SetLabels(Enum state)
+    static void SetLabel(Enum state)
     {
+        if (_this == null) return;
         switch (state)
         {
             case Choice:
-                ChoicePanel = labels[state];
-                OnPropertyChanged(nameof(ChoicePanel));
+                _this.ChoicePanel = labels[state];
+                RaiseEvtPropertyChanged(nameof(ChoicePanel));
                 break;
             case Info:
-                InfoPanel = labels[state];
-                OnPropertyChanged(nameof(InfoPanel));
+                _this.InfoPanel = labels[state];
+                RaiseEvtPropertyChanged(nameof(InfoPanel));
                 break;
             default:
                 throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
         }
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-    void OnPropertyChanged(string property)
+    static void RaiseEvtPropertyChanged(string property)
     {
-        var handler = PropertyChanged;
-        handler?.Invoke(this, new PropertyChangedEventArgs(property));
+        var handler = _this?.PropertyChanged;
+        handler?.Invoke(_this, new PropertyChangedEventArgs(property));
     }
+
+    /* 
+     * A workaround to implement the data binding interface that requires
+     * PropertyChanged event and binding properties to be instanced
+     * 
+     */
+
+    static LabelManager? _this;
+
+    /// <summary>
+    /// Data bindings
+    /// </summary>
+    public string ChoicePanel { get; private set; } = "";
+    public string InfoPanel { get; private set; } = "";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public LabelManager()
+    {
+        _this = this;
+    }   
 }

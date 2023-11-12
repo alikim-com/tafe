@@ -1,4 +1,6 @@
 ﻿
+using static WinFormsApp1.LabelManager;
+
 namespace WinFormsApp1;
 
 /// <summary>
@@ -77,7 +79,7 @@ internal class TurnWheel
 
         if (uiChoice.Count == 0)
         {
-            Ended("no ui"); // outside call
+            Ended(); // outside call
             return;
         }
 
@@ -101,7 +103,7 @@ internal class TurnWheel
         if (head == Game.TurnList.Length - 1)
             if (repeat == Repeat.Once)
             {
-                Ended("no players");
+                Ended();
                 return;
             }
             else if (repeat == Repeat.Loop)
@@ -112,29 +114,40 @@ internal class TurnWheel
         head++;
     }
 
+    // custom two player case
+    static readonly string firstPlayer = 
+        Game.TurnList[0].ToString().StartsWith("AI") ? "AI" :"HU";
+    static readonly Enum[] labels = firstPlayer == "AI" ?
+        new Enum[] { Choice.AIFirst } : new Enum[] { Choice.HumanFirst };
+
     /// <summary>
     /// Ensure next click is scheduled and will be performed
     /// </summary>
     static void AssertPlayer()
     {
-        MessageBox.Show(CurPlayer.ToString());
+        // custom two player case
+        if (mode == AI.Logic.Config) EM.RaiseEvtUpdateLabels(new { }, labels);
 
         if (CurPlayer.ToString().StartsWith("AI"))
         {
             DisableAll();
 
             AI.MakeMove(mode, uiChoice.Count);
+            EM.RaiseEvtUpdateLabels(new { }, new Enum[] { Info.AITurn });
         }
         else
         { // Human*
 
             EnableAll();
+            EM.RaiseEvtUpdateLabels(new { }, new Enum[] { Info.HumanTurn });
         }
     }
 
-    static void Ended(string msg)
+    static void Ended()
     {
-        MessageBox.Show(msg);
+        //  if config set -vs- label
+        // EM.RaiseEvtUpdateLabels(new { }, new Enum[] { LabelManager.Info.HumanTurn });
+        // else None
         EM.RaiseEvtConfigFinished(new { }, new EventArgs());
     }
 
