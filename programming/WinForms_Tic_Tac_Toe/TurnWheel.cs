@@ -5,14 +5,15 @@ namespace WinFormsApp1;
 
 /// <summary>
 /// The purpose is to go thru TurnList, identify a player as a Human or AI;<br/>
-/// in case of AI, run logic for choosing a move and performing clicks,<br/>
-/// in case of a Human player, wait for their action
+/// in case of AI, trigger logic for choosing a move and performing clicks,<br/>
+/// in case of a Human player, wait for their action.<br/>
+/// Update labels.
 /// </summary>
 internal class TurnWheel
 {
     static int head;
 
-    public enum Repeat // go thru TurnList
+    public enum Repeat // cycle thru TurnList
     {
         Once, // for player cfg
         Loop, // for playing game
@@ -21,9 +22,32 @@ internal class TurnWheel
     static AI.Logic mode;
     static Repeat repeat;
 
+    /// <summary>
+    /// Special case AI vs Human head to head, to set custom labels
+    /// </summary>
+    static bool AvH;
+    /// <summary>
+    /// AvH case, final cfg label
+    /// </summary>
+    static Choice cfgEndedLabel;
+    /// <summary>
+    /// AvH case, human confirm label
+    /// </summary>
+    static readonly Enum[] cfgConfirmLabel = PlayerIsAI(0) ?
+        new Enum[] { Choice.AIFirst } : new Enum[] { Choice.HumanFirst };
+
+    /// <summary>
+    /// Clickable UI elements
+    /// </summary>
     static List<IComponent> uiChoice = new();
 
     public static Game.Roster CurPlayer => Game.TurnList[head];
+
+    static bool CheckPlayerType(Game.Roster player, string type) => player.ToString().StartsWith(type);
+    static bool CurPlayerIsHuman => CheckPlayerType(CurPlayer, "Human");
+    static bool CurPlayerIsAI => CheckPlayerType(CurPlayer, "AI");
+    static bool PlayerIsHuman(int ind) => CheckPlayerType(Game.TurnList[ind], "Human");
+    static bool PlayerIsAI(int ind) => CheckPlayerType(Game.TurnList[ind], "AI");
 
     static public void Reset()
     {
@@ -37,14 +61,17 @@ internal class TurnWheel
         mode = _mode;
         repeat = _mode == AI.Logic.Config ? Repeat.Once : Repeat.Loop;
 
-        AssertPlayer();
+        AvH = Game.TurnList.Length == 2 &&
+            (PlayerIsHuman(0) && PlayerIsAI(1) || PlayerIsHuman(1) && PlayerIsAI(0));
 
         EM.EvtPlayerConfigured += Next;
         EM.EvtAIMoved += AIMoved;
+
+        AssertPlayer();
     }
 
     /// <summary>
-    /// Handles EM.EvtAIConfigMoved event sent when AI chose a panel to click on
+    /// Handles EvtAIMoved event sent after AI chooses a UI element to click on
     /// </summary>
     /// <param name="e">index in the range [0, uiChoice.Count)</param>
     private static void AIMoved(object? sender, int e) => uiChoice[e].SimulateOnClick();
@@ -73,7 +100,10 @@ internal class TurnWheel
         if (s == null) return;
         IComponent comp = (IComponent)s;
 
-        ComponentHandler(comp);
+        if (AvH && comp.Name == "pLeft")
+            cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
+
+        ComponentPostClick(comp);
 
         uiChoice.Remove(comp);
 
@@ -92,9 +122,9 @@ internal class TurnWheel
     /// Custom logic re how to visualize selected components 
     /// and if they need to be disabled
     /// </summary>
-    static void ComponentHandler(IComponent comp)
+    static void ComponentPostClick(IComponent comp)
     {
-        if (CurPlayer.ToString().StartsWith("Human")) comp.Highlight();
+        if (CurPlayerIsHuman) comp.Highlight();
         comp.Disable();
     }
 
@@ -114,21 +144,15 @@ internal class TurnWheel
         head++;
     }
 
-    // custom two player case
-    static readonly string firstPlayer = 
-        Game.TurnList[0].ToString().StartsWith("AI") ? "AI" :"HU";
-    static readonly Enum[] labels = firstPlayer == "AI" ?
-        new Enum[] { Choice.AIFirst } : new Enum[] { Choice.HumanFirst };
-
     /// <summary>
     /// Ensure next click is scheduled and will be performed
     /// </summary>
     static void AssertPlayer()
     {
-        // custom two player case
-        if (mode == AI.Logic.Config) EM.RaiseEvtUpdateLabels(new { }, labels);
+        if (AvH && mode == AI.Logic.Config)
+            EM.RaiseEvtUpdateLabels(new { }, cfgConfirmLabel);
 
-        if (CurPlayer.ToString().StartsWith("AI"))
+        if (CurPlayerIsAI)
         {
             DisableAll();
 
@@ -145,10 +169,41 @@ internal class TurnWheel
 
     static void Ended()
     {
-        //  if config set -vs- label
-        // EM.RaiseEvtUpdateLabels(new { }, new Enum[] { LabelManager.Info.HumanTurn });
-        // else None
-        EM.RaiseEvtConfigFinished(new { }, new EventArgs());
+        if (mode == AI.Logic.Config)
+        {
+            EM.RaiseEvtUpdateLabels(new { }, new Enum[] { cfgEndedLabel, Info.None });
+            GameCountdown();
+
+        }
+        else
+        {
+
+            // GAME OVER
+
+        }
+
     }
+
+    static void GameCountdown()
+    {
+        Thread thread = new(CntDown);
+        thread.Start();
+    }
+
+    static void CntDown()
+    {
+        Thread.Sleep(500);
+        foreach (Countdown e in Enum.GetValues(typeof(Countdown)))
+        {
+
+            // raise from UI thread for safe UI access
+            AppForm.instance?.Invoke(
+                () => EM.RaiseEvtUpdateLabels(new { }, new Enum[] { e })
+            );
+            Thread.Sleep(1000);
+        }
+    }
+
+    //EM.RaiseEvtConfigFinished(new { }, new EventArgs());
 
 }

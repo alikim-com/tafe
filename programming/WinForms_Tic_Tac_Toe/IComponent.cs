@@ -7,4 +7,5 @@ internal interface IComponent
     void Disable();
     void Highlight();
     void SimulateOnClick();
+    string Name { get; }
 }

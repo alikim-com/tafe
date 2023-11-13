@@ -16,7 +16,7 @@ internal class LabelManager : INotifyPropertyChanged
         None,
         HumanLeft,
         HumanRight,
-        // two player case
+        // for TurnWheel.AvH case
         HumanFirst,
         AIFirst,
     }
@@ -29,6 +29,15 @@ internal class LabelManager : INotifyPropertyChanged
         HumanTurn,
         AITurn,
     }
+    /// <summary>
+    /// Pre-game countdown info panel states
+    /// </summary>
+    public enum Countdown
+    {
+        Three, 
+        Two,
+        One
+    }
 
     static public readonly Dictionary<Enum, string> labels = new()
     {
@@ -40,7 +49,11 @@ internal class LabelManager : INotifyPropertyChanged
         //
         { Info.None, "" },
         { Info.HumanTurn, "Your turn..." },
-        { Info.AITurn, "AI is moving..." },
+        { Info.AITurn, "AI is thinking..." },
+        //
+        { Countdown.Three, "Game starts in 3..." },
+        { Countdown.Two, "Game starts in 2..." },
+        { Countdown.One, "Game starts in 1..." },
     };
 
     /// <summary>
@@ -71,6 +84,10 @@ internal class LabelManager : INotifyPropertyChanged
                 RaiseEvtPropertyChanged(nameof(ChoicePanel));
                 break;
             case Info:
+                _this.InfoPanel = labels[state];
+                RaiseEvtPropertyChanged(nameof(InfoPanel));
+                break;
+            case Countdown:
                 _this.InfoPanel = labels[state];
                 RaiseEvtPropertyChanged(nameof(InfoPanel));
                 break;

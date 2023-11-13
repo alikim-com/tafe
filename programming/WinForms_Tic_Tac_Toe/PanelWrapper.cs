@@ -7,6 +7,8 @@ namespace WinFormsApp1;
 /// </summary>
 internal class PanelWrapper : IComponent
 {
+    public string Name { get => box.Name; } // interface
+
     readonly Panel box;
     readonly Control[] extra;
 

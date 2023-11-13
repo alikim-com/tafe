@@ -32,7 +32,10 @@ internal class AI
 
             Random random = new();
 
-            EM.RaiseEvtAIMoved(new { }, random.Next(count));
+            // raise from UI thread for safe UI access
+            AppForm.instance?.Invoke(
+                () => EM.RaiseEvtAIMoved(new { }, random.Next(count))
+            );
             
         });
 

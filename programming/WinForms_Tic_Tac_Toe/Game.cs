@@ -15,13 +15,15 @@ internal class Game
         Human,
         AI
     }
+
+    static Roster[] _turnList = 
+        ((IEnumerable<Roster>)Enum.GetValues(typeof(Roster)))
+        .Where(e => e != Roster.None).ToArray(); // exclude None
+
     /// <summary>
     /// Players from Roster in the order of their turns;<br/>
     /// can be overwritten by SetTurns()
     /// </summary>
-    static Roster[] _turnList = 
-        ((IEnumerable<Roster>)Enum.GetValues(typeof(Roster)))
-        .Where(e => e != Roster.None).ToArray(); // exclude None
     static public Roster[] TurnList
     {
         get => _turnList;

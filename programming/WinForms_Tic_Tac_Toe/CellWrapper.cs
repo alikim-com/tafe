@@ -6,6 +6,8 @@ namespace WinFormsApp1;
 /// </summary>
 internal class CellWrapper : IComponent
 {
+    public string Name { get => box.Name; } // interface
+
     readonly Panel box;
     readonly Point rc;
     readonly Dictionary<BgMode, Image> backgr = new();

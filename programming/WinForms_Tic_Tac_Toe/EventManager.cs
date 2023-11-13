@@ -23,7 +23,7 @@ internal class EM
     /// </summary>
     static public event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
-    /// Confirms a player visual appearance from PanelWrapper
+    /// Confirms a player visual appearance (cell bg) on PanelWrapper click
     /// </summary>
     static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfigured = delegate { };
     /// <summary>
@@ -58,7 +58,7 @@ internal class EM
         handler?.Invoke(sender, e);
     }
     /// <summary>
-    /// EvtPlayerConfigured wrapper, multi-thread safe
+    /// EvtAIMoved wrapper, multi-thread safe
     /// </summary>
     public static void RaiseEvtAIMoved(object sender, int e)
     {

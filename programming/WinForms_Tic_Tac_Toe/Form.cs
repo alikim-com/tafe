@@ -29,8 +29,12 @@ public partial class AppForm : Form
         );
     }
 
+    static public AppForm? instance; // UI thread ref for TurnWheel
+
     public AppForm()
     {
+        instance = this;
+
         // set the order of players turns, needed before clicking on cfg panels
         Game.SetTurns("random");
 
