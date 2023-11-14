@@ -2,12 +2,12 @@
 namespace WinFormsApp1;
 
 /// <summary>
-/// Game engine, controls players, moves and the board
+/// Defines players roster, evaluates the board and winning conditions
 /// </summary>
 internal class Game
 {
     /// <summary>
-    /// Pattern for human players Human*, for AI players - AI*
+    /// Pattern for human player names Human*, for AI players - AI*
     /// </summary>
     public enum Roster
     {
@@ -37,7 +37,29 @@ internal class Game
         private set => _curPlayer = value;
     }
 
-    public static Roster[,] board = new Roster[3, 3];
+    static Roster[,] board = new Roster[3, 3];
+    public static Roster[,] Board => board;
+
+    /// <summary>
+    /// Utility array Point(row, col) to help assert winning conditions and to assist AI logic
+    /// </summary>
+    static readonly Point[][] lines = new Point[][]
+    {
+        // horizontal
+       new Point[] { new Point(0,0), new Point(0,1), new Point(0,2) },
+       new Point[] { new Point(1,0), new Point(1,1), new Point(1,2) },
+       new Point[] { new Point(2,0), new Point(2,1), new Point(2,2) },
+
+       // vertical
+       new Point[] { new Point(0,0), new Point(1,0), new Point(2,0) },
+       new Point[] { new Point(0,1), new Point(1,1), new Point(2,1) },
+       new Point[] { new Point(0,2), new Point(1,2), new Point(2,2) },
+
+       // diagonal
+       new Point[] { new Point(0,0), new Point(1,1), new Point(2,2) },
+       new Point[] { new Point(0,2), new Point(1,1), new Point(0,2) },
+    };
+    public static Point[][] Lines => lines;
 
     public static void Reset()
     {
@@ -83,8 +105,7 @@ internal class Game
 
     static void AssertGame(Point rc, object s)
     {
-        board[rc.X, rc.Y] = TurnWheel.CurPlayer;
-
+        
         // assert the game state
 
         // if game over, call TurnWheel.Ended();
@@ -101,6 +122,8 @@ internal class Game
     static public EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
     {
         if (s == null) throw new Exception("Game.PlayerMovedHandler : cell is null");
+
+        board[rc.X, rc.Y] = TurnWheel.CurPlayer;
 
         // add the cell to the update
         var update = new Dictionary<Point, Roster>()

@@ -66,7 +66,7 @@ internal class TurnWheel
     {
         uiChoice = _uiChoice;
         mode = _mode;
-        repeat = _mode == AI.Logic.Config ? Repeat.Once : Repeat.Loop;
+        repeat = _mode == AI.Logic.ConfigRNG ? Repeat.Once : Repeat.Loop;
 
         AvH = Game.TurnList.Length == 2 &&
             (PlayerIsHuman(0) && PlayerIsAI(1) || PlayerIsHuman(1) && PlayerIsAI(0));
@@ -105,7 +105,6 @@ internal class TurnWheel
             cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
 
         if (CurPlayerIsHuman) comp.Highlight();
-        //comp.Disable();
 
         Advance(comp);
     };
@@ -117,11 +116,12 @@ internal class TurnWheel
     /// <param name="comp">Clicked component</param>
     static public void Advance(IComponent comp) 
     {
+        comp.Disable();
         uiChoice.Remove(comp);
 
         if (uiChoice.Count == 0)
         {
-            Ended(); // outside call
+            Ended();
             return;
         }
 
@@ -151,14 +151,14 @@ internal class TurnWheel
     /// </summary>
     static void AssertPlayer()
     {
-        if (AvH && mode == AI.Logic.Config)
+        if (AvH && mode == AI.Logic.ConfigRNG)
             EM.Raise(EM.Evt.UpdateLabels, new { }, cfgConfirmLabel);
 
         if (CurPlayerIsAI)
         {
             DisableAll();
 
-            AI.MakeMove(mode, uiChoice.Count);
+            AI.MakeMove(uiChoice.Count, mode);
             EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.AITurn });
         }
         else
@@ -171,7 +171,7 @@ internal class TurnWheel
 
     static void Ended()
     {
-        if (mode == AI.Logic.Config)
+        if (mode == AI.Logic.ConfigRNG)
         {
             EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { cfgEndedLabel, Info.None });
             GameCountdown();

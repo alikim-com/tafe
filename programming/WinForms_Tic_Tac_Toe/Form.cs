@@ -91,7 +91,7 @@ public partial class AppForm : Form
         if (pwLeft != null && pwRight != null)
             TurnWheel.Start(
                 new List<IComponent>() { pwLeft, pwRight },
-                AI.Logic.Config
+                AI.Logic.ConfigRNG
             );
 
         // when config is done, start game
@@ -99,7 +99,7 @@ public partial class AppForm : Form
         {
             TurnWheel.Start(
                 cellWrap.Cast<IComponent>().ToList(),
-                AI.Logic.Board
+                AI.Logic.BoardRNG
             );
         };
         EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
@@ -234,6 +234,7 @@ public partial class AppForm : Form
 
             float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
             choice.Font = new Font(choice.Font.FontFamily, newFontSize);
+            info.Font = new Font(info.Font.FontFamily, newFontSize);
         }
 
         base.WndProc(ref m);
