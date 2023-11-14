@@ -52,10 +52,10 @@ internal class Game
 
         // sync the board
         // also allows to save/load games
-        EM.RaiseEvtSyncBoard(new { }, update);
+        EM.Raise(EM.Evt.SyncBoard, new { }, update);
         
         // reset everything, new game
-        EM.RaiseEvtReset(new { }, new EventArgs());
+        EM.Raise(EM.Evt.Reset, new { }, new EventArgs());
     }
 
     /// <summary>

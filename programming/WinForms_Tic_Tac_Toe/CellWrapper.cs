@@ -41,6 +41,13 @@ internal class CellWrapper : IComponent
     {
         box = _box;
         rc = new Point(_row, _col);
+
+        SyncBoardUIHandler = (object? _, Dictionary<Point, BgMode> e) =>
+        {
+            if (!e.TryGetValue(rc, out BgMode val)) return;
+            SetBg(val);
+        };
+
         CreateBgSet();
         CreateEventHandlers();
     }
@@ -48,19 +55,7 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// Subscribed EM.EvtSyncBoardUI event
     /// </summary>
-    public void SyncBoardUIHandler(object? _, Dictionary<Point, BgMode> e)
-    {
-        if (!e.TryGetValue(rc, out BgMode val)) return;
-        SetBg(val);        
-    }
-
-    /// <summary>
-    /// Raises EM.EvtPlayerMoved event
-    /// </summary>
-    void OnClick(object? _, EventArgs __)
-    {
-        EM.RaiseEvtPlayerMoved(this, rc);
-    }
+    public EventHandler<Dictionary<Point, CellWrapper.BgMode>> SyncBoardUIHandler;
 
     void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());
 
@@ -157,6 +152,14 @@ internal class CellWrapper : IComponent
     /// Empty here, cells are controlled by EM.EvtSyncBoardUI
     /// </summary>
     public void Highlight() { }
+
+    /// <summary>
+    /// Raises EM.EvtPlayerMoved event
+    /// </summary>
+    void OnClick(object? _, EventArgs __)
+    {
+        EM.Raise(EM.Evt.PlayerMoved, this, rc);
+    }
 
     /// <summary>
     /// AI mouse clicks

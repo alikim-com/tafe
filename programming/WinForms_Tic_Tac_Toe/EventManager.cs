@@ -9,105 +9,114 @@ internal class EM
     /// <summary>
     /// Translates game states into UI states in VBridge
     /// </summary>
-    static public event EventHandler<Dictionary<Point, Game.Roster>> EvtSyncBoard = delegate { };
+    /// <param>List of cells to update,<br/>
+    /// containing row(X) and column(Y) of a cell and the player occupying it</param>
+    static event EventHandler<Dictionary<Point, Game.Roster>> EvtSyncBoard = delegate { };
     /// <summary>
     /// Sync the board with EvtSyncBoard translation done by VBridge
     /// </summary>
-    static public event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
+    /// <param>List of cells to update,<br/>
+    /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
+    static event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
     /// <summary>
     /// Resets UI, except the board
     /// </summary>
-    static public event EventHandler EvtReset = delegate { };
+    static event EventHandler EvtReset = delegate { };
     /// <summary>
     /// Raised when a player clicks on a cell
     /// </summary>
-    static public event EventHandler<Point> EvtPlayerMoved = delegate { };
+    /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
+    static event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
     /// Confirms a player visual appearance (cell bg) on PanelWrapper click
     /// </summary>
-    static public event EventHandler<CellWrapper.BgMode>EvtPlayerConfigured = delegate { };
+    static event EventHandler<CellWrapper.BgMode> EvtPlayerConfigured = delegate { };
     /// <summary>
-    /// AI choice of a config panel for TurnWheel to "click" on
+    /// AI choice of a config panel for TurnWheel to simulate click on it
     /// </summary>
-    static public event EventHandler<int>EvtAIMoved = delegate { };
+    static event EventHandler<int> EvtAIMoved = delegate { };
     /// <summary>
     /// Issued by TurnWheel when the game is ready to be played
     /// </summary>
-    static public event EventHandler EvtConfigFinished = delegate { };
+    static event EventHandler EvtConfigFinished = delegate { };
     /// <summary>
-    /// 
+    /// Updates labels in LabelManager
     /// </summary>
-    static public event EventHandler<Enum[]>EvtUpdateLabels = delegate { };
-
-    // ----- wrappers -----
+    static event EventHandler<Enum[]> EvtUpdateLabels = delegate { };
 
     /// <summary>
-    /// EvtUpdateLabels wrapper, multi-thread safe
+    /// Event associations
     /// </summary>
-    public static void RaiseEvtUpdateLabels(object sender, Enum[] e)
+    public enum Evt
     {
-        var handler = EvtUpdateLabels;
-        handler?.Invoke(sender, e);
+        SyncBoard,
+        SyncBoardUI,
+        Reset,
+        PlayerMoved,
+        PlayerConfigured,
+        AIMoved,
+        ConfigFinished,
+        UpdateLabels
     }
     /// <summary>
-    /// EvtConfigFinished wrapper, multi-thread safe
+    /// To raise or sub/unsub to events by their enum names
     /// </summary>
-    public static void RaiseEvtConfigFinished(object sender, EventArgs e)
-    {
-        var handler = EvtConfigFinished;
-        handler?.Invoke(sender, e);
-    }
+    static readonly Dictionary<Evt, Delegate> dict = new() {
+        { Evt.SyncBoard, EvtSyncBoard },
+        { Evt.SyncBoardUI, EvtSyncBoardUI },
+        { Evt.Reset, EvtReset },
+        { Evt.PlayerMoved, EvtPlayerMoved },
+        { Evt.PlayerConfigured, EvtPlayerConfigured },
+        { Evt.AIMoved, EvtAIMoved },
+        { Evt.ConfigFinished, EvtConfigFinished },
+        { Evt.UpdateLabels, EvtUpdateLabels },
+    };
+
+    // ----- event wrappers -----
+
     /// <summary>
-    /// EvtAIMoved wrapper, multi-thread safe
+    /// Multi-thread safe wrapper for raising events
     /// </summary>
-    public static void RaiseEvtAIMoved(object sender, int e)
+    /// <param name="evt">Event to be raised</param>
+    /// <param name="sender">Event sender object</param>
+    /// <param name="e">Event arguments</param>
+    static public void Raise<E>(Evt enm, object sender, E e)
     {
-        var handler = EvtAIMoved;
-        handler?.Invoke(sender, e);
+        if (!dict.TryGetValue(enm, out var evt))
+            throw new NotImplementedException($"EM.Raise : no event for Evt.{enm}");
+
+        bool generic = dict[enm].GetType() == typeof(EventHandler);
+
+        if (generic)
+            ((EventHandler)dict[enm])?.Invoke(sender, new EventArgs());
+
+        else
+            ((EventHandler<E>)dict[enm])?.Invoke(sender, e);
     }
+
+    static public void Subscribe(Evt enm, Delegate handler)
+    {
+        if (!dict.TryGetValue(enm, out var evt))
+            throw new NotImplementedException($"EM.Subscribe : no event for Evt.{enm}");
+
+            dict[enm] = Delegate.Combine(evt, handler);
+    }
+
+    static public void Unsubscribe(Evt enm, Delegate handler)
+    {
+        if (!dict.TryGetValue(enm, out var evt))
+            throw new NotImplementedException($"EM.Unsubscribe : no event for Evt.{enm}");
+
+        dict[enm] = Delegate.Remove(evt, handler) ?? (() => { });
+    }
+
+    // ----- cross-thread calls -----
+
+    public static AppForm? uiThread;
+
     /// <summary>
-    /// EvtPlayerConfigured wrapper, multi-thread safe
+    /// Raise events from UI thread for safe UI access
     /// </summary>
-    public static void RaiseEvtPlayerConfigured(object sender, CellWrapper.BgMode e)
-    {
-        var handler = EvtPlayerConfigured;
-        handler?.Invoke(sender, e);
-    }
-    /// <summary>
-    /// EvtReset wrapper, multi-thread safe
-    /// </summary>
-    public static void RaiseEvtReset(object sender, EventArgs e)
-    {
-        var handler = EvtReset;
-        handler?.Invoke(sender, e);
-    }
-    /// <summary>
-    /// EvtPlayerMoved wrapper, multi-thread safe
-    /// </summary>
-    /// <param name="e">Point containing row(X) and column(Y) of the cell clicked</param>
-    public static void RaiseEvtPlayerMoved(object sender, Point e)
-    {
-        var handler = EvtPlayerMoved;
-        handler?.Invoke(sender, e);
-    }
-    /// <summary>
-    /// EvtSyncBoard wrapper, multi-thread safe
-    /// </summary>
-    /// <param name="e">List of cells to update,<br/>
-    /// containing row(X) and column(Y) of a cell and the player occupying it</param>
-    public static void RaiseEvtSyncBoard(object sender, Dictionary<Point, Game.Roster> e)
-    {
-        var handler = EvtSyncBoard;
-        handler?.Invoke(sender, e);
-    }
-    /// <summary>
-    /// EvtSyncBoardUI wrapper, multi-thread safe
-    /// </summary>
-    /// <param name="e">List of cells to update,<br/>
-    /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
-    public static void RaiseEvtSyncBoardUI(object sender, Dictionary<Point, CellWrapper.BgMode> e)
-    {
-        var handler = EvtSyncBoardUI;
-        handler?.Invoke(sender, e);
-    }
+    /// <param name="lambda"></param>
+    public static void InvokeFromMainThread(Action lambda) => uiThread?.Invoke(lambda);
 }

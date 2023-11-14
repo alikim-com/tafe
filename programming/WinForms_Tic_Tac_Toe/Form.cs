@@ -29,11 +29,9 @@ public partial class AppForm : Form
         );
     }
 
-    static public AppForm? instance; // UI thread ref for TurnWheel
-
     public AppForm()
     {
-        instance = this;
+        EM.uiThread = this;
 
         // set the order of players turns, needed before clicking on cfg panels
         Game.SetTurns("random");
@@ -61,22 +59,25 @@ public partial class AppForm : Form
             };
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
-
+        
         // events subscriptions to reset from Game.Reset()
-        EM.EvtReset += LabelManager.ResetHandler;
-        if (pwLeft != null) EM.EvtReset += pwLeft.ResetHandler;
-        if (pwRight != null) EM.EvtReset += pwRight.ResetHandler;
+        EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
+        if (pwLeft != null) 
+            EM.Subscribe(EM.Evt.Reset, pwLeft.ResetHandler);
+        if (pwRight != null) 
+            EM.Subscribe(EM.Evt.Reset, pwRight.ResetHandler);
 
         // update labels
-        EM.EvtUpdateLabels += LabelManager.UpdateLabelsHandler;
+        EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
         // issued after Game board changes 
-        EM.EvtSyncBoard += VBridge.SyncBoardHandler;
+        EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
         // translation to board cell bgs
-        foreach (var cw in cellWrap) EM.EvtSyncBoardUI += cw.SyncBoardUIHandler;
+        foreach (var cw in cellWrap) 
+            EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
 
         // cfg panels clicks
-        EM.EvtPlayerConfigured += VBridge.PlayerConfiguredHandler;
+        EM.Subscribe(EM.Evt.PlayerConfigured, VBridge.PlayerConfiguredHandler);
 
         // board cell clicks ---------- TODO ------------
 
@@ -91,15 +92,14 @@ public partial class AppForm : Form
             );
 
         // when config is done, start game
-        EM.EvtConfigFinished += OnConfigFinished;
-    }
-
-    void OnConfigFinished(object? _, EventArgs __)
-    {
-        TurnWheel.Start(
-            cellWrap.Cast<IComponent>().ToList(),
-            AI.Logic.Board
-        );
+        EventHandler OnConfigFinished = (object? _, EventArgs __) =>
+        {
+            TurnWheel.Start(
+                cellWrap.Cast<IComponent>().ToList(),
+                AI.Logic.Board
+            );
+        };
+        EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)

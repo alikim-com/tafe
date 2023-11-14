@@ -32,10 +32,7 @@ internal class AI
 
             Random random = new();
 
-            // raise from UI thread for safe UI access
-            AppForm.instance?.Invoke(
-                () => EM.RaiseEvtAIMoved(new { }, random.Next(count))
-            );
+            EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
             
         });
 
@@ -54,7 +51,7 @@ internal class AI
 
             Random random = new();
 
-            EM.RaiseEvtAIMoved(new { }, random.Next(count));
+            EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
 
         });
 

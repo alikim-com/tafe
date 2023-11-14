@@ -16,8 +16,8 @@ internal class VBridge
     /// <summary>
     /// Adds all players choices from clicking on cfg panels to the dictionary
     /// </summary>
-    static public void PlayerConfiguredHandler(object? _, CellWrapper.BgMode e) => 
-        toCell.Add(TurnWheel.CurPlayer, e);
+    static public EventHandler<CellWrapper.BgMode> PlayerConfiguredHandler = 
+        (object? _, CellWrapper.BgMode e) => toCell.Add(TurnWheel.CurPlayer, e);
 
     /// <summary>
     /// Subscribed to EM.EvtReset event
@@ -28,15 +28,16 @@ internal class VBridge
     /// Subscribed to EM.EvtSyncBoard event<br/>
     /// Translates game board state into UI states
     /// </summary>
-    static public void SyncBoardHandler(object? s, Dictionary<Point, Game.Roster> e)
+    static public EventHandler<Dictionary<Point, Game.Roster>> SyncBoardHandler = (object? s, Dictionary<Point, Game.Roster> e) =>
     {
         Dictionary<Point, CellWrapper.BgMode> t = new();
-        foreach (var rec in e) {
+        foreach (var rec in e)
+        {
             if (!toCell.TryGetValue(rec.Value, out CellWrapper.BgMode bg))
                 throw new Exception($"VBridge.SyncBoardHandler : can't translate '{rec.Value}'");
             t.Add(rec.Key, bg);
         }
 
-        EM.RaiseEvtSyncBoardUI(s ?? new { }, t);
-    }    
+        EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, t);
+    };
 }

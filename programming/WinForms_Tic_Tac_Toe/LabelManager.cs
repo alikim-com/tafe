@@ -34,7 +34,7 @@ internal class LabelManager : INotifyPropertyChanged
     /// </summary>
     public enum Countdown
     {
-        Three, 
+        Three,
         Two,
         One
     }
@@ -60,19 +60,19 @@ internal class LabelManager : INotifyPropertyChanged
     /// Subscribed to EM.EvtUpdateLabels event
     /// </summary>
     /// <param name="e">An array of states to set for each panel</param>
-    static public void UpdateLabelsHandler(object? _, Enum[] e)
+    static public EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
     {
-        foreach(Enum state in e) SetLabel(state);
-    }
+        foreach (Enum state in e) SetLabel(state);
+    };
 
     /// <summary>
     /// Subscribed to EM.EvtReset event
     /// </summary>
-    static public void ResetHandler(object? _, EventArgs __)
+    static public EventHandler ResetHandler = (object? _, EventArgs __) =>
     {
         SetLabel(Choice.None);
         SetLabel(Info.None);
-    }
+    };
 
     static void SetLabel(Enum state)
     {
@@ -96,17 +96,18 @@ internal class LabelManager : INotifyPropertyChanged
         }
     }
 
-    static void RaiseEvtPropertyChanged(string property)
-    {
-        var handler = _this?.PropertyChanged;
-        handler?.Invoke(_this, new PropertyChangedEventArgs(property));
-    }
 
     /* 
      * A workaround to implement the data binding interface that requires
      * PropertyChanged event and binding properties to be instanced
      * 
      */
+
+    static void RaiseEvtPropertyChanged(string property)
+    {
+        var handler = _this?.PropertyChanged;
+        handler?.Invoke(_this, new PropertyChangedEventArgs(property));
+    }
 
     static LabelManager? _this;
 
@@ -120,5 +121,5 @@ internal class LabelManager : INotifyPropertyChanged
     public LabelManager()
     {
         _this = this;
-    }   
+    }
 }

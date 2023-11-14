@@ -47,6 +47,11 @@ internal class PanelWrapper : IComponent
         extra = _extra;
         playerBg = _playerBg;
 
+        ResetHandler = (object? s, EventArgs e) =>
+        {
+            SetBgMode(BgMode.Default);
+        };
+
         CreateBgSet();
         CreateEventHandlers();
 
@@ -55,10 +60,7 @@ internal class PanelWrapper : IComponent
     /// <summary>
     /// Subscribed to EM.EvtReset event
     /// </summary>
-    public void ResetHandler(object? s, EventArgs e)
-    {
-        SetBgMode(BgMode.Default);
-    }
+    public EventHandler ResetHandler;
 
     void CreateBgSet()
     {
@@ -139,8 +141,8 @@ internal class PanelWrapper : IComponent
 
     void OnClick(object? _, EventArgs __)
     {
-        // associate bg with the current player & turn the wheel
-        EM.RaiseEvtPlayerConfigured(this, playerBg);
+        // associate board cell bg with the current player & turn the wheel
+        EM.Raise(EM.Evt.PlayerConfigured, this, playerBg);
     }
 
     /// <summary>

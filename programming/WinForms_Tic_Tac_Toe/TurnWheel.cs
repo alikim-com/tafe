@@ -55,6 +55,13 @@ internal class TurnWheel
         uiChoice = new();
     }
 
+    /// <summary>
+    /// Handles EvtAIMoved event sent after AI chooses a UI element to click on
+    /// </summary>
+    /// <param name="e">index in the range [0, uiChoice.Count)</param>
+    private static EventHandler<int> AIMoved = 
+        (object? sender, int e) => uiChoice[e].SimulateOnClick();
+
     static public void Start(List<IComponent> _uiChoice, AI.Logic _mode)
     {
         uiChoice = _uiChoice;
@@ -64,22 +71,16 @@ internal class TurnWheel
         AvH = Game.TurnList.Length == 2 &&
             (PlayerIsHuman(0) && PlayerIsAI(1) || PlayerIsHuman(1) && PlayerIsAI(0));
 
-        EM.EvtPlayerConfigured += Next;
-        EM.EvtAIMoved += AIMoved;
+        EM.Subscribe(EM.Evt.PlayerConfigured, Next);
+        EM.Subscribe(EM.Evt.AIMoved, AIMoved);
 
         AssertPlayer();
     }
 
-    /// <summary>
-    /// Handles EvtAIMoved event sent after AI chooses a UI element to click on
-    /// </summary>
-    /// <param name="e">index in the range [0, uiChoice.Count)</param>
-    private static void AIMoved(object? sender, int e) => uiChoice[e].SimulateOnClick();
-
     static public void Stop()
     {
-        EM.EvtPlayerConfigured -= Next;
-        EM.EvtAIMoved -= AIMoved;
+        EM.Unsubscribe(EM.Evt.PlayerConfigured, Next);
+        EM.Unsubscribe(EM.Evt.AIMoved, AIMoved);
     }
 
     static void EnableAll()
@@ -95,7 +96,7 @@ internal class TurnWheel
     /// <summary>
     /// Subscribed to UI click events
     /// </summary>
-    static public void Next(object? s, CellWrapper.BgMode _)
+    static public EventHandler<CellWrapper.BgMode> Next = (object? s, CellWrapper.BgMode _) =>
     {
         if (s == null) return;
         IComponent comp = (IComponent)s;
@@ -116,7 +117,7 @@ internal class TurnWheel
         AdvancePlayer();
 
         AssertPlayer();
-    }
+    };
 
     /// <summary>
     /// Custom logic re how to visualize selected components 
@@ -150,20 +151,20 @@ internal class TurnWheel
     static void AssertPlayer()
     {
         if (AvH && mode == AI.Logic.Config)
-            EM.RaiseEvtUpdateLabels(new { }, cfgConfirmLabel);
+            EM.Raise(EM.Evt.UpdateLabels, new { }, cfgConfirmLabel);
 
         if (CurPlayerIsAI)
         {
             DisableAll();
 
             AI.MakeMove(mode, uiChoice.Count);
-            EM.RaiseEvtUpdateLabels(new { }, new Enum[] { Info.AITurn });
+            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.AITurn });
         }
         else
         { // Human*
 
             EnableAll();
-            EM.RaiseEvtUpdateLabels(new { }, new Enum[] { Info.HumanTurn });
+            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.HumanTurn });
         }
     }
 
@@ -171,7 +172,7 @@ internal class TurnWheel
     {
         if (mode == AI.Logic.Config)
         {
-            EM.RaiseEvtUpdateLabels(new { }, new Enum[] { cfgEndedLabel, Info.None });
+            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { cfgEndedLabel, Info.None });
             GameCountdown();
 
         }
@@ -197,13 +198,11 @@ internal class TurnWheel
         {
 
             // raise from UI thread for safe UI access
-            AppForm.instance?.Invoke(
-                () => EM.RaiseEvtUpdateLabels(new { }, new Enum[] { e })
-            );
+            EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { e }));
             Thread.Sleep(1000);
         }
-    }
 
-    //EM.RaiseEvtConfigFinished(new { }, new EventArgs());
+        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.ConfigFinished, new { }, new EventArgs()));
+    }
 
 }
