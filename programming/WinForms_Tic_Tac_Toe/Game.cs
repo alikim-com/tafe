@@ -51,7 +51,7 @@ internal class Game
                 update.Add(new Point(i, j), board[i, j]);
 
         // sync the board
-        // also allows to save/load games
+        // also allows to save/load games TODO
         EM.Raise(EM.Evt.SyncBoard, new { }, update);
         
         // reset everything, new game
@@ -80,5 +80,38 @@ internal class Game
             for (int j = 0; j < board.GetLength(1); j++)
                 board[i, j] = Roster.None;
     }
+
+    static void AssertGame(Point rc, object s)
+    {
+        board[rc.X, rc.Y] = TurnWheel.CurPlayer;
+
+        // assert the game state
+
+        // if game over, call TurnWheel.Ended();
+        // return;
+
+        // else, turn the wheel
+        TurnWheel.Advance((IComponent)s);
+    }
+
+    /// <summary>
+    /// Subscribed to cell click event;<br/>
+    /// asserts the game state (win/loss), issues board sync event, turns the wheel
+    /// </summary>
+    static public EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
+    {
+        if (s == null) throw new Exception("Game.PlayerMovedHandler : cell is null");
+
+        // add the cell to the update
+        var update = new Dictionary<Point, Roster>()
+        {
+            { rc, board[rc.X, rc.Y] }
+        };
+
+        // sync the board
+        EM.Raise(EM.Evt.SyncBoard, new { }, update);
+
+        AssertGame(rc, s);
+    };
 
 }

@@ -55,7 +55,7 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// Subscribed EM.EvtSyncBoardUI event
     /// </summary>
-    public EventHandler<Dictionary<Point, CellWrapper.BgMode>> SyncBoardUIHandler;
+    public EventHandler<Dictionary<Point, BgMode>> SyncBoardUIHandler;
 
     void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());
 

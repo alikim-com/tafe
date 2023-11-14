@@ -71,16 +71,11 @@ internal class TurnWheel
         AvH = Game.TurnList.Length == 2 &&
             (PlayerIsHuman(0) && PlayerIsAI(1) || PlayerIsHuman(1) && PlayerIsAI(0));
 
-        EM.Subscribe(EM.Evt.PlayerConfigured, Next);
-        EM.Subscribe(EM.Evt.AIMoved, AIMoved);
-
-        AssertPlayer();
-    }
-
-    static public void Stop()
-    {
-        EM.Unsubscribe(EM.Evt.PlayerConfigured, Next);
+        // translate AI responce to a click on a UI element
         EM.Unsubscribe(EM.Evt.AIMoved, AIMoved);
+        EM.Subscribe(EM.Evt.AIMoved, AIMoved);
+        
+        AssertPlayer();
     }
 
     static void EnableAll()
@@ -94,9 +89,14 @@ internal class TurnWheel
     }
 
     /// <summary>
-    /// Subscribed to UI click events
+    /// Subscribed to cfg panels clicks
     /// </summary>
-    static public EventHandler<CellWrapper.BgMode> Next = (object? s, CellWrapper.BgMode _) =>
+    /// <param name="_">BgMode is not used here;<br/>
+    /// used instead by VBridge, which is also subscribed.
+    /// </param>
+    static public EventHandler<CellWrapper.BgMode> PlayerConfiguredHandler = 
+
+    (object? s, CellWrapper.BgMode _) =>
     {
         if (s == null) return;
         IComponent comp = (IComponent)s;
@@ -104,8 +104,19 @@ internal class TurnWheel
         if (AvH && comp.Name == "pLeft")
             cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
 
-        ComponentPostClick(comp);
+        if (CurPlayerIsHuman) comp.Highlight();
+        //comp.Disable();
 
+        Advance(comp);
+    };
+
+    /// <summary>
+    /// Turns the wheel: asserts remaining active UI elements to click,<br/>
+    /// ensures the next player is active and ready to click
+    /// </summary>
+    /// <param name="comp">Clicked component</param>
+    static public void Advance(IComponent comp) 
+    {
         uiChoice.Remove(comp);
 
         if (uiChoice.Count == 0)
@@ -117,16 +128,6 @@ internal class TurnWheel
         AdvancePlayer();
 
         AssertPlayer();
-    };
-
-    /// <summary>
-    /// Custom logic re how to visualize selected components 
-    /// and if they need to be disabled
-    /// </summary>
-    static void ComponentPostClick(IComponent comp)
-    {
-        if (CurPlayerIsHuman) comp.Highlight();
-        comp.Disable();
     }
 
     static void AdvancePlayer()
@@ -179,7 +180,7 @@ internal class TurnWheel
         else
         {
 
-            // GAME OVER
+            MessageBox.Show("TurnWheel.Ended : GAME OVER");
 
         }
 
@@ -196,12 +197,12 @@ internal class TurnWheel
         Thread.Sleep(500);
         foreach (Countdown e in Enum.GetValues(typeof(Countdown)))
         {
-
             // raise from UI thread for safe UI access
             EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { e }));
             Thread.Sleep(1000);
         }
 
+        // UI safety
         EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.ConfigFinished, new { }, new EventArgs()));
     }
 

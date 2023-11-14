@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WinFormsApp1;
 
@@ -70,17 +71,19 @@ public partial class AppForm : Form
         // update labels
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
-        // issued after Game board changes 
+        // issued after game board changes 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
         // translation to board cell bgs
         foreach (var cw in cellWrap) 
             EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
 
-        // cfg panels clicks
+        // raised by bot panels after clicking 
         EM.Subscribe(EM.Evt.PlayerConfigured, VBridge.PlayerConfiguredHandler);
+        EM.Subscribe(EM.Evt.PlayerConfigured, TurnWheel.PlayerConfiguredHandler);
 
-        // board cell clicks ---------- TODO ------------
-
+        // raised by board cells after clicking
+        EM.Subscribe(EM.Evt.PlayerMoved, Game.PlayerMovedHandler);
+ 
         // raise reset event
         Game.Reset();
 
