@@ -58,7 +58,8 @@ internal class TurnWheel
     /// <summary>
     /// Handles EvtAIMoved event sent after AI chooses a UI element to click on
     /// </summary>
-    /// <param name="e">index in the range [0, uiChoice.Count)</param>
+    /// <param name="uiChoice">For 2D board, UI cell array must be unwrapped in row-major order</param>
+    /// <param name="e">Index in the range [0, uiChoice.Count)</param>
     private static EventHandler<int> AIMoved = 
         (object? sender, int e) => uiChoice[e].SimulateOnClick();
 

@@ -37,7 +37,8 @@ internal class Game
         private set => _curPlayer = value;
     }
 
-    static Roster[,] board = new Roster[3, 3];
+    static readonly Roster[,] board = new Roster[3, 3];
+    public static Size boardSize = new(board.GetLength(0), board.GetLength(1));
     public static Roster[,] Board => board;
 
     /// <summary>

@@ -61,7 +61,7 @@ public partial class AppForm : Form
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
         
-        // events subscriptions to reset from Game.Reset()
+        // subscriptions to reset from Game.Reset()
         EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
         if (pwLeft != null) 
             EM.Subscribe(EM.Evt.Reset, pwLeft.ResetHandler);
@@ -98,7 +98,7 @@ public partial class AppForm : Form
         EventHandler OnConfigFinished = (object? _, EventArgs __) =>
         {
             TurnWheel.Start(
-                cellWrap.Cast<IComponent>().ToList(),
+                cellWrap.Cast<IComponent>().ToList(), // unwraps in row-major order
                 AI.Logic.BoardRNG
             );
         };

@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace WinFormsApp1;
 
 internal class AI
@@ -32,7 +30,7 @@ internal class AI
     {
         Thread thread = new(() =>
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(750);
 
             switch (L)
             {
@@ -60,7 +58,7 @@ internal class AI
     {
         Thread thread = new(() =>
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(750);
 
             switch (L)
             {
@@ -74,6 +72,9 @@ internal class AI
                 case Logic.BoardEasy:
                     {
                         int move = LogicEasy();
+                        
+                        Thread.Sleep(250); // to see the reason for the decision in case AI vs AI
+
                         EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
                     }
                     break;
@@ -87,18 +88,60 @@ internal class AI
     }
 
     /// <summary>
-    /// Simple logic for playing the game
+    /// Simple AI logic (esay mode) for playing the game
     /// </summary>
     static int LogicEasy()
     {
-        Game.Roster self = TurnWheel.CurPlayer;
+        static bool CanTake(Point pnt) => Game.Board[pnt.X, pnt.Y] == Game.Roster.None;
 
-        // block the opponent
-        foreach(var line in Game.Lines)
+        static int LinearOffset(Point pnt) => pnt.X * Game.boardSize.Width + pnt.Y; // <------------ array removed
+
+        // examine lines
+        foreach (var line in Game.Lines)
         {
-            if (line[0] == line[1]) { }
+            // gather stats for the line
+            Dictionary<Game.Roster, int> stat = new();
+            // memo free cells
+            List<Point> free = new();
+            foreach (var pnt in line)
+            {
+                var player = Game.Board[pnt.X, pnt.Y];
+                if (!stat.ContainsKey(player)) stat.Add(player, 0);
+                stat[player]++;
+                if (player == Game.Roster.None) free.Add(pnt);
+            }
+            // search the line for 2 cells taken by same player
+            foreach(var rec in stat)
+            {
+                if (rec.Value == 2 && rec.Key != Game.Roster.None && free.Count > 0)
+                    // block player (rec.Key != self) or
+                    // win the game (rec.Key == self)
+
+                    // TODO send labels update
+                    
+                    return LinearOffset(free[0]);
+            }
 
         }
+
+        // try to take best spots
+        List<Point> bestSpots = new()
+        { 
+            // middle
+            new Point(1,1),
+            // corners
+            new Point(0,0),
+            new Point(0,2),
+            new Point(2,0),
+            new Point(2,2),
+        };
+        foreach (var spot in bestSpots)
+            if (CanTake(spot))
+            {
+                // TODO send labels
+                return LinearOffset(spot);
+            }
+
 
         return 0;
     }
