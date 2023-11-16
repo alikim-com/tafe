@@ -42,16 +42,16 @@
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
             // 
-            // Form1
+            // UML.Events
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            ClientSize = new Size(1200, 800);
+            ClientSize = new Size(1200, 900);
             Controls.Add(pictureBox1);
-            Name = "Form1";
+            Name = "UML.Events";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Form1";
+            Text = "UML.Events";
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
