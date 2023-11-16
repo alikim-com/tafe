@@ -65,9 +65,21 @@ public class ClassBox
     public Point Pos { get; set; }
     public Size Size { get; set; }
 
+    public struct _anchor
+    {
+        public Point top;
+        public Point bottom;
+        public Point left;
+        public Point right;
+    }
+
+    public _anchor anchor;
+
     public readonly string fpath;
     public readonly string fname;
     public readonly string name;
+
+    public List<Item> cls = new();
 
     public List<Item> events = new();
 
@@ -76,10 +88,10 @@ public class ClassBox
     public string PrintSubs()
     {
         string outp = "";
-        foreach(var s in subs)
+        foreach (var s in subs)
         {
             outp += s.Key.ToString() + "\n\r";
-            foreach(var e in s.Value)
+            foreach (var e in s.Value)
                 outp += e.ToString() + "\n\r";
             outp += "\n\r";
         }
@@ -93,6 +105,15 @@ public class ClassBox
         Size = _size;
         fpath = _fpath;
         fname = _fname;
+
+        int hw = _size.Width / 2;
+        int hh = _size.Height / 2;  
+        anchor = new _anchor { 
+            top = _pos.Add(hw, 0), 
+            bottom = _pos.Add(hw, _size.Height),
+            left = _pos.Add(0, hh),
+            right = _pos.Add(_size.Width, hh)
+        };
     }
 
     public void Draw(Graphics g)
@@ -102,6 +123,15 @@ public class ClassBox
 
         // box name
         Form1.DrawText(g, Color.LightGray, fntName, name, Pos.Add(10, 10));
+
+        // classes
+        //Size size2 = new(0, 0);
+        //Point curPos2 = Pos.Add(20, 30);
+        //foreach (var c in cls)
+        //{
+        //    size2 = Form1.DrawText(g, Color.DarkGray, fntEvt, c.name, curPos2);
+        //    curPos2.Y += size2.Height + 5;
+        //}
 
         // events
         Size size = new(0, 0);
@@ -248,7 +278,34 @@ public partial class Form1 : Form
 
             // find subscriptions 
             box.subs = FindSubscriptions(cleanCode);
+
+            box.cls = FindClasses(cleanCode);
+            if (box.name == "PanelWrapper")
+            {
+                box.cls.Add(new Item("pwLeft", ""));
+                box.cls.Add(new Item("pwRight", ""));
+
+            } else if (box.name == "CellWrapper") {
+                box.cls.Add(new Item("cw", ""));
+            }
         }
+    }
+
+    static List<Item> FindClasses(string inp)
+    {
+        string clsPattern = @"class\s+(\w+)";
+        MatchCollection matches = Regex.Matches(StripComments(inp), clsPattern, RegexOptions.Singleline);
+
+        List<Item> cls = new();
+
+        foreach (Match match in matches.Cast<Match>())
+        {
+            if (match.Groups.Count == 2)
+            {
+                cls.Add(new Item(match.Groups[1].Value, ""));
+            }
+        }
+        return cls;
     }
 
     static Dictionary<Item, List<Item>> FindSubscriptions(string inp)
