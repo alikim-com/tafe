@@ -11,18 +11,32 @@ static public class PointExtensions
     public static Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
 }
 
-public class Evt
+public class Item
 {
-    readonly public string type;
     readonly public string name;
-    readonly public Color color;
+    readonly public string subName;
+    public Color color = Color.Black;
 
-    public Evt(string _type, string _name, Color _color)
+    // offsets from the client top-left for drawing lines
+    public Point offName = new(-1, -1);
+    public Point offSubname = new(-1, -1);
+
+    public Item(string _name, string _subName)
     {
-        type = _type;
         name = _name;
-        color = _color;
+        subName = _subName;
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null) return false;
+        if (obj is Item compareTo) return name == compareTo.name && subName == compareTo.subName;
+        return false;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(name, subName);
+
+    public override string ToString() => $"name: {name}, subName: {subName}";
 
 }
 
@@ -42,9 +56,9 @@ public class ClassBox
     static public Color NextColor
     {
         get
-        { 
-            _ind = (++_ind) % _colors.Length; 
-            return _colors[_ind]; 
+        {
+            _ind = (++_ind) % _colors.Length;
+            return _colors[_ind];
         }
     }
 
@@ -55,15 +69,22 @@ public class ClassBox
     public readonly string fname;
     public readonly string name;
 
-    public List<Evt> events = new();
+    public List<Item> events = new();
 
-    public struct CM
+    public Dictionary<Item, List<Item>> subs = new();
+
+    public string PrintSubs()
     {
-        public string name;
-        public string subName;
+        string outp = "";
+        foreach(var s in subs)
+        {
+            outp += s.Key.ToString() + "\n\r";
+            foreach(var e in s.Value)
+                outp += e.ToString() + "\n\r";
+            outp += "\n\r";
+        }
+        return outp;
     }
-
-    public Dictionary<CM, List<CM>> subs = new();
 
     public ClassBox(string _name, string _fpath, string _fname, Point _pos, Size _size)
     {
@@ -87,36 +108,62 @@ public class ClassBox
         Point curPos = Pos.Add(20, 30);
         foreach (var evt in events)
         {
-            curPos.Y += size.Height + 5;
-            size = Form1.DrawText(g, evt.color, fntEvt, evt.name, curPos);
+            if (evt.offName.X < 0)
+            {
+                curPos.Y += size.Height + 5;
+                evt.offName = curPos;
+            }
+            size = Form1.DrawText(g, evt.color, fntEvt, evt.name, evt.offName);
 
-            curPos.Y += size.Height;
-            size = Form1.DrawText(g, evt.color, fntEType, evt.type, curPos);
+            if (evt.offSubname.X < 0)
+            {
+                curPos.Y += size.Height;
+                evt.offSubname = curPos;
+            }
+            size = Form1.DrawText(g, evt.color, fntEType, evt.subName, evt.offSubname);
         }
 
         // subscriptions
         size = new(0, 0);
-        if(events.Count > 0) curPos.Y += 15;
+        if (events.Count > 0) curPos.Y += 15;
 
         foreach (var sub in subs)
         {
-            Evt? evt = null;
+            bool init = sub.Key.offName.X < 0; // fill in Item's offset & color once
+
+            Item? evt = null;
             for (int i = 0; i < Form1.boxes.Count; i++)
             {
                 var events = Form1.boxes[i].events;
                 evt = events.Find(evt => evt.name == sub.Key.subName);
                 if (evt == null) continue;
 
-                curPos.Y += size.Height;
-                size = Form1.DrawText(g, evt.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", curPos);
+                if (init)
+                {
+                    sub.Key.color = evt.color;
+                    curPos.Y += size.Height;
+                    sub.Key.offName = curPos;
+                }
 
-                curPos.X += 5;
-                curPos.Y += size.Height;
-                foreach (var cm in sub.Value) {
-                    size = Form1.DrawText(g, evt.color, fntEType, $"{cm.name}.{cm.subName}", curPos);
+                size = Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", sub.Key.offName);
+
+                if (init)
+                {
+                    curPos.X += 5;
                     curPos.Y += size.Height;
                 }
-                curPos.X -= 5;
+                foreach (var s in sub.Value)
+                {
+                    if (init)
+                    {
+                        s.color = evt.color;
+                        s.offSubname = curPos;
+                    }
+
+                    size = Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", s.offSubname);
+                    curPos.Y += size.Height;
+                }
+                if (init) curPos.X -= 5;
 
                 break;
             }
@@ -185,7 +232,7 @@ public partial class Form1 : Form
             boxes.Add(new ClassBox(boxName, fpath, fname, leftTop.Add(pos), client));
 
             pos.X += boxes[^1].Size.Width + margin.Width;
-            
+
         }
 
         // update boxes
@@ -204,7 +251,7 @@ public partial class Form1 : Form
         }
     }
 
-    static Dictionary<ClassBox.CM, List<ClassBox.CM>> FindSubscriptions(string inp)
+    static Dictionary<Item, List<Item>> FindSubscriptions(string inp)
     {
         //EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
@@ -212,27 +259,24 @@ public partial class Form1 : Form
 
         MatchCollection matches = Regex.Matches(StripComments(inp), subPattern, RegexOptions.Singleline);
 
-        Dictionary<ClassBox.CM, List<ClassBox.CM>> subs = new();
+        Dictionary<Item, List<Item>> subs = new();
         foreach (Match match in matches.Cast<Match>())
         {
             if (match.Groups.Count == 6)
             {
-                var key = new ClassBox.CM
-                {
-                    name = match.Groups[1].Value,
-                    subName = match.Groups[2].Value + match.Groups[3].Value
-                };
+                var key = new Item(match.Groups[1].Value, match.Groups[2].Value + match.Groups[3].Value);
 
-                if (!subs.ContainsKey(key)) subs.Add(key, new List<ClassBox.CM>());
+                if (!subs.ContainsKey(key)) subs.Add(key, new List<Item>());
 
-                var val = new ClassBox.CM { name = match.Groups[4].Value, subName = match.Groups[5].Value };
-                subs[key].Add(val); 
+                var val = new Item(match.Groups[4].Value, match.Groups[5].Value);
+
+                subs[key].Add(val);
             }
         }
         return subs;
     }
 
-    static List<Evt> FindEvents(string inp)
+    static List<Item> FindEvents(string inp)
     {
         // static event EventHandler<Dictionary<Point, Game.Roster>> EvtSyncBoard
         // static event EventHandler EvtReset = delegate { };
@@ -242,15 +286,15 @@ public partial class Form1 : Form
 
         MatchCollection matches = Regex.Matches(StripComments(inp), @$"(?:{eventTypePattern})|(?:{eventPattern})", RegexOptions.Singleline);
 
-        List<Evt> evt = new();
+        List<Item> evt = new();
         foreach (Match match in matches.Cast<Match>())
         {
             if (match.Groups.Count == 5)
-                evt.Add(new Evt(
-                    match.Groups[1].Value + match.Groups[3].Value, 
-                    match.Groups[2].Value + match.Groups[4].Value, 
-                    ClassBox.NextColor
-                ));
+            {
+                evt.Add(new Item(match.Groups[2].Value + match.Groups[4].Value, match.Groups[1].Value + match.Groups[3].Value));
+                evt[^1].color = ClassBox.NextColor;
+            }
+
         }
         return evt;
     }
@@ -260,6 +304,9 @@ public partial class Form1 : Form
         Graphics g = e.Graphics; // disposed by the system
 
         foreach (var box in boxes) box.Draw(g);
+
+        // connect subs to events
+
 
         // test
         //DrawArrow(g, Color.White, 1, new Point(50, 50), new Point(150, 150), 10);
