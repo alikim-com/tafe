@@ -11,7 +11,8 @@ static public class PointExtensions
     static public Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
     static public Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
     static public Point Sub(this Point pnt, Size add) => new(pnt.X - add.Width, pnt.Y - add.Height);
-    static public int SquaredDistanceTo(this Point pnt, Point dst) {
+    static public int SquaredDistanceTo(this Point pnt, Point dst)
+    {
         Point diff = dst.Sub(pnt);
         return diff.X * diff.X + diff.Y * diff.Y;
     }
@@ -79,7 +80,21 @@ public class ClassBox
         public Point right;
     }
 
-    public _anchor anchor;
+    public _anchor Anchor
+    {
+        get
+        {
+            int hw = size.Width / 2;
+            int hh = size.Height / 2;
+            return new _anchor
+            {
+                top = pos.Add(hw, 0),
+                bottom = pos.Add(hw, size.Height),
+                left = pos.Add(0, hh),
+                right = pos.Add(size.Width, hh)
+            };
+        }
+    }
 
     public readonly string fpath;
     public readonly string fname;
@@ -96,6 +111,8 @@ public class ClassBox
     readonly bool autoSize = true;
 
     readonly Form1 parent;
+
+    public bool firstDraw = true;
 
     public string PrintSubs()
     {
@@ -118,31 +135,21 @@ public class ClassBox
         fpath = _fpath;
         fname = _fname;
 
-        int hw = _size.Width / 2;
-        int hh = _size.Height / 2;
-        anchor = new _anchor
-        {
-            top = _pos.Add(hw, 0),
-            bottom = _pos.Add(hw, _size.Height),
-            left = _pos.Add(0, hh),
-            right = _pos.Add(_size.Width, hh)
-        };
-
         parent = _parent;
 
         Draw = FirstDraw;
     }
 
-    public void FirstDraw(Graphics g)
+    void FirstDraw(Graphics g)
     {
         Size maxSize = size;
 
         void UpdateSize(Size sz, Point pos)
         {
-            if(!autoSize) return;
+            if (!autoSize) return;
 
             if (sz.Width > maxSize.Width) maxSize.Width = sz.Width + pos.X;
-            
+
             if (pos.Y + sz.Height > maxSize.Height) maxSize.Height = sz.Height + pos.Y;
         }
 
@@ -190,10 +197,10 @@ public class ClassBox
                 foreach (var s in sub.Value)
                 {
                     s.color = evt.color;
-                    s.offSubname = curPos.Sub(pos);
+                    s.offName = curPos.Sub(pos);
 
                     sz = Form1.MeasureText(g, fntEType, $"{s.name}.{s.subName}");
-                    UpdateSize(sz, s.offSubname);
+                    UpdateSize(sz, s.offName);
 
                     curPos.Y += sz.Height;
                 }
@@ -226,8 +233,10 @@ public class ClassBox
         Draw = FastDraw;
     }
 
-    public void FastDraw(Graphics g)
+    void FastDraw(Graphics g)
     {
+        firstDraw = false;
+
         // box
         Form1.DrawRectangle(g, Color.Gray, 1, pos, size.Width, size.Height);
 
@@ -255,7 +264,7 @@ public class ClassBox
                 Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
 
                 foreach (var s in sub.Value)
-                    Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offSubname));
+                    Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offName));
 
                 break;
             }
@@ -458,16 +467,19 @@ public partial class Form1 : Form
         // connect subs to events
         foreach (var boxFrom in boxes)
         {
-            foreach(var sub in boxFrom.subs)
+            if (boxFrom.firstDraw) return;
+            
+            foreach (var sub in boxFrom.subs)
             {
-               foreach(var itm in sub.Value)
+                foreach (var itm in sub.Value)
                 {
                     var classTo = itm.name;
                     foreach (var boxTo in boxes)
                     {
-                        if(boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
+                        if (boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
                         {
-                            DrawLineItemToBox(g, boxFrom.pos, boxTo.anchor, itm.color, 1);
+                            //Msg($"{itm.name} -> {itm.offName}");
+                            DrawLineItemToBox(g, boxFrom.pos.Add(itm.offName).Add(-3, 6), boxTo.Anchor, itm.color, 1);
                         }
                     }
                 }
@@ -477,13 +489,13 @@ public partial class Form1 : Form
 
     static public Point ClosestAnchor(Point start, ClassBox._anchor ends)
     {
-        Point res = new Point(0,0);
+        Point res = new(0, 0);
         int minSQDist = int.MaxValue;
         var endPoints = new Point[] { ends.top, ends.bottom, ends.left, ends.right };
         foreach (var end in endPoints)
         {
             int sq = end.SquaredDistanceTo(start);
-            if(sq < minSQDist)
+            if (sq < minSQDist)
             {
                 minSQDist = sq;
                 res = end;
@@ -496,6 +508,7 @@ public partial class Form1 : Form
     {
         Point end = ClosestAnchor(start, ends);
         DrawLine(g, color, thick, start, end);
+        //Msg($"{start} -> {end}");
     }
 
     static public void DrawText(Graphics g, Color color, Font font, string text, Point location)
