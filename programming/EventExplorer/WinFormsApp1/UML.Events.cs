@@ -5,10 +5,10 @@ namespace WinFormsApp1;
 
 static public class PointExtensions
 {
-    public static Point Add(this Point pnt, int x, int y) => new(pnt.X + x, pnt.Y + y);
-    public static Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
-    public static Point Add(this Point pnt, Point add) => new(pnt.X + add.X, pnt.Y + add.Y);
-    public static Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
+    static public Point Add(this Point pnt, int x, int y) => new(pnt.X + x, pnt.Y + y);
+    static public Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
+    static public Point Add(this Point pnt, Point add) => new(pnt.X + add.X, pnt.Y + add.Y);
+    static public Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
 }
 
 public class Item
@@ -62,8 +62,8 @@ public class ClassBox
         }
     }
 
-    public Point Pos { get; set; }
-    public Size Size { get; set; }
+    public Point pos;
+    public Size size;
 
     public struct _anchor
     {
@@ -85,6 +85,13 @@ public class ClassBox
 
     public Dictionary<Item, List<Item>> subs = new();
 
+    // to update box dimensions while drawing all texts
+    public Action<Graphics> Draw;
+
+    readonly bool autoSize = true;
+    // repaint due
+    public bool invalidated = true;
+
     public string PrintSubs()
     {
         string outp = "";
@@ -101,66 +108,75 @@ public class ClassBox
     public ClassBox(string _name, string _fpath, string _fname, Point _pos, Size _size)
     {
         name = _name;
-        Pos = _pos;
-        Size = _size;
+        pos = _pos;
+        size = _size;
         fpath = _fpath;
         fname = _fname;
 
         int hw = _size.Width / 2;
-        int hh = _size.Height / 2;  
-        anchor = new _anchor { 
-            top = _pos.Add(hw, 0), 
+        int hh = _size.Height / 2;
+        anchor = new _anchor
+        {
+            top = _pos.Add(hw, 0),
             bottom = _pos.Add(hw, _size.Height),
             left = _pos.Add(0, hh),
             right = _pos.Add(_size.Width, hh)
         };
+
+        Draw = FirstDraw;
     }
 
-    public void Draw(Graphics g)
+    public void FirstDraw(Graphics g)
     {
         // box
-        Form1.DrawRectangle(g, Color.Gray, 1, Pos, this.Size.Width, this.Size.Height);
+        Form1.DrawRectangle(g, Color.Gray, 1, pos, size.Width, size.Height);
 
         // box name
-        Form1.DrawText(g, Color.LightGray, fntName, name, Pos.Add(10, 10));
+        Form1.DrawText(g, Color.LightGray, fntName, name, pos.Add(10, 10));
 
         // classes
-        //Size size2 = new(0, 0);
+        //Size sz2 = new(0, 0);
         //Point curPos2 = Pos.Add(20, 30);
         //foreach (var c in cls)
         //{
-        //    size2 = Form1.DrawText(g, Color.DarkGray, fntEvt, c.name, curPos2);
-        //    curPos2.Y += size2.Height + 5;
+        //    sz2 = Form1.DrawText(g, Color.DarkGray, fntEvt, c.name, curPos2);
+        //    curPos2.Y += sz2.Height + 5;
         //}
 
+        int maxWidth = size.Width;
+
+        void UpdateSize(Size sz, Point pos)
+        {
+            if (autoSize && sz.Width > maxWidth)
+            {
+                maxWidth = sz.Width + pos.X;
+            }
+        }
+
         // events
-        Size size = new(0, 0);
-        Point curPos = Pos.Add(20, 30);
+        Size sz = new(0, 0);
+        Point curPos = pos.Add(20, 30); // check events + SUBS
         foreach (var evt in events)
         {
-            if (evt.offName.X < 0)
-            {
-                curPos.Y += size.Height + 5;
-                evt.offName = curPos;
-            }
-            size = Form1.DrawText(g, evt.color, fntEvt, evt.name, evt.offName);
+            curPos.Y += sz.Height + 5;
+            evt.offName = curPos.Sub(pos);
 
-            if (evt.offSubname.X < 0)
-            {
-                curPos.Y += size.Height;
-                evt.offSubname = curPos;
-            }
-            size = Form1.DrawText(g, evt.color, fntEType, evt.subName, evt.offSubname);
+            sz = Form1.DrawText(g, evt.color, fntEvt, evt.name, pos.Add(evt.offName));
+            UpdateSize(sz, evt.offName);
+
+            curPos.Y += sz.Height;
+            evt.offSubname = curPos.Sub(pos);
+
+            sz = Form1.DrawText(g, evt.color, fntEType, evt.subName, pos.Add(evt.offSubname));
+            UpdateSize(sz, evt.offSubname);
         }
 
         // subscriptions
-        size = new(0, 0);
+        sz = new(0, 0);
         if (events.Count > 0) curPos.Y += 15;
 
         foreach (var sub in subs)
         {
-            bool init = sub.Key.offName.X < 0; // fill in Item's offset & color once
-
             Item? evt = null;
             for (int i = 0; i < Form1.boxes.Count; i++)
             {
@@ -168,32 +184,27 @@ public class ClassBox
                 evt = events.Find(evt => evt.name == sub.Key.subName);
                 if (evt == null) continue;
 
-                if (init)
-                {
-                    sub.Key.color = evt.color;
-                    curPos.Y += size.Height;
-                    sub.Key.offName = curPos;
-                }
+                sub.Key.color = evt.color;
+                curPos.Y += sz.Height;
+                sub.Key.offName = curPos.Sub(pos);
 
-                size = Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", sub.Key.offName);
+                sz = Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
+                UpdateSize(sz, sub.Key.offName);
 
-                if (init)
-                {
-                    curPos.X += 5;
-                    curPos.Y += size.Height;
-                }
+                curPos.X += 5;
+                curPos.Y += sz.Height;
+
                 foreach (var s in sub.Value)
                 {
-                    if (init)
-                    {
-                        s.color = evt.color;
-                        s.offSubname = curPos;
-                    }
+                    s.color = evt.color;
+                    s.offSubname = curPos.Sub(pos);
 
-                    size = Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", s.offSubname);
-                    curPos.Y += size.Height;
+                    sz = Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offSubname));
+                    UpdateSize(sz, s.offSubname);
+
+                    curPos.Y += sz.Height;
                 }
-                if (init) curPos.X -= 5;
+                curPos.X -= 5;
 
                 break;
             }
@@ -203,6 +214,53 @@ public class ClassBox
             }
         }
 
+        if (autoSize)
+        {
+            if (maxWidth > size.Width)
+            {
+                size.Width = maxWidth + 10;
+                invalidated = true;
+            }
+            //curPos.Y;
+        }
+
+        Draw = FastDraw;
+    }
+
+    public void FastDraw(Graphics g)
+    {
+        // box
+        Form1.DrawRectangle(g, Color.Gray, 1, pos, size.Width, size.Height);
+
+        // box name
+        Form1.DrawText(g, Color.LightGray, fntName, name, pos.Add(10, 10));
+
+        // events
+        foreach (var evt in events)
+        {
+            Form1.DrawText(g, evt.color, fntEvt, evt.name, pos.Add(evt.offName));
+
+            Form1.DrawText(g, evt.color, fntEType, evt.subName, pos.Add(evt.offSubname));
+        }
+
+        // subscriptions
+        foreach (var sub in subs)
+        {
+            Item? evt = null;
+            for (int i = 0; i < Form1.boxes.Count; i++)
+            {
+                var events = Form1.boxes[i].events;
+                evt = events.Find(evt => evt.name == sub.Key.subName);
+                if (evt == null) continue;
+
+                Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
+
+                foreach (var s in sub.Value)
+                    Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offSubname));
+
+                break;
+            }
+        }
     }
 }
 
@@ -223,6 +281,14 @@ public partial class Form1 : Form
         InitializeComponent();
     }
 
+    public Control? GetControlByName(string controlName)
+    {
+        foreach (Control control in Controls)
+            if (control.Name == controlName) return control;
+
+        return null;
+    }
+
     void Form1_Load(object sender, EventArgs e)
     {
         // read source files
@@ -235,33 +301,33 @@ public partial class Form1 : Form
 
         Point leftTop = new(20, 20);
         Size margin = new(30, 30);
-        Size client;
+        Size client = new(170, 180);
 
         int totWidth = ClientSize.Width - 40;
 
-        int maxClientHeight = int.MinValue;
+        //int maxClientHeight = int.MinValue;
         Point pos = new(0, 0);
 
         foreach (var fname in files)
         {
             string boxName = fname[0..^3];
 
-            if (boxName == "EventManager") client = new(330, 320);
-            else if (boxName == "Form") client = new(230, 320);
-            else client = new(170, 180);
+            //if (boxName == "EventManager") client = new(330, 320);
+            //else if (boxName == "Form") client = new(230, 320);
+            //else client = new(170, 180);
 
-            maxClientHeight = Math.Max(maxClientHeight, client.Height);
+            //maxClientHeight = Math.Max(maxClientHeight, client.Height);
 
             if (pos.X + client.Width + margin.Width > totWidth)
             {
                 pos.X = 0;
-                pos.Y += maxClientHeight + margin.Height;
-                maxClientHeight = int.MinValue;
+                pos.Y += client.Height + margin.Height;
+                //maxClientHeight = int.MinValue;
             }
 
             boxes.Add(new ClassBox(boxName, fpath, fname, leftTop.Add(pos), client));
 
-            pos.X += boxes[^1].Size.Width + margin.Width;
+            pos.X += boxes[^1].size.Width + margin.Width;
 
         }
 
@@ -285,7 +351,9 @@ public partial class Form1 : Form
                 box.cls.Add(new Item("pwLeft", ""));
                 box.cls.Add(new Item("pwRight", ""));
 
-            } else if (box.name == "CellWrapper") {
+            }
+            else if (box.name == "CellWrapper")
+            {
                 box.cls.Add(new Item("cw", ""));
             }
         }
