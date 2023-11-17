@@ -3,278 +3,10 @@ using System.Text.RegularExpressions;
 
 namespace WinFormsApp1;
 
-static public class PointExtensions
+public partial class UML_Events : Form
 {
-    static public Point Add(this Point pnt, int x, int y) => new(pnt.X + x, pnt.Y + y);
-    static public Point Add(this Point pnt, Point add) => new(pnt.X + add.X, pnt.Y + add.Y);
-    static public Point Add(this Point pnt, Size add) => new(pnt.X + add.Width, pnt.Y + add.Height);
-    static public Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
-    static public Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
-    static public Point Sub(this Point pnt, Size add) => new(pnt.X - add.Width, pnt.Y - add.Height);
-    static public int SquaredDistanceTo(this Point pnt, Point dst)
-    {
-        Point diff = dst.Sub(pnt);
-        return diff.X * diff.X + diff.Y * diff.Y;
-    }
-}
-
-public class Item
-{
-    readonly public string name;
-    readonly public string subName;
-    public Color color = Color.Black;
-
-    // offsets from the client top-left for drawing lines
-    public Point offName = new(-1, -1);
-    public Point offSubname = new(-1, -1);
-
-    public Item(string _name, string _subName)
-    {
-        name = _name;
-        subName = _subName;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj == null) return false;
-        if (obj is Item compareTo) return name == compareTo.name && subName == compareTo.subName;
-        return false;
-    }
-
-    public override int GetHashCode() => HashCode.Combine(name, subName);
-
-    public override string ToString() => $"name: {name}, subName: {subName}";
-
-}
-
-public class ClassBox
-{
-    static readonly Font fntName = new("Arial", 11);
-    static readonly Font fntEvt = new("Arial", 10);
-    static readonly Font fntEType = new("Arial", 8);
-
-    static int _ind = -1;
-    static readonly Color[] _colors = new Color[]
-    {
-        Color.Red, Color.Green, Color.MediumSlateBlue, Color.Yellow, Color.Cyan, Color.Orange,
-        Color.CadetBlue, Color.Magenta, Color.LightGreen, Color.LightBlue, Color.LightCyan
-    };
-
-    static public Color NextColor
-    {
-        get
-        {
-            _ind = (++_ind) % _colors.Length;
-            return _colors[_ind];
-        }
-    }
-
-    public Point pos;
-    public Size size;
-
-    public struct _anchor
-    {
-        public Point top;
-        public Point bottom;
-        public Point left;
-        public Point right;
-    }
-
-    public _anchor Anchor
-    {
-        get
-        {
-            int hw = size.Width / 2;
-            int hh = size.Height / 2;
-            return new _anchor
-            {
-                top = pos.Add(hw, 0),
-                bottom = pos.Add(hw, size.Height),
-                left = pos.Add(0, hh),
-                right = pos.Add(size.Width, hh)
-            };
-        }
-    }
-
-    public readonly string fpath;
-    public readonly string fname;
-    public readonly string name;
-
-    public List<Item> cls = new();
-
-    public List<Item> events = new();
-
-    public Dictionary<Item, List<Item>> subs = new();
-
-    public Action<Graphics> Draw;
-
-    readonly bool autoSize = true;
-
-    readonly Form1 parent;
-
-    public bool firstDraw = true;
-
-    public string PrintSubs()
-    {
-        string outp = "";
-        foreach (var s in subs)
-        {
-            outp += s.Key.ToString() + "\n\r";
-            foreach (var e in s.Value)
-                outp += e.ToString() + "\n\r";
-            outp += "\n\r";
-        }
-        return outp;
-    }
-
-    public ClassBox(string _name, string _fpath, string _fname, Point _pos, Size _size, Form1 _parent)
-    {
-        name = _name;
-        pos = _pos;
-        size = _size;
-        fpath = _fpath;
-        fname = _fname;
-
-        parent = _parent;
-
-        Draw = FirstDraw;
-    }
-
-    void FirstDraw(Graphics g)
-    {
-        Size maxSize = size;
-
-        void UpdateSize(Size sz, Point pos)
-        {
-            if (!autoSize) return;
-
-            if (sz.Width > maxSize.Width) maxSize.Width = sz.Width + pos.X;
-
-            if (pos.Y + sz.Height > maxSize.Height) maxSize.Height = sz.Height + pos.Y;
-        }
-
-        // events
-        Size sz = new(0, 0);
-        Point curPos = pos.Add(20, 30); // check events + SUBS
-        foreach (var evt in events)
-        {
-            curPos.Y += sz.Height + 5;
-            evt.offName = curPos.Sub(pos);
-
-            sz = Form1.MeasureText(g, fntEvt, evt.name);
-            UpdateSize(sz, evt.offName);
-
-            curPos.Y += sz.Height;
-            evt.offSubname = curPos.Sub(pos);
-
-            sz = Form1.MeasureText(g, fntEType, evt.subName);
-            UpdateSize(sz, evt.offSubname);
-        }
-
-        // subscriptions
-        sz = new(0, 0);
-        if (events.Count > 0) curPos.Y += 15;
-
-        foreach (var sub in subs)
-        {
-            Item? evt = null;
-            for (int i = 0; i < Form1.boxes.Count; i++)
-            {
-                var events = Form1.boxes[i].events;
-                evt = events.Find(evt => evt.name == sub.Key.subName);
-                if (evt == null) continue;
-
-                sub.Key.color = evt.color;
-                curPos.Y += sz.Height;
-                sub.Key.offName = curPos.Sub(pos);
-
-                sz = Form1.MeasureText(g, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}");
-                UpdateSize(sz, sub.Key.offName);
-
-                curPos.X += 5;
-                curPos.Y += sz.Height;
-
-                foreach (var s in sub.Value)
-                {
-                    s.color = evt.color;
-                    s.offName = curPos.Sub(pos);
-
-                    sz = Form1.MeasureText(g, fntEType, $"{s.name}.{s.subName}");
-                    UpdateSize(sz, s.offName);
-
-                    curPos.Y += sz.Height;
-                }
-                curPos.X -= 5;
-
-                break;
-            }
-            if (evt == null)
-            {
-                Form1.Msg($"ClassBox.Draw : SUB for unknown event '{sub.Key}'");
-            }
-        }
-
-        bool updatePaintCheck = false;
-        if (autoSize)
-        {
-            if (maxSize.Width > size.Width)
-            {
-                size.Width = maxSize.Width + 10;
-                updatePaintCheck = true;
-            }
-            if (maxSize.Height > size.Height)
-            {
-                size.Height = maxSize.Height + 10;
-                updatePaintCheck = true;
-            }
-        }
-        parent.UpdatePaintCheck(updatePaintCheck);
-
-        Draw = FastDraw;
-    }
-
-    void FastDraw(Graphics g)
-    {
-        firstDraw = false;
-
-        // box
-        Form1.DrawRectangle(g, Color.Gray, 1, pos, size.Width, size.Height);
-
-        // box name
-        Form1.DrawText(g, Color.LightGray, fntName, name, pos.Add(10, 10));
-
-        // events
-        foreach (var evt in events)
-        {
-            Form1.DrawText(g, evt.color, fntEvt, evt.name, pos.Add(evt.offName));
-
-            Form1.DrawText(g, evt.color, fntEType, evt.subName, pos.Add(evt.offSubname));
-        }
-
-        // subscriptions
-        foreach (var sub in subs)
-        {
-            Item? evt = null;
-            for (int i = 0; i < Form1.boxes.Count; i++)
-            {
-                var events = Form1.boxes[i].events;
-                evt = events.Find(evt => evt.name == sub.Key.subName);
-                if (evt == null) continue;
-
-                Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
-
-                foreach (var s in sub.Value)
-                    Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offName));
-
-                break;
-            }
-        }
-    }
-}
-
-public partial class Form1 : Form
-{
-    static public void Msg(object obj) => MessageBox.Show(obj.ToString());
+    static UML_Events? instance;
+    static public void Msg(object obj) => instance.label1.Text += obj.ToString();//MessageBox.Show(obj.ToString());
 
     static public void Msg(object[] obj)
     {
@@ -288,9 +20,11 @@ public partial class Form1 : Form
     static Size boxClientDef = new(170, 180);
     static Size boxMargin = new(20, 20);
 
-    public Form1()
+    public UML_Events()
     {
+        BackColor = Color.Black;
         InitializeComponent();
+        instance = this;
     }
 
     int countdown = 0;
@@ -468,7 +202,7 @@ public partial class Form1 : Form
         foreach (var boxFrom in boxes)
         {
             if (boxFrom.firstDraw) return;
-            
+
             foreach (var sub in boxFrom.subs)
             {
                 foreach (var itm in sub.Value)
@@ -478,7 +212,6 @@ public partial class Form1 : Form
                     {
                         if (boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
                         {
-                            //Msg($"{itm.name} -> {itm.offName}");
                             DrawLineItemToBox(g, boxFrom.pos.Add(itm.offName).Add(-3, 6), boxTo.Anchor, itm.color, 1);
                         }
                     }
@@ -517,7 +250,7 @@ public partial class Form1 : Form
         g.DrawString(text, font, brush, location);
     }
 
-    static public Size MeasureText(Graphics g, Font font, string text)
+    static public Size MeasureText(Font font, string text)
     {
         using Bitmap bitmap = new(1, 1);
         using Graphics gbmp = Graphics.FromImage(bitmap);
@@ -627,5 +360,275 @@ public partial class Form1 : Form
             },
             RegexOptions.Singleline
         );
+    }
+}
+
+
+static public class PointExtensions
+{
+    static public Point Add(this Point pnt, int x, int y) => new(pnt.X + x, pnt.Y + y);
+    static public Point Add(this Point pnt, Point add) => new(pnt.X + add.X, pnt.Y + add.Y);
+    static public Point Add(this Point pnt, Size add) => new(pnt.X + add.Width, pnt.Y + add.Height);
+    static public Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
+    static public Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
+    static public Point Sub(this Point pnt, Size add) => new(pnt.X - add.Width, pnt.Y - add.Height);
+    static public int SquaredDistanceTo(this Point pnt, Point dst)
+    {
+        Point diff = dst.Sub(pnt);
+        return diff.X * diff.X + diff.Y * diff.Y;
+    }
+}
+
+public class Item
+{
+    readonly public string name;
+    readonly public string subName;
+    public Color color = Color.Black;
+
+    // offsets from the client top-left for drawing lines
+    public Point offName = new(-1, -1);
+    public Point offSubname = new(-1, -1);
+
+    public Item(string _name, string _subName)
+    {
+        name = _name;
+        subName = _subName;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null) return false;
+        if (obj is Item compareTo) return name == compareTo.name && subName == compareTo.subName;
+        return false;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(name, subName);
+
+    public override string ToString() => $"name: {name}, subName: {subName}";
+
+}
+
+public class ClassBox
+{
+    static readonly Font fntName = new("Arial", 11);
+    static readonly Font fntEvt = new("Arial", 10);
+    static readonly Font fntEType = new("Arial", 8);
+
+    static int _ind = -1;
+    static readonly Color[] _colors = new Color[]
+    {
+        Color.Red, Color.Green, Color.MediumSlateBlue, Color.Yellow, Color.Cyan, Color.Orange,
+        Color.CadetBlue, Color.Magenta, Color.LightGreen, Color.LightBlue, Color.LightCyan
+    };
+
+    static public Color NextColor
+    {
+        get
+        {
+            _ind = (++_ind) % _colors.Length;
+            return _colors[_ind];
+        }
+    }
+
+    public Point pos;
+    public Size size;
+
+    public struct _anchor
+    {
+        public Point top;
+        public Point bottom;
+        public Point left;
+        public Point right;
+    }
+
+    public _anchor Anchor
+    {
+        get
+        {
+            int hw = size.Width / 2;
+            int hh = size.Height / 2;
+            return new _anchor
+            {
+                top = pos.Add(hw, 0),
+                bottom = pos.Add(hw, size.Height),
+                left = pos.Add(0, hh),
+                right = pos.Add(size.Width, hh)
+            };
+        }
+    }
+
+    public readonly string fpath;
+    public readonly string fname;
+    public readonly string name;
+
+    public List<Item> cls = new();
+
+    public List<Item> events = new();
+
+    public Dictionary<Item, List<Item>> subs = new();
+
+    public Action<Graphics> Draw;
+
+    readonly bool autoSize = true;
+
+    readonly UML_Events parent;
+
+    public bool firstDraw = true;
+
+    public string PrintSubs()
+    {
+        string outp = "";
+        foreach (var s in subs)
+        {
+            outp += s.Key.ToString() + "\n\r";
+            foreach (var e in s.Value)
+                outp += e.ToString() + "\n\r";
+            outp += "\n\r";
+        }
+        return outp;
+    }
+
+    public ClassBox(string _name, string _fpath, string _fname, Point _pos, Size _size, UML_Events _parent)
+    {
+        name = _name;
+        pos = _pos;
+        size = _size;
+        fpath = _fpath;
+        fname = _fname;
+
+        parent = _parent;
+
+        Draw = FirstDraw;
+    }
+
+    void FirstDraw(Graphics g)
+    {
+        Size maxSize = size;
+
+        void UpdateSize(Size sz, Point pos)
+        {
+            if (!autoSize) return;
+
+            if (sz.Width > maxSize.Width) maxSize.Width = sz.Width + pos.X;
+
+            if (pos.Y + sz.Height > maxSize.Height) maxSize.Height = sz.Height + pos.Y;
+        }
+
+        // events
+        Size sz = new(0, 0);
+        Point curPos = pos.Add(20, 30); // check events + SUBS
+        foreach (var evt in events)
+        {
+            curPos.Y += sz.Height + 5;
+            evt.offName = curPos.Sub(pos);
+
+            sz = UML_Events.MeasureText(fntEvt, evt.name);
+            UpdateSize(sz, evt.offName);
+
+            curPos.Y += sz.Height;
+            evt.offSubname = curPos.Sub(pos);
+
+            sz = UML_Events.MeasureText(fntEType, evt.subName);
+            UpdateSize(sz, evt.offSubname);
+        }
+
+        // subscriptions
+        sz = new(0, 0);
+        if (events.Count > 0) curPos.Y += 15;
+
+        foreach (var sub in subs)
+        {
+            Item? evt = null;
+            for (int i = 0; i < UML_Events.boxes.Count; i++)
+            {
+                var events = UML_Events.boxes[i].events;
+                evt = events.Find(evt => evt.name == sub.Key.subName);
+                if (evt == null) continue;
+
+                sub.Key.color = evt.color;
+                curPos.Y += sz.Height;
+                sub.Key.offName = curPos.Sub(pos);
+
+                sz = UML_Events.MeasureText(fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}");
+                UpdateSize(sz, sub.Key.offName);
+
+                curPos.X += 5;
+                curPos.Y += sz.Height;
+
+                foreach (var s in sub.Value)
+                {
+                    s.color = evt.color;
+                    s.offName = curPos.Sub(pos);
+
+                    sz = UML_Events.MeasureText(fntEType, $"{s.name}.{s.subName}");
+                    UpdateSize(sz, s.offName);
+
+                    curPos.Y += sz.Height;
+                }
+                curPos.X -= 5;
+
+                break;
+            }
+            if (evt == null)
+            {
+                UML_Events.Msg($"ClassBox.Draw : SUB for unknown event '{sub.Key}'");
+            }
+        }
+
+        bool updatePaintCheck = false;
+        if (autoSize)
+        {
+            if (maxSize.Width > size.Width)
+            {
+                size.Width = maxSize.Width + 10;
+                updatePaintCheck = true;
+            }
+            if (maxSize.Height > size.Height)
+            {
+                size.Height = maxSize.Height + 10;
+                updatePaintCheck = true;
+            }
+        }
+        parent.UpdatePaintCheck(updatePaintCheck);
+
+        Draw = FastDraw;
+    }
+
+    void FastDraw(Graphics g)
+    {
+        firstDraw = false;
+
+        // box
+        UML_Events.DrawRectangle(g, Color.Gray, 1, pos, size.Width, size.Height);
+
+        // box name
+        UML_Events.DrawText(g, Color.LightGray, fntName, name, pos.Add(10, 10));
+
+        // events
+        foreach (var evt in events)
+        {
+            UML_Events.DrawText(g, evt.color, fntEvt, evt.name, pos.Add(evt.offName));
+
+            UML_Events.DrawText(g, evt.color, fntEType, evt.subName, pos.Add(evt.offSubname));
+        }
+
+        // subscriptions
+        foreach (var sub in subs)
+        {
+            Item? evt = null;
+            for (int i = 0; i < UML_Events.boxes.Count; i++)
+            {
+                var events = UML_Events.boxes[i].events;
+                evt = events.Find(evt => evt.name == sub.Key.subName);
+                if (evt == null) continue;
+
+                UML_Events.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
+
+                foreach (var s in sub.Value)
+                    UML_Events.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offName));
+
+                break;
+            }
+        }
     }
 }
