@@ -6,9 +6,15 @@ namespace WinFormsApp1;
 static public class PointExtensions
 {
     static public Point Add(this Point pnt, int x, int y) => new(pnt.X + x, pnt.Y + y);
-    static public Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
     static public Point Add(this Point pnt, Point add) => new(pnt.X + add.X, pnt.Y + add.Y);
+    static public Point Add(this Point pnt, Size add) => new(pnt.X + add.Width, pnt.Y + add.Height);
+    static public Point Sub(this Point pnt, int x, int y) => new(pnt.X - x, pnt.Y - y);
     static public Point Sub(this Point pnt, Point add) => new(pnt.X - add.X, pnt.Y - add.Y);
+    static public Point Sub(this Point pnt, Size add) => new(pnt.X - add.Width, pnt.Y - add.Height);
+    static public int SquaredDistanceTo(this Point pnt, Point dst) {
+        Point diff = dst.Sub(pnt);
+        return diff.X * diff.X + diff.Y * diff.Y;
+    }
 }
 
 public class Item
@@ -85,12 +91,11 @@ public class ClassBox
 
     public Dictionary<Item, List<Item>> subs = new();
 
-    // to update box dimensions while drawing all texts
     public Action<Graphics> Draw;
 
     readonly bool autoSize = true;
-    // repaint due
-    public bool invalidated = true;
+
+    readonly Form1 parent;
 
     public string PrintSubs()
     {
@@ -105,7 +110,7 @@ public class ClassBox
         return outp;
     }
 
-    public ClassBox(string _name, string _fpath, string _fname, Point _pos, Size _size)
+    public ClassBox(string _name, string _fpath, string _fname, Point _pos, Size _size, Form1 _parent)
     {
         name = _name;
         pos = _pos;
@@ -123,34 +128,22 @@ public class ClassBox
             right = _pos.Add(_size.Width, hh)
         };
 
+        parent = _parent;
+
         Draw = FirstDraw;
     }
 
     public void FirstDraw(Graphics g)
     {
-        // box
-        Form1.DrawRectangle(g, Color.Gray, 1, pos, size.Width, size.Height);
-
-        // box name
-        Form1.DrawText(g, Color.LightGray, fntName, name, pos.Add(10, 10));
-
-        // classes
-        //Size sz2 = new(0, 0);
-        //Point curPos2 = Pos.Add(20, 30);
-        //foreach (var c in cls)
-        //{
-        //    sz2 = Form1.DrawText(g, Color.DarkGray, fntEvt, c.name, curPos2);
-        //    curPos2.Y += sz2.Height + 5;
-        //}
-
-        int maxWidth = size.Width;
+        Size maxSize = size;
 
         void UpdateSize(Size sz, Point pos)
         {
-            if (autoSize && sz.Width > maxWidth)
-            {
-                maxWidth = sz.Width + pos.X;
-            }
+            if(!autoSize) return;
+
+            if (sz.Width > maxSize.Width) maxSize.Width = sz.Width + pos.X;
+            
+            if (pos.Y + sz.Height > maxSize.Height) maxSize.Height = sz.Height + pos.Y;
         }
 
         // events
@@ -161,13 +154,13 @@ public class ClassBox
             curPos.Y += sz.Height + 5;
             evt.offName = curPos.Sub(pos);
 
-            sz = Form1.DrawText(g, evt.color, fntEvt, evt.name, pos.Add(evt.offName));
+            sz = Form1.MeasureText(g, fntEvt, evt.name);
             UpdateSize(sz, evt.offName);
 
             curPos.Y += sz.Height;
             evt.offSubname = curPos.Sub(pos);
 
-            sz = Form1.DrawText(g, evt.color, fntEType, evt.subName, pos.Add(evt.offSubname));
+            sz = Form1.MeasureText(g, fntEType, evt.subName);
             UpdateSize(sz, evt.offSubname);
         }
 
@@ -188,7 +181,7 @@ public class ClassBox
                 curPos.Y += sz.Height;
                 sub.Key.offName = curPos.Sub(pos);
 
-                sz = Form1.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
+                sz = Form1.MeasureText(g, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}");
                 UpdateSize(sz, sub.Key.offName);
 
                 curPos.X += 5;
@@ -199,7 +192,7 @@ public class ClassBox
                     s.color = evt.color;
                     s.offSubname = curPos.Sub(pos);
 
-                    sz = Form1.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offSubname));
+                    sz = Form1.MeasureText(g, fntEType, $"{s.name}.{s.subName}");
                     UpdateSize(sz, s.offSubname);
 
                     curPos.Y += sz.Height;
@@ -214,15 +207,21 @@ public class ClassBox
             }
         }
 
+        bool updatePaintCheck = false;
         if (autoSize)
         {
-            if (maxWidth > size.Width)
+            if (maxSize.Width > size.Width)
             {
-                size.Width = maxWidth + 10;
-                invalidated = true;
+                size.Width = maxSize.Width + 10;
+                updatePaintCheck = true;
             }
-            //curPos.Y;
+            if (maxSize.Height > size.Height)
+            {
+                size.Height = maxSize.Height + 10;
+                updatePaintCheck = true;
+            }
         }
+        parent.UpdatePaintCheck(updatePaintCheck);
 
         Draw = FastDraw;
     }
@@ -276,17 +275,65 @@ public partial class Form1 : Form
 
     static public readonly List<ClassBox> boxes = new();
 
+    static Point topLeft = new(10, 10);
+    static Size boxClientDef = new(170, 180);
+    static Size boxMargin = new(20, 20);
+
     public Form1()
     {
         InitializeComponent();
     }
 
-    public Control? GetControlByName(string controlName)
-    {
-        foreach (Control control in Controls)
-            if (control.Name == controlName) return control;
+    int countdown = 0;
+    bool invalidated = false;
 
-        return null;
+    /// <summary>
+    /// Ensures the image control is invalidated only once after<br/>
+    /// a round of box Draw calls, if needed
+    /// </summary>
+    /// <param name="invalid">If set true by at least one caller, repaint will happen at zero countdown</param>
+    public void UpdatePaintCheck(bool invalid)
+    {
+        invalidated |= invalid;
+        countdown--;
+        if (countdown == 0 && invalidated)
+        {
+            PositionBoxes();
+            pictureBox1.Invalidate();
+        }
+    }
+
+    /// <summary>
+    /// Will check if image control needs enforced painting after<br/>
+    /// a number of UpdatePaintCheck calls
+    /// </summary>
+    /// <param name="cnt">Number of UpdatePaintCheck calls before checking "invalidated" value</param>
+    /// <param name="force">Initial "invalidated" value, to force Paint call after countdown</param>
+    void PaintCheckAfter(int cnt, bool force = false)
+    {
+        countdown = cnt;
+        invalidated = force;
+    }
+
+    void PositionBoxes()
+    {
+        int rowHeight = int.MinValue;
+        Point curPos = topLeft.Add(boxMargin);
+        for (var i = 0; i < boxes.Count; i++)
+        {
+            var box = boxes[i];
+            box.pos = curPos;
+            if (i == boxes.Count - 1) break;
+            if (rowHeight < box.size.Height) rowHeight = box.size.Height;
+            curPos.X += box.size.Width + 2 * boxMargin.Width;
+            var next = boxes[i + 1];
+            if (curPos.X + next.size.Width + boxMargin.Width + topLeft.X > ClientSize.Width)
+            {
+                curPos.X = topLeft.X + boxMargin.Width;
+                curPos.Y += rowHeight + 2 * boxMargin.Height;
+                rowHeight = int.MinValue;
+            }
+        }
     }
 
     void Form1_Load(object sender, EventArgs e)
@@ -299,39 +346,14 @@ public partial class Form1 : Form
 
         // create boxes
 
-        Point leftTop = new(20, 20);
-        Size margin = new(30, 30);
-        Size client = new(170, 180);
-
-        int totWidth = ClientSize.Width - 40;
-
-        //int maxClientHeight = int.MinValue;
-        Point pos = new(0, 0);
-
         foreach (var fname in files)
         {
             string boxName = fname[0..^3];
 
-            //if (boxName == "EventManager") client = new(330, 320);
-            //else if (boxName == "Form") client = new(230, 320);
-            //else client = new(170, 180);
-
-            //maxClientHeight = Math.Max(maxClientHeight, client.Height);
-
-            if (pos.X + client.Width + margin.Width > totWidth)
-            {
-                pos.X = 0;
-                pos.Y += client.Height + margin.Height;
-                //maxClientHeight = int.MinValue;
-            }
-
-            boxes.Add(new ClassBox(boxName, fpath, fname, leftTop.Add(pos), client));
-
-            pos.X += boxes[^1].size.Width + margin.Width;
-
+            boxes.Add(new ClassBox(boxName, fpath, fname, topLeft, boxClientDef, this));
         }
 
-        // update boxes
+        // update boxes content
 
         foreach (var box in boxes)
         {
@@ -357,6 +379,9 @@ public partial class Form1 : Form
                 box.cls.Add(new Item("cw", ""));
             }
         }
+
+        // repaint image component if at least one box in DrawFirst is resized
+        PaintCheckAfter(boxes.Count);
     }
 
     static List<Item> FindClasses(string inp)
@@ -431,24 +456,59 @@ public partial class Form1 : Form
         foreach (var box in boxes) box.Draw(g);
 
         // connect subs to events
-
-
-        // test
-        //DrawArrow(g, Color.White, 1, new Point(50, 50), new Point(150, 150), 10);
-        //DrawRectangle(g, Color.White, 1, new Point(200, 200), 100, 150);
-        //Font font = new("Arial", 12);
-        //DrawText(g, Color.Yellow, font, "Hello, world!", new Point(350, 250));
-
+        foreach (var boxFrom in boxes)
+        {
+            foreach(var sub in boxFrom.subs)
+            {
+               foreach(var itm in sub.Value)
+                {
+                    var classTo = itm.name;
+                    foreach (var boxTo in boxes)
+                    {
+                        if(boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
+                        {
+                            DrawLineItemToBox(g, boxFrom.pos, boxTo.anchor, itm.color, 1);
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    static public Size DrawText(Graphics g, Color color, Font font, string text, Point location)
+    static public Point ClosestAnchor(Point start, ClassBox._anchor ends)
+    {
+        Point res = new Point(0,0);
+        int minSQDist = int.MaxValue;
+        var endPoints = new Point[] { ends.top, ends.bottom, ends.left, ends.right };
+        foreach (var end in endPoints)
+        {
+            int sq = end.SquaredDistanceTo(start);
+            if(sq < minSQDist)
+            {
+                minSQDist = sq;
+                res = end;
+            }
+        }
+        return res;
+    }
+
+    static public void DrawLineItemToBox(Graphics g, Point start, ClassBox._anchor ends, Color color, int thick)
+    {
+        Point end = ClosestAnchor(start, ends);
+        DrawLine(g, color, thick, start, end);
+    }
+
+    static public void DrawText(Graphics g, Color color, Font font, string text, Point location)
+    {
+        using Brush brush = new SolidBrush(color);
+        g.DrawString(text, font, brush, location);
+    }
+
+    static public Size MeasureText(Graphics g, Font font, string text)
     {
         using Bitmap bitmap = new(1, 1);
         using Graphics gbmp = Graphics.FromImage(bitmap);
         SizeF textSize = gbmp.MeasureString(text, font);
-
-        using Brush brush = new SolidBrush(color);
-        g.DrawString(text, font, brush, location);
 
         return new Size((int)textSize.Width, (int)textSize.Height);
     }
@@ -457,6 +517,14 @@ public partial class Form1 : Form
     {
         using Pen pen = new(color, thick);
         g.DrawRectangle(pen, location.X, location.Y, width, height);
+    }
+
+    static public void DrawLine(Graphics g, Color color, int thick, Point start, Point end)
+    {
+        using Pen pen = new(color, thick);
+        using Brush brush = new SolidBrush(color);
+
+        g.DrawLine(pen, start, end);
     }
 
     static public void DrawArrow(Graphics g, Color color, int thick, Point start, Point end, int head)
