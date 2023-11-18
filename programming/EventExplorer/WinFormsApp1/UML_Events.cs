@@ -1,18 +1,12 @@
 
 using System.Text.RegularExpressions;
 
-namespace WinFormsApp1;
+namespace WinformsUMLEvents;
 
 public partial class UML_Events : Form
 {
-    static UML_Events? instance;
-    static public void Msg(object obj) => instance.label1.Text += obj.ToString();//MessageBox.Show(obj.ToString());
-
-    static public void Msg(object[] obj)
-    {
-        foreach (var o in obj)
-            MessageBox.Show(o.ToString());
-    }
+    static string srcPath = "../../../source/";
+    static string profPath = "../../../profile/";
 
     static public readonly List<ClassBox> boxes = new();
 
@@ -24,7 +18,6 @@ public partial class UML_Events : Form
     {
         BackColor = Color.Black;
         InitializeComponent();
-        instance = this;
     }
 
     int countdown = 0;
@@ -83,9 +76,7 @@ public partial class UML_Events : Form
     {
         // read source files
 
-        string fpath = "../../../source/";
-
-        string[] files = ReadFolder(fpath);
+        string[] files = Utils.ReadFolder(srcPath);
 
         // create boxes
 
@@ -93,14 +84,14 @@ public partial class UML_Events : Form
         {
             string boxName = fname[0..^3];
 
-            boxes.Add(new ClassBox(boxName, fpath, fname, topLeft, boxClientDef, this));
+            boxes.Add(new ClassBox(boxName, srcPath, fname, topLeft, boxClientDef, this));
         }
 
         // update boxes content
 
         foreach (var box in boxes)
         {
-            string code = ReadFile(box.fpath, box.fname);
+            string code = Utils.ReadFile(box.fpath, box.fname);
 
             string cleanCode = StripComments(code);
 
@@ -299,44 +290,6 @@ public partial class UML_Events : Form
         arrowhead[2] = new PointF(end.X - size * cosPPI, end.Y - size * sinPPI);
 
         g.FillPolygon(brush, arrowhead);
-    }
-
-    static string ReadFile(string path, string name)
-    {
-        try
-        {
-            return File.ReadAllText(Path.Combine(path, name));
-        }
-        catch (Exception ex)
-        {
-            Msg($"An error occurred: {ex.Message}");
-            return "";
-        }
-    }
-
-    static void WriteFile(string path, string name, string outp)
-    {
-        try
-        {
-            File.WriteAllText(Path.Combine(path, name), outp);
-        }
-        catch (Exception ex)
-        {
-            Msg($"An error occurred: {ex.Message}");
-        }
-    }
-
-    static string[] ReadFolder(string fpath)
-    {
-        try
-        {
-            return Directory.GetFiles(fpath).Select(e => Path.GetFileName(e) ?? "").ToArray();
-        }
-        catch (Exception ex)
-        {
-            Msg($"An error occurred: {ex.Message}");
-            return Array.Empty<string>();
-        }
     }
 
     static string StripComments(string inp)
@@ -571,7 +524,7 @@ public class ClassBox
             }
             if (evt == null)
             {
-                UML_Events.Msg($"ClassBox.Draw : SUB for unknown event '{sub.Key}'");
+                Utils.Msg($"ClassBox.Draw : SUB for unknown event '{sub.Key}'");
             }
         }
 

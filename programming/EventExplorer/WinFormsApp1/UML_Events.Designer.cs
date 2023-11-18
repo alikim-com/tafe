@@ -1,4 +1,4 @@
-﻿namespace WinFormsApp1;
+﻿namespace WinformsUMLEvents;
 
 partial class UML_Events
 {
