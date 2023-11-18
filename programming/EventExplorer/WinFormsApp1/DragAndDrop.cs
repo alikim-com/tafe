@@ -15,10 +15,24 @@ public partial class UML_Events
 
     ClassBox? mBox;
 
-    static bool DetectBox(Point pos, out ClassBox? box)
+    static bool DetectBox(Point pos, out ClassBox? boxOver)
     {
-        box = boxes[0];
-        return true;
+        var x = pos.X;
+        var y = pos.Y;
+        foreach(var box in boxes)
+        {
+            var bx = box.pos.X;
+            var by = box.pos.Y;
+            if (
+            x > bx && x < bx + box.size.Width &&
+            y > by && y < by + box.size.Height
+            ) {
+                boxOver = box;
+                return true;
+            }
+        }
+        boxOver = null;
+        return false;
     }
 
     private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -37,8 +51,8 @@ public partial class UML_Events
     {
         if (mState == MState.Up || mBox == null) return;
         Point diff = e.Location.Sub(mPos);
-        mBox.pos = mBox.pos.Add(diff); Msg($"{mBox.pos.Add(diff).X}->{mBox.pos.X} ");
-        PositionBoxes();
+        mBox.pos = mBox.pos.Add(diff);
+        mPos = e.Location;
         pictureBox1.Invalidate();
 
     }
