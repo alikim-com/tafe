@@ -48,7 +48,7 @@ namespace WinformsUMLEvents
             label1.Location = new Point(0, 0);
             label1.Margin = new Padding(0);
             label1.Name = "label1";
-            label1.Padding = new Padding(20, 0, 20, 30);
+            label1.Padding = new Padding(20, 0, 20, 45);
             label1.Size = new Size(500, 541);
             label1.TabIndex = 0;
             label1.Text = resources.GetString("label1.Text");
@@ -57,17 +57,18 @@ namespace WinformsUMLEvents
             // button1
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            button1.AutoSize = true;
             button1.BackColor = Color.FromArgb(57, 57, 64);
             button1.FlatAppearance.BorderSize = 0;
             button1.FlatAppearance.MouseDownBackColor = Color.FromArgb(46, 46, 51);
             button1.FlatAppearance.MouseOverBackColor = Color.FromArgb(69, 69, 77);
             button1.FlatStyle = FlatStyle.Flat;
-            button1.Location = new Point(212, 506);
+            button1.Location = new Point(192, 492);
             button1.Margin = new Padding(0);
             button1.Name = "button1";
-            button1.Size = new Size(76, 23);
+            button1.Size = new Size(116, 25);
             button1.TabIndex = 1;
-            button1.Text = "Whatever";
+            button1.Text = "Leave the narrative";
             button1.UseVisualStyleBackColor = false;
             button1.Click += button1_Click;
             // 
@@ -75,7 +76,7 @@ namespace WinformsUMLEvents
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(45, 45, 50);
+            BackColor = Color.FromArgb(46, 46, 51);
             ClientSize = new Size(500, 541);
             Controls.Add(button1);
             Controls.Add(label1);
@@ -87,6 +88,7 @@ namespace WinformsUMLEvents
             StartPosition = FormStartPosition.CenterScreen;
             Text = "About";
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

@@ -19,7 +19,7 @@ partial class UML_Events
         }
         base.Dispose(disposing);
 
-        if(aboutForm != null) aboutForm.Dispose();
+        if (aboutForm != null) aboutForm.Dispose();
     }
 
     #region Windows Form Designer generated code
@@ -33,7 +33,7 @@ partial class UML_Events
         pictureBox1 = new PictureBox();
         label1 = new Label();
         menuStrip1 = new MenuStrip();
-        menuLoad = new ToolStripMenuItem();
+        menuLoad = new ToolStripMenuItem("NoMargins");
         menuLoadOpen = new ToolStripMenuItem();
         menuLoadCollection = new ToolStripMenuItem();
         menuSave = new ToolStripMenuItem();
@@ -69,6 +69,8 @@ partial class UML_Events
         // 
         // menuStrip1
         // 
+        menuStrip1.BackColor = Color.FromArgb(46, 46, 51);
+        menuStrip1.ForeColor = Color.LightGray;
         menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp });
         menuStrip1.Location = new Point(0, 0);
         menuStrip1.Name = "menuStrip1";
@@ -85,14 +87,19 @@ partial class UML_Events
         // 
         // menuLoadOpen
         // 
+        menuLoadOpen.BackColor = Color.FromArgb(46, 46, 51);
+        menuLoadOpen.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        menuLoadOpen.ForeColor = Color.LightGray;
         menuLoadOpen.Name = "menuLoadOpen";
-        menuLoadOpen.Size = new Size(168, 22);
+        menuLoadOpen.Size = new Size(180, 22);
         menuLoadOpen.Text = "Open profile...";
         // 
         // menuLoadCollection
         // 
+        menuLoadCollection.BackColor = Color.FromArgb(46, 46, 51);
+        menuLoadCollection.ForeColor = Color.LightGray;
         menuLoadCollection.Name = "menuLoadCollection";
-        menuLoadCollection.Size = new Size(168, 22);
+        menuLoadCollection.Size = new Size(180, 22);
         menuLoadCollection.Text = "Profiles collection";
         // 
         // menuSave
@@ -104,6 +111,8 @@ partial class UML_Events
         // 
         // menuSaveAs
         // 
+        menuSaveAs.BackColor = Color.FromArgb(46, 46, 51);
+        menuSaveAs.ForeColor = Color.LightGray;
         menuSaveAs.Name = "menuSaveAs";
         menuSaveAs.Size = new Size(158, 22);
         menuSaveAs.Text = "Save profile as...";
@@ -117,8 +126,10 @@ partial class UML_Events
         // 
         // menuHelpAbout
         // 
+        menuHelpAbout.BackColor = Color.FromArgb(46, 46, 51);
+        menuHelpAbout.ForeColor = Color.LightGray;
         menuHelpAbout.Name = "menuHelpAbout";
-        menuHelpAbout.Size = new Size(180, 22);
+        menuHelpAbout.Size = new Size(107, 22);
         menuHelpAbout.Text = "About";
         menuHelpAbout.Click += menuHelpAbout_Click;
         // 

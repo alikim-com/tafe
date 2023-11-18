@@ -18,6 +18,11 @@ public partial class UML_Events : Form
     {
         BackColor = Color.Black;
         InitializeComponent();
+        // menu appearance
+        menuStrip1.Renderer = new CustomRenderer();
+        ((ToolStripDropDownMenu)menuLoad.DropDown).ShowImageMargin = false;
+        ((ToolStripDropDownMenu)menuSave.DropDown).ShowImageMargin = false;
+        ((ToolStripDropDownMenu)menuHelp.DropDown).ShowImageMargin = false;
     }
 
     int countdown = 0;
