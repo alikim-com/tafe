@@ -21,7 +21,7 @@ public class Utils
         }
         catch (Exception ex)
         {
-            Msg($"An error occurred: {ex.Message}");
+            Msg($"Utils.ReadFile : An error occurred: {ex.Message}");
             return "";
         }
     }
@@ -34,53 +34,64 @@ public class Utils
         }
         catch (Exception ex)
         {
-            Msg($"An error occurred: {ex.Message}");
+            Msg($"Utils.WriteFile : An error occurred: {ex.Message}");
         }
     }
 
-    static public string[] ReadFolder(string fpath)
+    static public string[] ReadFolder(string path)
     {
         try
         {
-            return Directory.GetFiles(fpath).Select(e => Path.GetFileName(e) ?? "").ToArray();
+            return Directory.GetFiles(path).Select(e => Path.GetFileName(e) ?? "").ToArray();
         }
         catch (Exception ex)
         {
-            Msg($"An error occurred: {ex.Message}");
+            Msg($"Utils.ReadFolder : An error occurred: {ex.Message}");
             return Array.Empty<string>();
         }
     }
 
-    static void SaveProfile(Profile prof, string path, string name)
+    static public void SaveProfile<P>(string profPath, string fName, P prof)
     {
-        string outp = JsonSerializer.Serialize(prof); 
-        WriteFile(path, name, outp);
+        string outp = JsonSerializer.Serialize(prof);
+
+        OpenSaveFileDialog(profPath, fName, outp);
+    }
+
+    static public void OpenSaveFileDialog(string profPath, string fName, string outp)
+    {
+        using SaveFileDialog saveFileDialog = new();
+        
+        saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+        saveFileDialog.Title = "Save As";
+        saveFileDialog.InitialDirectory = profPath;
+        saveFileDialog.FileName = fName;
+
+        DialogResult result = saveFileDialog.ShowDialog();
+
+        if (result == DialogResult.OK)
+        {
+            string selectedFilePath = saveFileDialog.FileName;
+            WriteFile(selectedFilePath, "", outp);
+        }
+    }
+
+    static public P? LoadProfile<P>(string pfile, string profPath)
+    {
+        try
+        {
+            var input = ReadFile(profPath, pfile);
+
+            var obj = JsonSerializer.Deserialize<P>(input);
+
+            return obj;
+        }
+        catch (Exception ex)
+        {
+            Msg($"Utils.LoadProfile : There was an error <{ex.Message}> reading '{pfile}'");
+            return default;
+        }
     }
 }
 
-public class BoxInfo
-{
-    string name;
-    Point pos;
-    Size size;
 
-    public BoxInfo(string _name, Point _pos, Size _size)
-    {
-        name = _name;
-        pos = _pos;
-        size = _size;
-    }
-}
-
-public class Profile
-{
-    readonly string name = "Default";
-    readonly List<BoxInfo> boxes = new();
-
-    public Profile(string _name, List<WinformsUMLEvents.ClassBox> _boxes)
-    {
-        name = _name;
-        foreach(var _box in _boxes)
-            boxes.Add(new BoxInfo(_box.name, _box.pos, _box.size));
-    }
-}

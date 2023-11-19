@@ -1,4 +1,6 @@
-﻿namespace WinformsUMLEvents;
+﻿using System.Windows.Forms;
+
+namespace WinformsUMLEvents;
 
 partial class UML_Events
 {
@@ -33,13 +35,16 @@ partial class UML_Events
         pictureBox1 = new PictureBox();
         label1 = new Label();
         menuStrip1 = new MenuStrip();
-        menuLoad = new ToolStripMenuItem("NoMargins");
+        menuLoad = new ToolStripMenuItem();
         menuLoadOpen = new ToolStripMenuItem();
         menuLoadCollection = new ToolStripMenuItem();
         menuSave = new ToolStripMenuItem();
         menuSaveAs = new ToolStripMenuItem();
         menuHelp = new ToolStripMenuItem();
         menuHelpAbout = new ToolStripMenuItem();
+        menuLabel = new ToolStripLabel();
+        menuDummy = new ToolStripTextBox();
+        menuLayout = new ToolStripTextBox();
         ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
         menuStrip1.SuspendLayout();
         SuspendLayout();
@@ -71,12 +76,12 @@ partial class UML_Events
         // 
         menuStrip1.BackColor = Color.FromArgb(46, 46, 51);
         menuStrip1.ForeColor = Color.LightGray;
-        menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp });
+        menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp, menuLabel, menuDummy, menuLayout });
         menuStrip1.Location = new Point(0, 0);
         menuStrip1.Name = "menuStrip1";
         menuStrip1.Size = new Size(1200, 24);
         menuStrip1.TabIndex = 2;
-        menuStrip1.Text = "menuStrip1";
+        menuStrip1.Text = "menuMain";
         // 
         // menuLoad
         // 
@@ -91,16 +96,18 @@ partial class UML_Events
         menuLoadOpen.DisplayStyle = ToolStripItemDisplayStyle.Text;
         menuLoadOpen.ForeColor = Color.LightGray;
         menuLoadOpen.Name = "menuLoadOpen";
-        menuLoadOpen.Size = new Size(180, 22);
-        menuLoadOpen.Text = "Open profile...";
+        menuLoadOpen.Size = new Size(165, 22);
+        menuLoadOpen.Text = "Open layout...";
+        menuLoadOpen.Click += menuLoadOpen_Click;
         // 
         // menuLoadCollection
         // 
         menuLoadCollection.BackColor = Color.FromArgb(46, 46, 51);
         menuLoadCollection.ForeColor = Color.LightGray;
         menuLoadCollection.Name = "menuLoadCollection";
-        menuLoadCollection.Size = new Size(180, 22);
-        menuLoadCollection.Text = "Profiles collection";
+        menuLoadCollection.Size = new Size(165, 22);
+        menuLoadCollection.Text = "Layout collection";
+        menuLoadCollection.Click += menuLoadCollection_Click;
         // 
         // menuSave
         // 
@@ -114,8 +121,9 @@ partial class UML_Events
         menuSaveAs.BackColor = Color.FromArgb(46, 46, 51);
         menuSaveAs.ForeColor = Color.LightGray;
         menuSaveAs.Name = "menuSaveAs";
-        menuSaveAs.Size = new Size(158, 22);
-        menuSaveAs.Text = "Save profile as...";
+        menuSaveAs.Size = new Size(157, 22);
+        menuSaveAs.Text = "Save layout as...";
+        menuSaveAs.Click += menuSaveAs_Click;
         // 
         // menuHelp
         // 
@@ -132,6 +140,35 @@ partial class UML_Events
         menuHelpAbout.Size = new Size(107, 22);
         menuHelpAbout.Text = "About";
         menuHelpAbout.Click += menuHelpAbout_Click;
+        // 
+        // menuLabel
+        // 
+        menuLabel.BackColor = Color.FromArgb(34, 34, 38);
+        menuLabel.Margin = new Padding(50, 1, 5, 2);
+        menuLabel.Name = "menuLabel";
+        menuLabel.Size = new Size(46, 17);
+        menuLabel.Text = "Layout:";
+        // 
+        // menuDummy
+        // 
+        menuDummy.Enabled = false;
+        menuDummy.BackColor = Color.FromArgb(34, 34, 38);
+        menuDummy.BorderStyle = BorderStyle.None;
+        menuDummy.Enabled = false;
+        menuDummy.ForeColor = Color.LightGray;
+        menuDummy.Margin = new Padding(1, 0, 0, 0);
+        menuDummy.Name = "menuDummy";
+        menuDummy.Size = new Size(7, 20);
+        // 
+        // menuLayout
+        // 
+        menuLayout.BackColor = Color.FromArgb(34, 34, 38);
+        menuLayout.BorderStyle = BorderStyle.None;
+        menuLayout.ForeColor = Color.LightGray;
+        menuLayout.Margin = new Padding(0, 0, 1, 0);
+        menuLayout.Name = "menuLayout";
+        menuLayout.Size = new Size(100, 20);
+        menuLayout.Text = "Default";
         // 
         // UML_Events
         // 
@@ -159,7 +196,6 @@ partial class UML_Events
     private PictureBox pictureBox1;
     private Label label1;
     private MenuStrip menuStrip1;
-    private ToolStripComboBox menuAbout;
     private ToolStripMenuItem menuSave;
     private ToolStripMenuItem menuLoad;
     private ToolStripMenuItem menuHelp;
@@ -167,5 +203,7 @@ partial class UML_Events
     private ToolStripMenuItem menuLoadCollection;
     private ToolStripMenuItem menuSaveAs;
     private ToolStripMenuItem menuHelpAbout;
-    private ToolStripTextBox menuText;
+    private ToolStripLabel menuLabel;
+    private ToolStripTextBox menuLayout;
+    private ToolStripTextBox menuDummy;
 }

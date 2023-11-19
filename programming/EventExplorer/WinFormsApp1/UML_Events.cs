@@ -5,8 +5,9 @@ namespace WinformsUMLEvents;
 
 public partial class UML_Events : Form
 {
-    static string srcPath = "../../../source/";
-    static string profPath = "../../../profile/";
+    static string curDir = Directory.GetCurrentDirectory();
+    static string srcPath = Path.GetFullPath(Path.Combine(curDir, "../../../source/"));
+    static string profPath = Path.GetFullPath(Path.Combine(curDir, "../../../profiles/"));
 
     static public readonly List<ClassBox> boxes = new();
 
@@ -18,6 +19,10 @@ public partial class UML_Events : Form
     {
         BackColor = Color.Black;
         InitializeComponent();
+
+        // read profiles from profPath and add to the menu
+        UpdateProfileList();
+
         // menu appearance
         menuStrip1.Renderer = new CustomRenderer();
         ((ToolStripDropDownMenu)menuLoad.DropDown).ShowImageMargin = false;
@@ -33,13 +38,13 @@ public partial class UML_Events : Form
     /// a round of box Draw calls, if needed
     /// </summary>
     /// <param name="invalid">If set true by at least one caller, repaint will happen at zero countdown</param>
-    public void UpdatePaintCheck(bool invalid)
+    public void UpdatePaintCheck(bool invalid, bool grid = true)
     {
         invalidated |= invalid;
         countdown--;
         if (countdown == 0 && invalidated)
         {
-            PositionBoxes();
+            ArrangeBoxesOnGrid();
             pictureBox1.Invalidate();
         }
     }
@@ -56,7 +61,7 @@ public partial class UML_Events : Form
         invalidated = force;
     }
 
-    void PositionBoxes()
+    void ArrangeBoxesOnGrid()
     {
         int rowHeight = int.MinValue;
         Point curPos = topLeft.Add(boxMargin);

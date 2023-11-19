@@ -9,8 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="profiles\**" />
     <Compile Remove="source\**" />
+    <EmbeddedResource Remove="profiles\**" />
     <EmbeddedResource Remove="source\**" />
+    <None Remove="profiles\**" />
     <None Remove="source\**" />
   </ItemGroup>
 
