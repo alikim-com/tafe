@@ -54,7 +54,7 @@ partial class UML_Events
         pictureBox1.Dock = DockStyle.Fill;
         pictureBox1.Location = new Point(0, 24);
         pictureBox1.Name = "pictureBox1";
-        pictureBox1.Size = new Size(1200, 876);
+        pictureBox1.Size = new Size(1400, 876);
         pictureBox1.TabIndex = 0;
         pictureBox1.TabStop = false;
         pictureBox1.Paint += pictureBox1_Paint;
@@ -65,12 +65,14 @@ partial class UML_Events
         // 
         // label1
         // 
-        label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        label1.AutoSize = true;
         label1.ForeColor = Color.Gray;
-        label1.Location = new Point(609, 871);
+        label1.Location = new Point(10, 875);
         label1.Name = "label1";
-        label1.Size = new Size(591, 29);
+        label1.Size = new Size(372, 15);
         label1.TabIndex = 1;
+        label1.Text = "Drag && drop boxes around, save and load their size && position as a layout";
         // 
         // menuStrip1
         // 
@@ -79,7 +81,7 @@ partial class UML_Events
         menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp, menuLabel, menuDummy, menuLayout });
         menuStrip1.Location = new Point(0, 0);
         menuStrip1.Name = "menuStrip1";
-        menuStrip1.Size = new Size(1200, 24);
+        menuStrip1.Size = new Size(1400, 24);
         menuStrip1.TabIndex = 2;
         menuStrip1.Text = "menuMain";
         // 
@@ -151,7 +153,6 @@ partial class UML_Events
         // 
         // menuDummy
         // 
-        menuDummy.Enabled = false;
         menuDummy.BackColor = Color.FromArgb(34, 34, 38);
         menuDummy.BorderStyle = BorderStyle.None;
         menuDummy.Enabled = false;
@@ -175,7 +176,7 @@ partial class UML_Events
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Black;
-        ClientSize = new Size(1200, 900);
+        ClientSize = new Size(1400, 900);
         Controls.Add(label1);
         Controls.Add(pictureBox1);
         Controls.Add(menuStrip1);

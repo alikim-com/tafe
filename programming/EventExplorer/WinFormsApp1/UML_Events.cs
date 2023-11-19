@@ -21,10 +21,11 @@ public partial class UML_Events : Form
         InitializeComponent();
 
         // read profiles from profPath and add to the menu
-        UpdateProfileList();
+        RebuildProfileListAndMenu();
 
         // menu appearance
         menuStrip1.Renderer = new CustomRenderer();
+        menuLoad.DropDown.Renderer = new CustomRenderer();
         ((ToolStripDropDownMenu)menuLoad.DropDown).ShowImageMargin = false;
         ((ToolStripDropDownMenu)menuSave.DropDown).ShowImageMargin = false;
         ((ToolStripDropDownMenu)menuHelp.DropDown).ShowImageMargin = false;
@@ -44,7 +45,7 @@ public partial class UML_Events : Form
         countdown--;
         if (countdown == 0 && invalidated)
         {
-            ArrangeBoxesOnGrid();
+            if (grid) ArrangeBoxesOnGrid();
             pictureBox1.Invalidate();
         }
     }

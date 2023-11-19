@@ -14,6 +14,7 @@ public class CustomColors : ProfessionalColorTable
     public override Color MenuItemSelectedGradientEnd => Color.FromArgb(69, 69, 77);
     public override Color MenuItemPressedGradientBegin => Color.FromArgb(69, 69, 77);
     public override Color MenuItemPressedGradientEnd => Color.FromArgb(69, 69, 77);
+    public override Color ToolStripDropDownBackground => Color.FromArgb(69, 69, 77);
 }
 
 partial class UML_Events
@@ -81,6 +82,7 @@ partial class UML_Events
             return;
         }
 
+        // add to menu
         int ind = menuLoadCollection.DropDownItems.Count;
         ToolStripMenuItem menuItem = new()
         {
@@ -93,10 +95,11 @@ partial class UML_Events
 
         menuLoadCollection.DropDownItems.Add(menuItem);
 
+        // add to profiles
         profiles.Add(prof);
     }
 
-    void UpdateProfileList()  // <----------- separate adding to menu and profiles, figure positioning issues
+    void RebuildProfileListAndMenu()
     {
         profiles.Clear();
         menuLoadCollection.DropDownItems.Clear();
