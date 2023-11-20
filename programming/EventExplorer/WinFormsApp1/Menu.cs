@@ -39,16 +39,6 @@ partial class UML_Events
         AddProfile(prof);
     }
 
-    private void menuLoadCollection_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void menuLoadOpen_Click(object sender, EventArgs e)
-    {
-
-    }
-
     void ApplyProfile(string pname)
     {
         var prof = profiles.Find(p => p.Name == pname);

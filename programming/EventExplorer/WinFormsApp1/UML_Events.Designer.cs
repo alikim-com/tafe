@@ -100,7 +100,6 @@ partial class UML_Events
         menuLoadOpen.Name = "menuLoadOpen";
         menuLoadOpen.Size = new Size(165, 22);
         menuLoadOpen.Text = "Open layout...";
-        menuLoadOpen.Click += menuLoadOpen_Click;
         // 
         // menuLoadCollection
         // 
@@ -109,7 +108,6 @@ partial class UML_Events
         menuLoadCollection.Name = "menuLoadCollection";
         menuLoadCollection.Size = new Size(165, 22);
         menuLoadCollection.Text = "Layout collection";
-        menuLoadCollection.Click += menuLoadCollection_Click;
         // 
         // menuSave
         // 

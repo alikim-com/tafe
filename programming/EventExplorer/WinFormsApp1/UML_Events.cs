@@ -109,6 +109,9 @@ public partial class UML_Events : Form
             // find events
             box.events = FindEvents(cleanCode);
 
+            // find events
+            box.triggers = FindTriggers(cleanCode);
+
             // find subscriptions 
             box.subs = FindSubscriptions(cleanCode);
 
@@ -144,6 +147,28 @@ public partial class UML_Events : Form
             }
         }
         return cls;
+    }
+
+    static Dictionary<Item, Item> FindTriggers(string inp)
+    {
+        // EM.Raise(EM.Evt.ConfigFinished, new { }, new EventArgs());
+        // EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { cfgEndedLabel, Info.None });
+        // EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { e }));
+
+        string triggerPattern = @"Raise\((\w+)\.(\w+)\.(\w+),(.*?),\s*(.*?[^,\s])\s*\);";
+
+        MatchCollection matches = Regex.Matches(StripComments(inp), triggerPattern, RegexOptions.Singleline);
+
+        Dictionary<Item, Item> trig = new();
+        foreach (Match match in matches.Cast<Match>())
+        {
+            if (match.Groups.Count == 4)
+                trig.Add(
+                    new(match.Groups[1].Value, match.Groups[2].Value + match.Groups[3].Value),
+                    new(match.Groups[1].Value, match.Groups[2].Value + match.Groups[3].Value)
+                );
+        }
+        return trig;
     }
 
     static Dictionary<Item, List<Item>> FindSubscriptions(string inp)
@@ -431,6 +456,8 @@ public class ClassBox
 
     public Dictionary<Item, List<Item>> subs = new();
 
+    public Dictionary<Item, Item> triggers = new();
+
     public Action<Graphics> Draw;
 
     readonly bool autoSize = true;
@@ -473,14 +500,13 @@ public class ClassBox
         {
             if (!autoSize) return;
 
-            if (sz.Width > maxSize.Width) maxSize.Width = sz.Width + pos.X;
-
+            if (pos.X + sz.Width > maxSize.Width) maxSize.Width = sz.Width + pos.X;
             if (pos.Y + sz.Height > maxSize.Height) maxSize.Height = sz.Height + pos.Y;
         }
 
         // events
         Size sz = new(0, 0);
-        Point curPos = pos.Add(20, 30); // check events + SUBS
+        Point curPos = pos.Add(20, 30);
         foreach (var evt in events)
         {
             curPos.Y += sz.Height + 5;
@@ -535,10 +561,39 @@ public class ClassBox
             }
             if (evt == null)
             {
-                Utils.Msg($"ClassBox.Draw : SUB for unknown event '{sub.Key}'");
+                Utils.Msg($"ClassBox.FirstDraw : SUB for unknown event '{sub.Key}'");
             }
         }
 
+        // triggers
+        sz = new(0, 0);
+        if (subs.Count > 0) curPos.Y += 15;
+
+        foreach (var trig in triggers)
+        {
+            Item? evt = null;
+            for (int i = 0; i < UML_Events.boxes.Count; i++)
+            {
+                var events = UML_Events.boxes[i].events;
+                evt = events.Find(evt => evt.name == trig.subName);
+                if (evt == null) continue;
+
+                trig.color = evt.color;
+                trig.offName = curPos.Sub(pos);
+
+                sz = UML_Events.MeasureText(fntEvt, $"{trig.name}.{trig.subName}");
+                UpdateSize(sz, trig.offName);
+
+                curPos.Y += sz.Height;
+                break;
+            }
+            if (evt == null)
+            {
+                Utils.Msg($"ClassBox.FirstDraw : trigger for unknown event '{trig.subName}'");
+            }
+        }
+
+        // schedule repaint
         bool updatePaintCheck = false;
         if (autoSize)
         {
@@ -594,5 +649,9 @@ public class ClassBox
                 break;
             }
         }
+
+        // triggers
+        foreach(var trig in triggers)
+            UML_Events.DrawText(g, trig.color, fntEvt, $"{trig.name}.{trig.subName}", pos.Add(trig.offName));
     }
 }
