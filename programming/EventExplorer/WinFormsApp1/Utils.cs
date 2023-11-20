@@ -1,16 +1,64 @@
 ﻿
 namespace utils;
 
+using System.Collections;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 public class Utils
 {
-    static public void Msg(object obj) => MessageBox.Show(obj.ToString());
+    static public void Msg(object obj)
+    {
+        string outp = "";
+
+        var type = obj.GetType();
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+        {
+            Type[] genArgs = type.GetGenericArguments();
+            Type keyType = genArgs[0];
+            Type valueType = genArgs[1];
+            if (
+            keyType.GetMethod("ToString")?.DeclaringType != typeof(object) &&
+            valueType.GetMethod("ToString")?.DeclaringType != typeof(object)
+            ) {
+                dynamic genDict = (dynamic)obj;
+                foreach (var rec in genDict)
+                    outp += $"{rec.Key}: {rec.Value}";
+            }
+
+        } else {
+            outp = obj.ToString() ?? "";
+        }
+        if(outp != "") MessageBox.Show(outp);
+    }
 
     static public void Msg(object[] obj)
     {
         foreach (var o in obj)
             MessageBox.Show(o.ToString());
+    }
+
+    static public string StripComments(string inp)
+    {
+        var blockComments = @"/\*(.*?)\*/";
+        var lineComments = @"//(.*?)\r?\n";
+        var strings = @"""((\\[^\n]|[^""\n])*)""";
+        var verbatimStrings = @"@(""[^""]*"")+";
+
+        return
+        Regex.Replace
+        (
+            inp,
+            blockComments + "|" + lineComments + "|" + strings + "|" + verbatimStrings,
+            me =>
+            {
+                if (me.Value.StartsWith("/*") || me.Value.StartsWith("//"))
+                    return me.Value.StartsWith("//") ? Environment.NewLine : "";
+
+                return me.Value;
+            },
+            RegexOptions.Singleline
+        );
     }
 
     static public string ReadFile(string path, string name)

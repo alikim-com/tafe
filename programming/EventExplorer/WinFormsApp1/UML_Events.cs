@@ -12,7 +12,7 @@ public partial class UML_Events : Form
     static public readonly List<ClassBox> boxes = new();
 
     static Point topLeft = new(10, 10);
-    static Size boxClientDef = new(170, 180);
+    static Size boxClientDef = new(170, 100);
     static Size boxMargin = new(20, 20);
 
     public UML_Events()
@@ -104,7 +104,7 @@ public partial class UML_Events : Form
         {
             string code = Utils.ReadFile(box.fpath, box.fname);
 
-            string cleanCode = StripComments(code);
+            string cleanCode = Utils.StripComments(code);
 
             // find events
             box.events = FindEvents(cleanCode);
@@ -115,6 +115,7 @@ public partial class UML_Events : Form
             // find subscriptions 
             box.subs = FindSubscriptions(cleanCode);
 
+            // find classes
             box.cls = FindClasses(cleanCode);
             if (box.name == "PanelWrapper")
             {
@@ -135,7 +136,7 @@ public partial class UML_Events : Form
     static List<Item> FindClasses(string inp)
     {
         string clsPattern = @"class\s+(\w+)";
-        MatchCollection matches = Regex.Matches(StripComments(inp), clsPattern, RegexOptions.Singleline);
+        MatchCollection matches = Regex.Matches(inp, clsPattern, RegexOptions.Singleline);
 
         List<Item> cls = new();
 
@@ -149,23 +150,23 @@ public partial class UML_Events : Form
         return cls;
     }
 
-    static Dictionary<Item, Item> FindTriggers(string inp)
+    static List<KeyValuePair<Item, Item>> FindTriggers(string inp)
     {
         // EM.Raise(EM.Evt.ConfigFinished, new { }, new EventArgs());
         // EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { cfgEndedLabel, Info.None });
         // EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { e }));
 
-        string triggerPattern = @"Raise\((\w+)\.(\w+)\.(\w+),(.*?),\s*(.*?[^,\s])\s*\);";
+        string triggerPattern = @"Raise\((\w+)\.(\w+)\.(\w+),\s*(.*?),\s*(.*?[^,\s])\s*\);";
 
-        MatchCollection matches = Regex.Matches(StripComments(inp), triggerPattern, RegexOptions.Singleline);
+        MatchCollection matches = Regex.Matches(inp, triggerPattern, RegexOptions.Singleline);
 
-        Dictionary<Item, Item> trig = new();
+        List<KeyValuePair<Item, Item>> trig = new(); // keys are not unique
         foreach (Match match in matches.Cast<Match>())
         {
-            if (match.Groups.Count == 4)
-                trig.Add(
+            if (match.Groups.Count == 6)
+                trig.Add(new KeyValuePair<Item, Item>(
                     new(match.Groups[1].Value, match.Groups[2].Value + match.Groups[3].Value),
-                    new(match.Groups[1].Value, match.Groups[2].Value + match.Groups[3].Value)
+                    new(match.Groups[4].Value, match.Groups[5].Value))
                 );
         }
         return trig;
@@ -173,22 +174,37 @@ public partial class UML_Events : Form
 
     static Dictionary<Item, List<Item>> FindSubscriptions(string inp)
     {
-        //EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
+        // EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
+        // EM.Subscribe(EM.Evt.AIMoved, AIMoved);
 
-        string subPattern = @"Subscribe\((\w+)\.(\w+)\.(\w+)\s*,\s*(\w+)\.(\w+)\);";
+        string subPattern = @"Subscribe\((\w+)\.(\w+)\.(\w+)\s*,\s*(\w+\.?\w*)\);";
 
-        MatchCollection matches = Regex.Matches(StripComments(inp), subPattern, RegexOptions.Singleline);
+        MatchCollection matches = Regex.Matches(inp, subPattern, RegexOptions.Singleline);
 
         Dictionary<Item, List<Item>> subs = new();
         foreach (Match match in matches.Cast<Match>())
         {
-            if (match.Groups.Count == 6)
+            if (match.Groups.Count == 5)
             {
                 var key = new Item(match.Groups[1].Value, match.Groups[2].Value + match.Groups[3].Value);
 
                 if (!subs.ContainsKey(key)) subs.Add(key, new List<Item>());
 
-                var val = new Item(match.Groups[4].Value, match.Groups[5].Value);
+                var arr = match.Groups[4].Value.Split(".");
+                string name;
+                string subName;
+                if (arr.Length == 1)
+                {
+                    name = "this";
+                    subName = arr[0];
+
+                }
+                else
+                {
+                    name = arr[0];
+                    subName = arr[1];
+                }
+                var val = new Item(name, subName);
 
                 subs[key].Add(val);
             }
@@ -204,7 +220,7 @@ public partial class UML_Events : Form
         string eventTypePattern = @"event\s+(EventHandler<.*?>+)\s*(\w+)";
         string eventPattern = @"event\s+(EventHandler)\s+(\w+)";
 
-        MatchCollection matches = Regex.Matches(StripComments(inp), @$"(?:{eventTypePattern})|(?:{eventPattern})", RegexOptions.Singleline);
+        MatchCollection matches = Regex.Matches(inp, @$"(?:{eventTypePattern})|(?:{eventPattern})", RegexOptions.Singleline);
 
         List<Item> evt = new();
         foreach (Match match in matches.Cast<Match>())
@@ -239,7 +255,7 @@ public partial class UML_Events : Form
                     {
                         if (boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
                         {
-                            DrawLineItemToBox(g, boxFrom.pos.Add(itm.offName).Add(-3, 6), boxTo.Anchor, itm.color, 1);
+                            DrawLineItemToBox(g, boxFrom.pos.Add(itm.offName).Add(-3, 6), boxTo.Anchor, itm.color, 1, 10);
                         }
                     }
                 }
@@ -264,11 +280,13 @@ public partial class UML_Events : Form
         return res;
     }
 
-    static public void DrawLineItemToBox(Graphics g, Point start, ClassBox._anchor ends, Color color, int thick)
+    static public void DrawLineItemToBox(Graphics g, Point start, ClassBox._anchor ends, Color color, int thick, int arrowSize = 0)
     {
         Point end = ClosestAnchor(start, ends);
-        DrawLine(g, color, thick, start, end);
-        //Msg($"{start} -> {end}");
+        if (arrowSize == 0)
+            DrawLine(g, color, thick, start, end);
+        else
+            DrawArrow(g, color, thick, start, end, arrowSize);
     }
 
     static public void DrawText(Graphics g, Color color, Font font, string text, Point location)
@@ -326,29 +344,6 @@ public partial class UML_Events : Form
         arrowhead[2] = new PointF(end.X - size * cosPPI, end.Y - size * sinPPI);
 
         g.FillPolygon(brush, arrowhead);
-    }
-
-    static string StripComments(string inp)
-    {
-        var blockComments = @"/\*(.*?)\*/";
-        var lineComments = @"//(.*?)\r?\n";
-        var strings = @"""((\\[^\n]|[^""\n])*)""";
-        var verbatimStrings = @"@(""[^""]*"")+";
-
-        return
-        Regex.Replace
-        (
-            inp,
-            blockComments + "|" + lineComments + "|" + strings + "|" + verbatimStrings,
-            me =>
-            {
-                if (me.Value.StartsWith("/*") || me.Value.StartsWith("//"))
-                    return me.Value.StartsWith("//") ? Environment.NewLine : "";
-
-                return me.Value;
-            },
-            RegexOptions.Singleline
-        );
     }
 }
 
@@ -456,7 +451,7 @@ public class ClassBox
 
     public Dictionary<Item, List<Item>> subs = new();
 
-    public Dictionary<Item, Item> triggers = new();
+    public List<KeyValuePair<Item, Item>> triggers = new();
 
     public Action<Graphics> Draw;
 
@@ -571,25 +566,40 @@ public class ClassBox
 
         foreach (var trig in triggers)
         {
+            var ce = trig.Key; // event class name + event name
+            var arg = trig.Value; // 2nd + 3rd raise call arguments
+
             Item? evt = null;
             for (int i = 0; i < UML_Events.boxes.Count; i++)
             {
                 var events = UML_Events.boxes[i].events;
-                evt = events.Find(evt => evt.name == trig.subName);
+                evt = events.Find(evt => evt.name == ce.subName);
                 if (evt == null) continue;
 
-                trig.color = evt.color;
-                trig.offName = curPos.Sub(pos);
+                ce.color = evt.color;
+                curPos.Y += sz.Height;
+                ce.offName = curPos.Sub(pos);
 
-                sz = UML_Events.MeasureText(fntEvt, $"{trig.name}.{trig.subName}");
-                UpdateSize(sz, trig.offName);
+                sz = UML_Events.MeasureText(fntEvt, $"{ce.name}.{ce.subName}");
+                UpdateSize(sz, ce.offName);
+
+                curPos.X += 5;
+                curPos.Y += sz.Height;
+
+                arg.color = evt.color;
+                arg.offName = curPos.Sub(pos);
+
+                sz = UML_Events.MeasureText(fntEType, $"({arg.name}, {arg.subName})");
+                UpdateSize(sz, arg.offName);
 
                 curPos.Y += sz.Height;
+                curPos.X -= 5;
+
                 break;
             }
             if (evt == null)
             {
-                Utils.Msg($"ClassBox.FirstDraw : trigger for unknown event '{trig.subName}'");
+                Utils.Msg($"ClassBox.FirstDraw : trigger for unknown event '{ce.subName}'");
             }
         }
 
@@ -634,24 +644,19 @@ public class ClassBox
         // subscriptions
         foreach (var sub in subs)
         {
-            Item? evt = null;
-            for (int i = 0; i < UML_Events.boxes.Count; i++)
-            {
-                var events = UML_Events.boxes[i].events;
-                evt = events.Find(evt => evt.name == sub.Key.subName);
-                if (evt == null) continue;
+            UML_Events.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
 
-                UML_Events.DrawText(g, sub.Key.color, fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}", pos.Add(sub.Key.offName));
-
-                foreach (var s in sub.Value)
-                    UML_Events.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offName));
-
-                break;
-            }
+            foreach (var s in sub.Value)
+                UML_Events.DrawText(g, s.color, fntEType, $"{s.name}.{s.subName}", pos.Add(s.offName));
         }
 
         // triggers
-        foreach(var trig in triggers)
-            UML_Events.DrawText(g, trig.color, fntEvt, $"{trig.name}.{trig.subName}", pos.Add(trig.offName));
+        foreach (var trig in triggers)
+        {
+            var ce = trig.Key; // event class name + event name
+            var arg = trig.Value; // 2nd + 3rd raise call arguments
+            UML_Events.DrawText(g, ce.color, fntEvt, $"TRG {ce.name}.{ce.subName}", pos.Add(ce.offName));
+            UML_Events.DrawText(g, arg.color, fntEType, $"({arg.name}, {arg.subName})", pos.Add(arg.offName));
+        }
     }
 }
