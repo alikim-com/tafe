@@ -235,7 +235,7 @@ public partial class UML_Events : Form
         return evt;
     }
 
-    void pictureBox1_Paint(object sender, PaintEventArgs e)
+    void PictureBox1_Paint(object sender, PaintEventArgs e)
     {
         Graphics g = e.Graphics; // disposed by the system
 
@@ -263,7 +263,7 @@ public partial class UML_Events : Form
         }
     }
 
-    static public Point ClosestAnchor(Point start, ClassBox._anchor ends)
+    static public Point ClosestAnchor(Point start, ClassBox.anchor ends)
     {
         Point res = new(0, 0);
         int minSQDist = int.MaxValue;
@@ -280,7 +280,7 @@ public partial class UML_Events : Form
         return res;
     }
 
-    static public void DrawLineItemToBox(Graphics g, Point start, ClassBox._anchor ends, Color color, int thick, int arrowSize = 0)
+    static public void DrawLineItemToBox(Graphics g, Point start, ClassBox.anchor ends, Color color, int thick, int arrowSize = 0)
     {
         Point end = ClosestAnchor(start, ends);
         if (arrowSize == 0)
@@ -318,32 +318,37 @@ public partial class UML_Events : Form
         g.DrawLine(pen, start, end);
     }
 
-    static public void DrawArrow(Graphics g, Color color, int thick, Point start, Point end, int head)
+    static public void DrawArrow(Graphics g, Color color, int thick, Point start, Point end, int arrowHeight)
     {
         using Pen pen = new(color, thick);
         using Brush brush = new SolidBrush(color);
 
-        PaintArrow(g, pen, brush, start, end, head);
+        PaintArrow(g, pen, brush, start, end, new SizeF(0.66f * arrowHeight, arrowHeight));
     }
 
-    static void PaintArrow(Graphics g, Pen pen, Brush brush, Point start, Point end, int size)
+    static void PaintArrow(Graphics g, Pen pen, Brush brush, Point start, Point end, SizeF arrowSize)
     {
         g.DrawLine(pen, start, end);
 
-        PointF[] arrowhead = new PointF[3];
-        double angle = Math.Atan2(end.Y - start.Y, end.X - start.X);
-        double PIo6 = Math.PI / 6;
-        double angMPI = angle - PIo6;
-        double angPPI = angle + PIo6;
-        float sinMPI = (float)Math.Sin(angMPI);
-        float sinPPI = (float)Math.Sin(angPPI);
-        float cosMPI = (float)Math.Cos(angMPI);
-        float cosPPI = (float)Math.Cos(angPPI);
-        arrowhead[0] = new PointF(end.X, end.Y);
-        arrowhead[1] = new PointF(end.X - size * cosMPI, end.Y - size * sinMPI);
-        arrowhead[2] = new PointF(end.X - size * cosPPI, end.Y - size * sinPPI);
+        Point v = start.Sub(end);
+        float dist = (float)Math.Sqrt(v.X * v.X + v.Y * v.Y);
+        float recDist = 1 / dist;
+        float t = arrowSize.Height * recDist; // parametric line eq
+        float px = end.X + v.X * t;
+        float py = end.Y + v.Y * t;
+        float rx = -v.Y;
+        float ry = v.X;
+        float halfWidth = 0.5f * arrowSize.Width * recDist;
+        float offX = rx * halfWidth;
+        float offY = ry * halfWidth;
 
-        g.FillPolygon(brush, arrowhead);
+        PointF[] arrowHead = new PointF[] {
+            new PointF(end.X, end.Y),
+            new PointF(px - offX, py - offY),
+            new PointF(px + offX, py + offY),
+        };
+
+        g.FillPolygon(brush, arrowHead);
     }
 }
 
@@ -417,7 +422,7 @@ public class ClassBox
     public Point pos;
     public Size size;
 
-    public struct _anchor
+    public struct anchor
     {
         public Point top;
         public Point bottom;
@@ -425,13 +430,13 @@ public class ClassBox
         public Point right;
     }
 
-    public _anchor Anchor
+    public anchor Anchor
     {
         get
         {
             int hw = size.Width / 2;
             int hh = size.Height / 2;
-            return new _anchor
+            return new anchor
             {
                 top = pos.Add(hw, 0),
                 bottom = pos.Add(hw, size.Height),
@@ -580,7 +585,7 @@ public class ClassBox
                 curPos.Y += sz.Height;
                 ce.offName = curPos.Sub(pos);
 
-                sz = UML_Events.MeasureText(fntEvt, $"{ce.name}.{ce.subName}");
+                sz = UML_Events.MeasureText(fntEvt, $"TRG {ce.name}.{ce.subName}");
                 UpdateSize(sz, ce.offName);
 
                 curPos.X += 5;

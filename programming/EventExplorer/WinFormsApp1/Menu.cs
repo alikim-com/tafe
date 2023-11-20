@@ -23,14 +23,14 @@ partial class UML_Events
 
     List<Profile> profiles = new(); 
 
-    private void menuHelpAbout_Click(object sender, EventArgs e)
+    private void MenuHelpAbout_Click(object sender, EventArgs e)
     {
         aboutForm ??= new AboutForm();
 
         if (aboutForm.ShowDialog(this) == DialogResult.OK) return;
     }
 
-    private void menuSaveAs_Click(object sender, EventArgs e)
+    private void MenuSaveAs_Click(object sender, EventArgs e)
     {
         string layoutName = menuLayout.Text.Trim();
         layoutName = string.IsNullOrEmpty(layoutName) ? "Default" : layoutName;
@@ -66,10 +66,17 @@ partial class UML_Events
 
     void AddProfile(Profile prof)
     {
-        if(menuLoadCollection.DropDownItems.OfType<ToolStripMenuItem>().Any(itm => itm.Text == prof.Name))
+        foreach(var obj in menuLoadCollection.DropDownItems)
         {
-            Utils.Msg($"UML_Events.AddProfile : layout '{prof.Name}' menu item already exists");
-            return;
+            if (obj is ToolStripMenuItem item && item.Text == prof.Name) {
+                
+                menuLoadCollection.DropDownItems.Remove(item);
+
+                var existingProfile = profiles.Find(p => p.Name == prof.Name);
+                if (existingProfile != null) profiles.Remove(existingProfile);
+
+                break;
+            }
         }
 
         // add to menu

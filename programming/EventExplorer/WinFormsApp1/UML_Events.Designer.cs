@@ -53,10 +53,10 @@ partial class UML_Events
         pictureBox1.Dock = DockStyle.Fill;
         pictureBox1.Location = new Point(0, 24);
         pictureBox1.Name = "pictureBox1";
-        pictureBox1.Size = new Size(1600, 876);
+        pictureBox1.Size = new Size(1500, 876);
         pictureBox1.TabIndex = 0;
         pictureBox1.TabStop = false;
-        pictureBox1.Paint += pictureBox1_Paint;
+        pictureBox1.Paint += PictureBox1_Paint;
         pictureBox1.MouseDown += pictureBox1_MouseDown;
         pictureBox1.MouseLeave += pictureBox1_MouseLeave;
         pictureBox1.MouseMove += pictureBox1_MouseMove;
@@ -122,7 +122,7 @@ partial class UML_Events
         menuSaveAs.Name = "menuSaveAs";
         menuSaveAs.Size = new Size(157, 22);
         menuSaveAs.Text = "Save layout as...";
-        menuSaveAs.Click += menuSaveAs_Click;
+        menuSaveAs.Click += MenuSaveAs_Click;
         // 
         // menuHelp
         // 
@@ -138,7 +138,7 @@ partial class UML_Events
         menuHelpAbout.Name = "menuHelpAbout";
         menuHelpAbout.Size = new Size(107, 22);
         menuHelpAbout.Text = "About";
-        menuHelpAbout.Click += menuHelpAbout_Click;
+        menuHelpAbout.Click += MenuHelpAbout_Click;
         // 
         // menuLabel
         // 
@@ -173,7 +173,7 @@ partial class UML_Events
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Black;
-        ClientSize = new Size(1600, 900);
+        ClientSize = new Size(1500, 900);
         Controls.Add(label1);
         Controls.Add(pictureBox1);
         Controls.Add(menuStrip1);
