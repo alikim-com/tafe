@@ -7,3 +7,8 @@ A WinForms application designed for drawing a custom UML-like diagram that visua
  - Saving & loading information via JsonSerializer
  - Extraction of event-related information from source files using Regex
 
+ ### How to
+ - Run the executable
+ - For a clearer view of the event diagram, use the menu: ```Load``` > ```Layout collection``` > ```Right fan```
+ - Drag & drop boxes around if needed
+

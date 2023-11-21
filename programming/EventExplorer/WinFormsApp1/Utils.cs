@@ -21,21 +21,33 @@ public class Utils
             keyType.GetMethod("ToString")?.DeclaringType != typeof(object) &&
             valueType.GetMethod("ToString")?.DeclaringType != typeof(object)
             ) {
-                dynamic genDict = (dynamic)obj;
-                foreach (var rec in genDict)
+                dynamic dynObj = (dynamic)obj;
+                foreach (var rec in dynObj)
                     outp += $"{rec.Key}: {rec.Value}";
             }
 
+        } else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)) {
+
+            Type[] genArgs = type.GetGenericArguments();
+            Type itmType = genArgs[0];
+            if (itmType.GetMethod("ToString")?.DeclaringType != typeof(object))
+            {
+                dynamic dynObj = (dynamic)obj;
+                foreach (var rec in dynObj)
+                    outp += rec.ToString();
+            }
+
         } else {
+
             outp = obj.ToString() ?? "";
         }
+
         if(outp != "") MessageBox.Show(outp);
     }
 
     static public void Msg(object[] obj)
     {
-        foreach (var o in obj)
-            MessageBox.Show(o.ToString());
+        foreach (var o in obj) Msg(o);
     }
 
     static public string StripComments(string inp)

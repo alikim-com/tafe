@@ -49,7 +49,7 @@ partial class UML_Events
         SuspendLayout();
         // 
         // pictureBox1
-        // 
+        //
         pictureBox1.Dock = DockStyle.Fill;
         pictureBox1.Location = new Point(0, 24);
         pictureBox1.Name = "pictureBox1";
@@ -57,10 +57,10 @@ partial class UML_Events
         pictureBox1.TabIndex = 0;
         pictureBox1.TabStop = false;
         pictureBox1.Paint += PictureBox1_Paint;
-        pictureBox1.MouseDown += pictureBox1_MouseDown;
-        pictureBox1.MouseLeave += pictureBox1_MouseLeave;
-        pictureBox1.MouseMove += pictureBox1_MouseMove;
-        pictureBox1.MouseUp += pictureBox1_MouseUp;
+        pictureBox1.MouseDown += PictureBox1_MouseDown;
+        pictureBox1.MouseLeave += PictureBox1_MouseLeave;
+        pictureBox1.MouseMove += PictureBox1_MouseMove;
+        pictureBox1.MouseUp += PictureBox1_MouseUp;
         // 
         // label1
         // 
@@ -80,7 +80,7 @@ partial class UML_Events
         menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp, menuLabel, menuDummy, menuLayout });
         menuStrip1.Location = new Point(0, 0);
         menuStrip1.Name = "menuStrip1";
-        menuStrip1.Size = new Size(1600, 24);
+        menuStrip1.Size = new Size(1500, 24);
         menuStrip1.TabIndex = 2;
         menuStrip1.Text = "menuMain";
         // 

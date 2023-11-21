@@ -5,9 +5,9 @@ namespace WinformsUMLEvents;
 
 public partial class UML_Events : Form
 {
-    static string curDir = Directory.GetCurrentDirectory();
-    static string srcPath = Path.GetFullPath(Path.Combine(curDir, "../../../source/"));
-    static string profPath = Path.GetFullPath(Path.Combine(curDir, "../../../profiles/"));
+    static readonly string curDir = Directory.GetCurrentDirectory();
+    static readonly string srcPath = Path.GetFullPath(Path.Combine(curDir, "../../../source/"));
+    static readonly string profPath = Path.GetFullPath(Path.Combine(curDir, "../../../profiles/"));
 
     static public readonly List<ClassBox> boxes = new();
 
@@ -239,13 +239,17 @@ public partial class UML_Events : Form
     {
         Graphics g = e.Graphics; // disposed by the system
 
-        foreach (var box in boxes) box.Draw(g);
+        foreach (var box in boxes)
+        {
+            box.Draw(g);
+            box.binds.Clear();
+        }
 
-        // connect subs to events
         foreach (var boxFrom in boxes)
         {
             if (boxFrom.firstDraw) return;
 
+            // connect subs to events
             foreach (var sub in boxFrom.subs)
             {
                 foreach (var itm in sub.Value)
@@ -255,17 +259,97 @@ public partial class UML_Events : Form
                     {
                         if (boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
                         {
-                            DrawLineItemToBox(g, boxFrom.pos.Add(itm.offName).Add(-3, 6), boxTo.Anchor, itm.color, 1, 10);
+                            DrawLineItemToBox(
+                                g,
+                                boxFrom.pos.Add(itm.offName).Add(-3, 6),
+                                boxTo.Anchor,
+                                boxFrom.binds,
+                                boxTo.binds,
+                                itm.color,
+                                1,
+                                10,
+                                10);
                         }
                     }
                 }
             }
+
+            // connect triggers to subs
+            foreach (var trg in boxFrom.triggers)
+            {
+                foreach (var boxTo in boxes)
+                {
+                    foreach (var sub in boxTo.subs)
+                    {
+                        if (sub.Key.Equals(trg.Key))
+                        {
+                            DrawLineBoxToBox(
+                                g,
+                                boxFrom.Anchor,
+                                boxTo.Anchor,
+                                boxFrom.binds,
+                                boxTo.binds,
+                                trg.Key.color,
+                                1,
+                                10,
+                                10);
+                        }
+                    }
+
+                }
+
+            }
         }
     }
 
-    static public Point ClosestAnchor(Point start, ClassBox.anchor ends)
+    public enum SideType
+    {
+        None,
+        Horizontal,
+        Vertical
+    }
+
+    public struct sideInfo
+    {
+        public SideType start;
+        public SideType end;
+    }
+
+    static public KeyValuePair<Point, Point> ClosestAnchor(ClassBox.anchor starts, ClassBox.anchor ends, out sideInfo align)
+    {
+        Point s = new();
+        Point e = new();
+
+        align = new sideInfo { start = SideType.None, end = SideType.None };
+
+        int minSQDist = int.MaxValue;
+        var startPoints = new Point[] { starts.top, starts.bottom, starts.left, starts.right };
+        var endPoints = new Point[] { ends.top, ends.bottom, ends.left, ends.right };
+
+        foreach (var start in startPoints)
+        {
+            foreach (var end in endPoints)
+            {
+                int sq = end.SquaredDistanceTo(start);
+                if (sq < minSQDist)
+                {
+                    minSQDist = sq;
+                    s = start;
+                    e = end;
+                    align.start = start == starts.top || start == starts.bottom ? SideType.Horizontal : SideType.Vertical;
+                    align.end = end == ends.top || end == ends.bottom ? SideType.Horizontal : SideType.Vertical;
+                }
+            }
+        }
+        return new KeyValuePair<Point, Point>(s, e);
+    }
+
+    static public Point ClosestAnchor(Point start, ClassBox.anchor ends, out sideInfo align)
     {
         Point res = new(0, 0);
+
+        align = new sideInfo { start = SideType.None, end = SideType.None };
+
         int minSQDist = int.MaxValue;
         var endPoints = new Point[] { ends.top, ends.bottom, ends.left, ends.right };
         foreach (var end in endPoints)
@@ -275,18 +359,104 @@ public partial class UML_Events : Form
             {
                 minSQDist = sq;
                 res = end;
+                align.end = end == ends.top || end == ends.bottom ? SideType.Horizontal : SideType.Vertical;
             }
         }
         return res;
     }
 
-    static public void DrawLineItemToBox(Graphics g, Point start, ClassBox.anchor ends, Color color, int thick, int arrowSize = 0)
+    static int SpreadBinds(int alignState, int amp)
     {
-        Point end = ClosestAnchor(start, ends);
+        return amp * (2 * (alignState % 2) - 1) * alignState / 2;
+    }
+
+    static public void DrawLineBoxToBox(
+        Graphics g,
+        ClassBox.anchor starts,
+        ClassBox.anchor ends,
+        List<Point> fromBinds,
+        List<Point> toBinds,
+        Color color,
+        int thick,
+        int arrowSize = 0,
+        int bindSpread = 10)
+    {
+        (Point startBind, Point endBind) = ClosestAnchor(starts, ends, out sideInfo align);
+
+        // find a free bind on the perimeter
+        int cnt = 1;
+        while (fromBinds.Contains(startBind) && cnt < 100)
+        {
+            if(align.start == SideType.Horizontal)
+                startBind.X += SpreadBinds(cnt, bindSpread);
+
+            else if (align.start == SideType.Vertical)
+                startBind.Y += SpreadBinds(cnt, bindSpread);
+            cnt++;
+        }
+        fromBinds.Add(startBind);
+
+        cnt = 1;
+        while (toBinds.Contains(endBind) && cnt < 100)
+        {
+            if (align.end == SideType.Horizontal)
+                endBind.X += SpreadBinds(cnt, bindSpread);
+
+            else if (align.end == SideType.Vertical)
+                endBind.Y += SpreadBinds(cnt, bindSpread);
+            cnt++;
+        }
+        toBinds.Add(endBind);
+
         if (arrowSize == 0)
-            DrawLine(g, color, thick, start, end);
+            DrawLine(g, color, thick, startBind, endBind);
         else
-            DrawArrow(g, color, thick, start, end, arrowSize);
+            DrawArrow(g, color, thick, startBind, endBind, arrowSize);
+    }
+
+    static public void DrawLineItemToBox(
+        Graphics g,
+        Point start,
+        ClassBox.anchor ends,
+        List<Point> fromBinds,
+        List<Point> toBinds,
+        Color color,
+        int thick,
+        int arrowSize = 0,
+        int bindSpread = 10)
+    {
+        Point startBind = start;
+        Point endBind = ClosestAnchor(start, ends, out sideInfo align);
+
+        // find a free bind on the perimeter
+        int cnt = 1;
+        while (fromBinds.Contains(startBind) && cnt < 100)
+        {
+            if (align.start == SideType.Horizontal)
+                startBind.X += SpreadBinds(cnt, bindSpread);
+
+            else if (align.start == SideType.Vertical)
+                startBind.Y += SpreadBinds(cnt, bindSpread);
+            cnt++;
+        }
+        fromBinds.Add(startBind);
+
+        cnt = 1;
+        while (toBinds.Contains(endBind) && cnt < 100)
+        {
+            if (align.end == SideType.Horizontal)
+                endBind.X += SpreadBinds(cnt, bindSpread);
+
+            else if (align.end == SideType.Vertical)
+                endBind.Y += SpreadBinds(cnt, bindSpread);
+            cnt++;
+        }
+        toBinds.Add(endBind);
+
+        if (arrowSize == 0)
+            DrawLine(g, color, thick, startBind, endBind);
+        else
+            DrawArrow(g, color, thick, startBind, endBind, arrowSize);
     }
 
     static public void DrawText(Graphics g, Color color, Font font, string text, Point location)
@@ -430,6 +600,9 @@ public class ClassBox
         public Point right;
     }
 
+    /// <summary>
+    /// Main anchor points on each side
+    /// </summary>
     public anchor Anchor
     {
         get
@@ -445,6 +618,12 @@ public class ClassBox
             };
         }
     }
+
+    /// <summary>
+    /// Currently occupied anchor points on the box's perimeter<br/>
+    /// generated by SpeadBinds()
+    /// </summary>
+    public List<Point> binds = new();
 
     public readonly string fpath;
     public readonly string fname;

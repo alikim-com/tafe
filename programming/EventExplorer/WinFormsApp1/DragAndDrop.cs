@@ -35,7 +35,7 @@ public partial class UML_Events
         return false;
     }
 
-    private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+    private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
     {
         if (e.Button == MouseButtons.Left)
         {
@@ -47,9 +47,13 @@ public partial class UML_Events
         }
     }
 
-    private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+    private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
     {
-        if (mState == MState.Up || mBox == null) return;
+        if (sender is PictureBox pbox) 
+            pbox.Cursor = DetectBox(e.Location, out ClassBox? _) ? Cursors.Hand : Cursors.Default;
+
+        if (mState == MState.Up || mBox == null) return; // "|| mBox == null" to supress CS8602
+
         Point diff = e.Location.Sub(mPos);
         mBox.pos = mBox.pos.Add(diff);
         mPos = e.Location;
@@ -57,12 +61,15 @@ public partial class UML_Events
 
     }
 
-    private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+    private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
     {
-        if (e.Button == MouseButtons.Left) mState = MState.Up;
+        if (e.Button == MouseButtons.Left)
+        {
+            mState = MState.Up;
+        }
     }
 
-    private void pictureBox1_MouseLeave(object sender, EventArgs e)
+    private void PictureBox1_MouseLeave(object sender, EventArgs e)
     {
         mState = MState.Up;
     }
