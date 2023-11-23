@@ -63,6 +63,26 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AILeft {
+            get {
+                object obj = ResourceManager.GetObject("AILeft", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AIRight {
+            get {
+                object obj = ResourceManager.GetObject("AIRight", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FaceLeft {
             get {
                 object obj = ResourceManager.GetObject("FaceLeft", resourceCulture);
@@ -76,6 +96,36 @@ namespace WinFormsApp1 {
         internal static System.Drawing.Bitmap FaceRight {
             get {
                 object obj = ResourceManager.GetObject("FaceRight", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap HumanLeft {
+            get {
+                object obj = ResourceManager.GetObject("HumanLeft", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap HumanRight {
+            get {
+                object obj = ResourceManager.GetObject("HumanRight", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SetupBackImg {
+            get {
+                object obj = ResourceManager.GetObject("SetupBackImg", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace WinFormsApp1;
 
@@ -30,8 +29,60 @@ public partial class AppForm : Form
         );
     }
 
+    UIColors.ColorTheme theme;
+
+    void InitializeMenu()
+    {
+        // menu appearance
+        menuStrip1.BackColor = theme.Prime;
+        menuStrip1.ForeColor = theme.Text;
+        menuStrip1.Renderer = UIRenderer.TSRenderer(theme, "ColorTableMain");
+
+        ToolStripMenuItem[] expandableItems = new[] { menuLoad, menuLoadCollection, menuSave, menuHelp };
+
+        foreach (var item in expandableItems)
+        {
+            if (item.DropDown is ToolStripDropDownMenu dropDownMenu)
+                dropDownMenu.ShowImageMargin = false;
+
+            foreach (ToolStripItem subItem in item.DropDownItems) subItem.ForeColor = theme.Text;
+        }
+
+        menuLayout.BackColor = theme.Dark;
+        menuLayout.ForeColor = theme.Text;
+        menuLayout.BorderStyle = BorderStyle.None;
+
+        menuDummy.BackColor = theme.Dark;
+        menuDummy.ForeColor = theme.Text;
+        menuDummy.BorderStyle = BorderStyle.None;
+    }
+
+    SetupForm? setupForm;
+
+    void SetupFormPopup()
+    {
+        setupForm ??= new SetupForm();
+
+        setupForm.ForeColor = theme.Text;
+        setupForm.BackColor = theme.Pitch;
+
+        /*
+                 menuLayout.BackColor = theme.Dark;
+        menuLayout.ForeColor = theme.Text;
+        menuLayout.BorderStyle = BorderStyle.None;
+
+        menuDummy.BackColor = theme.Dark;
+        menuDummy.ForeColor = theme.Text;
+        menuDummy.BorderStyle = BorderStyle.None;
+         */
+
+        if (setupForm.ShowDialog(this) == DialogResult.OK) return;
+    }
+
     public AppForm()
     {
+        theme = UIColors.Steel;
+
         EM.uiThread = this;
 
         // set the order of players turns, needed before clicking on cfg panels
@@ -48,6 +99,8 @@ public partial class AppForm : Form
 
         InitializeComponent();
 
+        InitializeMenu();
+
         // for scaling font
         lChoiceWidth = choice.Width;
         lChoiceFontSize = choice.Font.Size;
@@ -60,12 +113,12 @@ public partial class AppForm : Form
             };
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
-        
+
         // subscriptions to reset from Game.Reset()
         EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
-        if (pwLeft != null) 
+        if (pwLeft != null)
             EM.Subscribe(EM.Evt.Reset, pwLeft.ResetHandler);
-        if (pwRight != null) 
+        if (pwRight != null)
             EM.Subscribe(EM.Evt.Reset, pwRight.ResetHandler);
 
         // update labels
@@ -74,7 +127,7 @@ public partial class AppForm : Form
         // issued after game board changes 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
         // translation to board cell bgs
-        foreach (var cw in cellWrap) 
+        foreach (var cw in cellWrap)
             EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
 
         // raised by bot panels after clicking 
@@ -83,7 +136,10 @@ public partial class AppForm : Form
 
         // raised by board cells after clicking
         EM.Subscribe(EM.Evt.PlayerMoved, Game.PlayerMovedHandler);
- 
+
+        // BLOCKS: player setup pop-up 
+        SetupFormPopup();
+
         // raise reset event
         Game.Reset();
 
@@ -188,7 +244,8 @@ public partial class AppForm : Form
         public int Bottom;
     }
     private const int WM_SIZING = 0x214;
-    public enum WMSZ
+    private const int WM_NCPAINT = 0x85;
+    enum WMSZ
     {
         LEFT = 1,
         RIGHT = 2,
@@ -235,6 +292,7 @@ public partial class AppForm : Form
             float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
             choice.Font = new Font(choice.Font.FontFamily, newFontSize);
             info.Font = new Font(info.Font.FontFamily, newFontSize);
+
         }
 
         base.WndProc(ref m);

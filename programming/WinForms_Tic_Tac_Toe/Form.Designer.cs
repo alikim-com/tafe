@@ -1,4 +1,5 @@
 ﻿
+using System.Windows.Forms;
 using static WinFormsApp1.LabelManager;
 
 namespace WinFormsApp1;
@@ -42,8 +43,20 @@ partial class AppForm
         sBR = new Panel();
         choice = new Label();
         info = new Label();
+        menuStrip1 = new MenuStrip();
+        menuLoad = new ToolStripMenuItem();
+        menuLoadOpen = new ToolStripMenuItem();
+        menuLoadCollection = new ToolStripMenuItem();
+        menuSave = new ToolStripMenuItem();
+        menuSaveAs = new ToolStripMenuItem();
+        menuHelp = new ToolStripMenuItem();
+        menuHelpAbout = new ToolStripMenuItem();
+        menuLabel = new ToolStripLabel();
+        menuDummy = new ToolStripTextBox();
+        menuLayout = new ToolStripTextBox();
         tLayout.SuspendLayout();
         tSplit.SuspendLayout();
+        menuStrip1.SuspendLayout();
         SuspendLayout();
         // 
         // tLayout
@@ -174,6 +187,83 @@ partial class AppForm
         info.TabIndex = 3;
         info.TextAlign = ContentAlignment.TopCenter;
         // 
+        // menuStrip1
+        // 
+        menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp, menuLabel, menuDummy, menuLayout });
+        menuStrip1.Location = new Point(0, 0);
+        menuStrip1.Name = "menuStrip1";
+        menuStrip1.Size = new Size(1500, 24);
+        menuStrip1.TabIndex = 2;
+        menuStrip1.Text = "menuMain";
+        // 
+        // menuLoad
+        // 
+        menuLoad.DropDownItems.AddRange(new ToolStripItem[] { menuLoadOpen, menuLoadCollection });
+        menuLoad.Name = "menuLoad";
+        menuLoad.Size = new Size(45, 20);
+        menuLoad.Text = "Load";
+        // 
+        // menuLoadOpen
+        // 
+        menuLoadOpen.Name = "menuLoadOpen";
+        menuLoadOpen.Size = new Size(165, 22);
+        menuLoadOpen.Text = "Open layout...";
+        // 
+        // menuLoadCollection
+        // 
+        menuLoadCollection.Name = "menuLoadCollection";
+        menuLoadCollection.Size = new Size(165, 22);
+        menuLoadCollection.Text = "Layout collection";
+        // 
+        // menuSave
+        // 
+        menuSave.DropDownItems.AddRange(new ToolStripItem[] { menuSaveAs });
+        menuSave.Name = "menuSave";
+        menuSave.Size = new Size(43, 20);
+        menuSave.Text = "Save";
+        // 
+        // menuSaveAs
+        // 
+        menuSaveAs.Name = "menuSaveAs";
+        menuSaveAs.Size = new Size(157, 22);
+        menuSaveAs.Text = "Save layout as...";
+        //menuSaveAs.Click += MenuSaveAs_Click;
+        // 
+        // menuHelp
+        // 
+        menuHelp.DropDownItems.AddRange(new ToolStripItem[] { menuHelpAbout });
+        menuHelp.Name = "menuHelp";
+        menuHelp.Size = new Size(44, 20);
+        menuHelp.Text = "Help";
+        // 
+        // menuHelpAbout
+        // 
+        menuHelpAbout.Name = "menuHelpAbout";
+        menuHelpAbout.Size = new Size(107, 22);
+        menuHelpAbout.Text = "About";
+        //menuHelpAbout.Click += MenuHelpAbout_Click;
+        // 
+        // menuLabel
+        // 
+        menuLabel.Margin = new Padding(50, 1, 5, 2);
+        menuLabel.Name = "menuLabel";
+        menuLabel.Size = new Size(46, 17);
+        menuLabel.Text = "Layout:";
+        // 
+        // menuDummy
+        // 
+        menuDummy.Enabled = false;
+        menuDummy.Margin = new Padding(1, 0, 0, 0);
+        menuDummy.Name = "menuDummy";
+        menuDummy.Size = new Size(7, 20);
+        // 
+        // menuLayout
+        // 
+        menuLayout.Margin = new Padding(0, 0, 1, 0);
+        menuLayout.Name = "menuLayout";
+        menuLayout.Size = new Size(100, 20);
+        menuLayout.Text = "Default";
+        // 
         // AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -181,8 +271,10 @@ partial class AppForm
         BackColor = Color.FromArgb(0, 0, 0);
         BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
         BackgroundImageLayout = ImageLayout.Stretch;
-        ClientSize = new Size(400, 600);
+        ClientSize = new Size(500, 750);
         Controls.Add(tLayout);
+        Controls.Add(menuStrip1);
+        MainMenuStrip = menuStrip1;
         MaximizeBox = false;
         Name = "AppForm";
         StartPosition = FormStartPosition.CenterScreen;
@@ -190,6 +282,8 @@ partial class AppForm
         Load += FormAspect_Load;
         tLayout.ResumeLayout(false);
         tSplit.ResumeLayout(false);
+        menuStrip1.ResumeLayout(false);
+        menuStrip1.PerformLayout();
         ResumeLayout(false);
     }
 
@@ -206,4 +300,15 @@ partial class AppForm
     private Label choice;
     private Panel[,] cells;
     private Label info;
+    private MenuStrip menuStrip1;
+    private ToolStripMenuItem menuSave;
+    private ToolStripMenuItem menuLoad;
+    private ToolStripMenuItem menuHelp;
+    private ToolStripMenuItem menuLoadOpen;
+    private ToolStripMenuItem menuLoadCollection;
+    private ToolStripMenuItem menuSaveAs;
+    private ToolStripMenuItem menuHelpAbout;
+    private ToolStripLabel menuLabel;
+    private ToolStripTextBox menuLayout;
+    private ToolStripTextBox menuDummy;
 }
