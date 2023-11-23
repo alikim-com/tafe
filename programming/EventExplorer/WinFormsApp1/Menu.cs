@@ -1,27 +1,11 @@
 ﻿
 namespace WinformsUMLEvents;
 
-public class CustomRenderer : ToolStripProfessionalRenderer
-{
-    public CustomRenderer() : base(new CustomColors()) { }
-}
-
-public class CustomColors : ProfessionalColorTable
-{
-    public override Color MenuItemBorder => Color.Transparent;
-    public override Color MenuItemSelected => Color.FromArgb(69, 69, 77);
-    public override Color MenuItemSelectedGradientBegin => Color.FromArgb(69, 69, 77);
-    public override Color MenuItemSelectedGradientEnd => Color.FromArgb(69, 69, 77);
-    public override Color MenuItemPressedGradientBegin => Color.FromArgb(69, 69, 77);
-    public override Color MenuItemPressedGradientEnd => Color.FromArgb(69, 69, 77);
-    public override Color ToolStripDropDownBackground => Color.FromArgb(69, 69, 77);
-}
-
 partial class UML_Events
 {
     AboutForm? aboutForm;
 
-    List<Profile> profiles = new(); 
+    List<Profile> profiles = new();
 
     private void MenuHelpAbout_Click(object sender, EventArgs e)
     {
@@ -50,11 +34,11 @@ partial class UML_Events
 
         // update boxes from profile
         menuLayout.Text = prof.Name;
-        foreach(var pbox in prof.Boxes)
+        foreach (var pbox in prof.Boxes)
         {
             var box = boxes.Find(b => b.name == pbox.Name);
             if (box == null) continue;
-            
+
             box.pos = pbox.Pos;
             box.size = pbox.Size;
         }
@@ -66,10 +50,11 @@ partial class UML_Events
 
     void AddProfile(Profile prof)
     {
-        foreach(var obj in menuLoadCollection.DropDownItems)
+        foreach (var obj in menuLoadCollection.DropDownItems)
         {
-            if (obj is ToolStripMenuItem item && item.Text == prof.Name) {
-                
+            if (obj is ToolStripMenuItem item && item.Text == prof.Name)
+            {
+
                 menuLoadCollection.DropDownItems.Remove(item);
 
                 var existingProfile = profiles.Find(p => p.Name == prof.Name);
@@ -83,8 +68,8 @@ partial class UML_Events
         int ind = menuLoadCollection.DropDownItems.Count;
         ToolStripMenuItem menuItem = new()
         {
-            BackColor = Color.FromArgb(46, 46, 51),
-            ForeColor = Color.LightGray,
+            ForeColor = theme.Text,
+            BackColor = theme.Light,
             Name = $"menuLoadCollection{ind}",
             Text = prof.Name,
         };
@@ -109,7 +94,7 @@ partial class UML_Events
             if (prof == null) continue;
 
             AddProfile(prof);
-        }        
+        }
     }
 }
 

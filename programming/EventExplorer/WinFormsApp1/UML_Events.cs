@@ -15,20 +15,43 @@ public partial class UML_Events : Form
     static Size boxClientDef = new(170, 100);
     static Size boxMargin = new(20, 20);
 
+    UIColors.ColorTheme theme;
+
     public UML_Events()
     {
-        BackColor = Color.Black;
+
+        theme = UIColors.Steel;
+
+        BackColor = theme.Pitch;
+
         InitializeComponent();
+
+        ToolStripMenuItem[] expandableItems = new[] { menuLoad, menuLoadCollection, menuSave, menuHelp };
 
         // read profiles from profPath and add to the menu
         RebuildProfileListAndMenu();
 
         // menu appearance
-        menuStrip1.Renderer = new CustomRenderer();
-        menuLoad.DropDown.Renderer = new CustomRenderer();
-        ((ToolStripDropDownMenu)menuLoad.DropDown).ShowImageMargin = false;
-        ((ToolStripDropDownMenu)menuSave.DropDown).ShowImageMargin = false;
-        ((ToolStripDropDownMenu)menuHelp.DropDown).ShowImageMargin = false;
+        menuStrip1.BackColor = theme.Prime;
+        menuStrip1.ForeColor = theme.Text;
+        menuStrip1.Renderer = UIRenderer.TSRenderer(theme, "ColorTableMain");
+
+        foreach (var item in expandableItems)
+        {
+
+            if (item.DropDown is ToolStripDropDownMenu dropDownMenu)
+                dropDownMenu.ShowImageMargin = false;
+
+            foreach (ToolStripItem subItem in item.DropDownItems) subItem.ForeColor = theme.Text;
+        }
+
+        menuLayout.BackColor = theme.Dark;
+        menuLayout.ForeColor = theme.Text;
+        menuLayout.BorderStyle = BorderStyle.None;
+
+        menuDummy.BackColor = theme.Dark;
+        menuDummy.ForeColor = theme.Text;
+        menuDummy.BorderStyle = BorderStyle.None;
     }
 
     int countdown = 0;
@@ -86,11 +109,9 @@ public partial class UML_Events : Form
     void Form1_Load(object sender, EventArgs e)
     {
         // read source files
-
         string[] files = Utils.ReadFolder(srcPath);
 
         // create boxes
-
         foreach (var fname in files)
         {
             string boxName = fname[0..^3];
@@ -99,7 +120,6 @@ public partial class UML_Events : Form
         }
 
         // update boxes content
-
         foreach (var box in boxes)
         {
             string code = Utils.ReadFile(box.fpath, box.fname);
@@ -122,8 +142,7 @@ public partial class UML_Events : Form
                 box.cls.Add(new Item("pwLeft", ""));
                 box.cls.Add(new Item("pwRight", ""));
 
-            }
-            else if (box.name == "CellWrapper")
+            } else if (box.name == "CellWrapper")
             {
                 box.cls.Add(new Item("cw", ""));
             }
@@ -198,8 +217,7 @@ public partial class UML_Events : Form
                     name = "this";
                     subName = arr[0];
 
-                }
-                else
+                } else
                 {
                     name = arr[0];
                     subName = arr[1];
@@ -387,7 +405,7 @@ public partial class UML_Events : Form
         int cnt = 1;
         while (fromBinds.Contains(startBind) && cnt < 100)
         {
-            if(align.start == SideType.Horizontal)
+            if (align.start == SideType.Horizontal)
                 startBind.X += SpreadBinds(cnt, bindSpread);
 
             else if (align.start == SideType.Vertical)

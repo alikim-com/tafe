@@ -49,7 +49,7 @@ partial class UML_Events
         SuspendLayout();
         // 
         // pictureBox1
-        //
+        // 
         pictureBox1.Dock = DockStyle.Fill;
         pictureBox1.Location = new Point(0, 24);
         pictureBox1.Name = "pictureBox1";
@@ -66,7 +66,6 @@ partial class UML_Events
         // 
         label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
         label1.AutoSize = true;
-        label1.ForeColor = Color.Gray;
         label1.Location = new Point(10, 875);
         label1.Name = "label1";
         label1.Size = new Size(392, 15);
@@ -75,8 +74,6 @@ partial class UML_Events
         // 
         // menuStrip1
         // 
-        menuStrip1.BackColor = Color.FromArgb(46, 46, 51);
-        menuStrip1.ForeColor = Color.LightGray;
         menuStrip1.Items.AddRange(new ToolStripItem[] { menuLoad, menuSave, menuHelp, menuLabel, menuDummy, menuLayout });
         menuStrip1.Location = new Point(0, 0);
         menuStrip1.Name = "menuStrip1";
@@ -93,17 +90,12 @@ partial class UML_Events
         // 
         // menuLoadOpen
         // 
-        menuLoadOpen.BackColor = Color.FromArgb(46, 46, 51);
-        menuLoadOpen.DisplayStyle = ToolStripItemDisplayStyle.Text;
-        menuLoadOpen.ForeColor = Color.LightGray;
         menuLoadOpen.Name = "menuLoadOpen";
         menuLoadOpen.Size = new Size(165, 22);
         menuLoadOpen.Text = "Open layout...";
         // 
         // menuLoadCollection
         // 
-        menuLoadCollection.BackColor = Color.FromArgb(46, 46, 51);
-        menuLoadCollection.ForeColor = Color.LightGray;
         menuLoadCollection.Name = "menuLoadCollection";
         menuLoadCollection.Size = new Size(165, 22);
         menuLoadCollection.Text = "Layout collection";
@@ -117,8 +109,6 @@ partial class UML_Events
         // 
         // menuSaveAs
         // 
-        menuSaveAs.BackColor = Color.FromArgb(46, 46, 51);
-        menuSaveAs.ForeColor = Color.LightGray;
         menuSaveAs.Name = "menuSaveAs";
         menuSaveAs.Size = new Size(157, 22);
         menuSaveAs.Text = "Save layout as...";
@@ -133,8 +123,6 @@ partial class UML_Events
         // 
         // menuHelpAbout
         // 
-        menuHelpAbout.BackColor = Color.FromArgb(46, 46, 51);
-        menuHelpAbout.ForeColor = Color.LightGray;
         menuHelpAbout.Name = "menuHelpAbout";
         menuHelpAbout.Size = new Size(107, 22);
         menuHelpAbout.Text = "About";
@@ -142,7 +130,6 @@ partial class UML_Events
         // 
         // menuLabel
         // 
-        menuLabel.BackColor = Color.FromArgb(34, 34, 38);
         menuLabel.Margin = new Padding(50, 1, 5, 2);
         menuLabel.Name = "menuLabel";
         menuLabel.Size = new Size(46, 17);
@@ -150,19 +137,13 @@ partial class UML_Events
         // 
         // menuDummy
         // 
-        menuDummy.BackColor = Color.FromArgb(34, 34, 38);
-        menuDummy.BorderStyle = BorderStyle.None;
         menuDummy.Enabled = false;
-        menuDummy.ForeColor = Color.LightGray;
         menuDummy.Margin = new Padding(1, 0, 0, 0);
         menuDummy.Name = "menuDummy";
         menuDummy.Size = new Size(7, 20);
         // 
         // menuLayout
         // 
-        menuLayout.BackColor = Color.FromArgb(34, 34, 38);
-        menuLayout.BorderStyle = BorderStyle.None;
-        menuLayout.ForeColor = Color.LightGray;
         menuLayout.Margin = new Padding(0, 0, 1, 0);
         menuLayout.Name = "menuLayout";
         menuLayout.Size = new Size(100, 20);
@@ -172,7 +153,6 @@ partial class UML_Events
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.Black;
         ClientSize = new Size(1500, 900);
         Controls.Add(label1);
         Controls.Add(pictureBox1);

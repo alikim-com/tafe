@@ -8,6 +8,9 @@
     <Compile Update="DragAndDrop.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="UML_Events.cs">
       <SubType>Form</SubType>
     </Compile>
