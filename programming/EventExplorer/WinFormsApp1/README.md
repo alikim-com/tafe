@@ -2,7 +2,7 @@ A WinForms application designed for drawing a custom UML-like diagram that visua
 
 ### Features:
  - Drawing objects with Drag & Drop support on PictureBox control
- - Custom menu appearance
+ - Full custom menu appearance
  - Dynamic menu content
  - Saving & loading information via JsonSerializer
  - Extraction of event-related information from source files using Regex

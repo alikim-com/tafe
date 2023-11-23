@@ -1,11 +1,5 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+﻿
 using System.ComponentModel;
-using System.Drawing;
-using System.Net.NetworkInformation;
-using System.Numerics;
-using System.Windows.Forms;
-using System;
 
 namespace WinformsUMLEvents
 {
@@ -58,10 +52,6 @@ namespace WinformsUMLEvents
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             button1.AutoSize = true;
-            button1.BackColor = Color.FromArgb(57, 57, 64);
-            button1.FlatAppearance.BorderSize = 0;
-            button1.FlatAppearance.MouseDownBackColor = Color.FromArgb(46, 46, 51);
-            button1.FlatAppearance.MouseOverBackColor = Color.FromArgb(69, 69, 77);
             button1.FlatStyle = FlatStyle.Flat;
             button1.Location = new Point(192, 492);
             button1.Margin = new Padding(0);
@@ -71,16 +61,15 @@ namespace WinformsUMLEvents
             button1.Text = "Leave the narrative";
             button1.UseVisualStyleBackColor = false;
             button1.Click += button1_Click;
+            button1.Cursor = Cursors.Hand;
             // 
             // AboutForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(46, 46, 51);
             ClientSize = new Size(500, 541);
             Controls.Add(button1);
             Controls.Add(label1);
-            ForeColor = Color.LightGray;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
