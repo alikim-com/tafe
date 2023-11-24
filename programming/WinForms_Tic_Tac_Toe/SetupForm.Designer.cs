@@ -34,17 +34,9 @@ partial class SetupForm
         headerLeft = new Label();
         allegLeft = new Label();
         identityLeft = new Label();
-        nameLeft = new TextBox();
-        comboLeft = new FlatCombo();
-        allegRight = new Label();
-        identityRight = new Label();
-        nameRight = new TextBox();
-        comboRight = new ComboBox();
         panelLeft = new Panel();
         panelRight = new Panel();
-        headerRight = new Label();
         panelLeft.SuspendLayout();
-        panelRight.SuspendLayout();
         SuspendLayout();
         // 
         // button1
@@ -65,7 +57,7 @@ partial class SetupForm
         // headerLeft
         // 
         headerLeft.AutoSize = true;
-        headerLeft.Location = new Point(23, 25);
+        headerLeft.Location = new Point(23, 184);
         headerLeft.Name = "headerLeft";
         headerLeft.Size = new Size(62, 15);
         headerLeft.TabIndex = 2;
@@ -76,73 +68,22 @@ partial class SetupForm
         allegLeft.AutoSize = true;
         allegLeft.Location = new Point(23, 239);
         allegLeft.Name = "allegLeft";
-        allegLeft.Size = new Size(62, 15);
+        allegLeft.Size = new Size(40, 15);
         allegLeft.TabIndex = 2;
-        allegLeft.Text = "Allegiance";
+        allegLeft.Text = "Origin";
         // 
         // identityLeft
         // 
         identityLeft.AutoSize = true;
-        identityLeft.Location = new Point(23, 352);
+        identityLeft.Location = new Point(85, 239);
+        identityLeft.Margin = new Padding(10, 0, 3, 0);
         identityLeft.Name = "identityLeft";
         identityLeft.Size = new Size(47, 15);
         identityLeft.TabIndex = 2;
         identityLeft.Text = "Identity";
         // 
-        // nameLeft
-        // 
-        nameLeft.Location = new Point(23, 382);
-        nameLeft.Name = "nameLeft";
-        nameLeft.Size = new Size(121, 23);
-        nameLeft.TabIndex = 3;
-        // 
-        // comboLeft
-        // 
-        comboLeft.BorderColor = Color.Yellow;
-        comboLeft.FormattingEnabled = true;
-        comboLeft.Location = new Point(23, 269);
-        comboLeft.Name = "comboLeft";
-        comboLeft.Size = new Size(121, 23);
-        comboLeft.TabIndex = 4;
-        // 
-        // allegRight
-        // 
-        allegRight.AutoSize = true;
-        allegRight.Location = new Point(139, 269);
-        allegRight.Name = "allegRight";
-        allegRight.Size = new Size(62, 15);
-        allegRight.TabIndex = 2;
-        allegRight.Text = "Allegiance";
-        // 
-        // identityRight
-        // 
-        identityRight.AutoSize = true;
-        identityRight.Location = new Point(164, 352);
-        identityRight.Name = "identityRight";
-        identityRight.Size = new Size(47, 15);
-        identityRight.TabIndex = 2;
-        identityRight.Text = "Identity";
-        // 
-        // nameRight
-        // 
-        nameRight.Location = new Point(120, 382);
-        nameRight.Name = "nameRight";
-        nameRight.Size = new Size(100, 23);
-        nameRight.TabIndex = 3;
-        // 
-        // comboRight
-        // 
-        comboRight.FormattingEnabled = true;
-        comboRight.Location = new Point(99, 299);
-        comboRight.Name = "comboRight";
-        comboRight.Size = new Size(121, 23);
-        comboRight.TabIndex = 4;
-        // 
         // panelLeft
         // 
-        panelLeft.BackgroundImage = Resource.AILeft;
-        panelLeft.Controls.Add(comboLeft);
-        panelLeft.Controls.Add(nameLeft);
         panelLeft.Controls.Add(identityLeft);
         panelLeft.Controls.Add(allegLeft);
         panelLeft.Controls.Add(headerLeft);
@@ -153,24 +94,10 @@ partial class SetupForm
         // 
         // panelRight
         // 
-        panelRight.Controls.Add(comboRight);
-        panelRight.Controls.Add(nameRight);
-        panelRight.Controls.Add(identityRight);
-        panelRight.Controls.Add(allegRight);
-        panelRight.Controls.Add(headerRight);
         panelRight.Location = new Point(220, 0);
         panelRight.Name = "panelRight";
         panelRight.Size = new Size(220, 490);
         panelRight.TabIndex = 1;
-        // 
-        // headerRight
-        // 
-        headerRight.AutoSize = true;
-        headerRight.Location = new Point(96, 25);
-        headerRight.Name = "headerRight";
-        headerRight.Size = new Size(70, 15);
-        headerRight.TabIndex = 2;
-        headerRight.Text = "Right Player";
         // 
         // SetupForm
         // 
@@ -190,8 +117,6 @@ partial class SetupForm
         Text = "Player setup";
         panelLeft.ResumeLayout(false);
         panelLeft.PerformLayout();
-        panelRight.ResumeLayout(false);
-        panelRight.PerformLayout();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -201,13 +126,6 @@ partial class SetupForm
     private Label headerLeft;
     private Label allegLeft;
     private Label identityLeft;
-    private TextBox nameLeft;
-    private Label allegRight;
-    private Label identityRight;
-    private TextBox nameRight;
-    private ComboBox comboRight;
     private Panel panelLeft;
     private Panel panelRight;
-    private Label headerRight;
-    private FlatCombo comboLeft;
 }

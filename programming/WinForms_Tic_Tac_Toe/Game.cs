@@ -12,11 +12,19 @@ internal class Game
     public enum Roster
     {
         None,
-        HumanOne,
-        HumanTwo,
-        AIOne,
-        AITwo
+        Human_One,
+        Human_Two,
+        AI_One,
+        AI_Two
     }
+
+    static public Dictionary<Roster, string> rosterIdentity = new()
+    {
+        { Roster.Human_One, "Ironheart" },
+        { Roster.Human_Two, "Moonshadow" },
+        { Roster.AI_One, "Quantum" },
+        { Roster.AI_Two, "Synthstorm" }
+    };
 
     static Roster[] _turnList = 
         ((IEnumerable<Roster>)Enum.GetValues(typeof(Roster)))

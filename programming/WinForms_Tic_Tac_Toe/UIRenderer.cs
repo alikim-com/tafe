@@ -5,9 +5,10 @@ public class UIFonts
 {
     static readonly public Font Default = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
 
-    static readonly public Font header = new("Arial", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
-    static readonly public Font title = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
-    static readonly public Font regular = new("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point);
+    static readonly public Font header = new("Arial", 16F, FontStyle.Regular, GraphicsUnit.Point);
+    static readonly public Font regular = new("Arial", 13.5F, FontStyle.Regular, GraphicsUnit.Point);
+    static readonly public Font small = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
+    static readonly public Font tiny = new("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point);
 }
 
 public class UIColors
