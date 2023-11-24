@@ -31,6 +31,8 @@ public partial class AppForm : Form
 
     UIColors.ColorTheme theme;
 
+
+
     void InitializeMenu()
     {
         // menu appearance
@@ -62,19 +64,6 @@ public partial class AppForm : Form
     void SetupFormPopup()
     {
         setupForm ??= new SetupForm();
-
-        setupForm.ForeColor = theme.Text;
-        setupForm.BackColor = theme.Pitch;
-
-        /*
-                 menuLayout.BackColor = theme.Dark;
-        menuLayout.ForeColor = theme.Text;
-        menuLayout.BorderStyle = BorderStyle.None;
-
-        menuDummy.BackColor = theme.Dark;
-        menuDummy.ForeColor = theme.Text;
-        menuDummy.BorderStyle = BorderStyle.None;
-         */
 
         if (setupForm.ShowDialog(this) == DialogResult.OK) return;
     }
@@ -244,7 +233,6 @@ public partial class AppForm : Form
         public int Bottom;
     }
     private const int WM_SIZING = 0x214;
-    private const int WM_NCPAINT = 0x85;
     enum WMSZ
     {
         LEFT = 1,

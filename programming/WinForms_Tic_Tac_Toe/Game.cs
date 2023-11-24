@@ -12,8 +12,10 @@ internal class Game
     public enum Roster
     {
         None,
-        Human,
-        AI
+        HumanOne,
+        HumanTwo,
+        AIOne,
+        AITwo
     }
 
     static Roster[] _turnList = 
