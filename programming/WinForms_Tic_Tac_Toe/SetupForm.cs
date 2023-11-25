@@ -1,79 +1,18 @@
 ﻿
+using System.Linq;
+
 namespace WinFormsApp1;
 
 public partial class SetupForm : Form
 {
     static public readonly UIColors.ColorTheme theme = UIColors.Steel;
 
-    Game.Roster? choiceLeft, choiceRight;
-    readonly Dictionary<Game.Roster, Label> rosterLeft = new();
-    readonly Dictionary<Game.Roster, Label> rosterRight = new();
+    static public readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
+    static public readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
 
-    void CreateChoiceLists()
-    {
-        // left side
+    public Color foreLeft, foreRight, foreLeftDim, foreRightDim;
 
-        List<Label> aux = new();
-
-        int tab = -1;
-        Point locId = identityLeft.Location;
-        int allegX = allegLeft.Location.X + allegLeft.Width;
-        locId.Y += 15;
-        foreach (var (rostItem, identity) in Game.rosterIdentity)
-        {
-            tab++;
-            locId.Y += 25;
-
-            var labName = AddLabel(panelLeft, locId, $"{identity}{tab}", tab, identity);
-            labName.Font = UIFonts.regular;
-            labName.Cursor = Cursors.Hand;
-
-            var alleg = rostItem.ToString().Split('_')[0];
-            var labAlleg = AddLabel(panelLeft, Point.Empty, $"{alleg}{tab}", tab, alleg);
-            labAlleg.Font = UIFonts.tiny;
-
-            labAlleg.Location = new Point(
-                allegX - labAlleg.Width,
-                labName.Location.Y + (labName.Height - labAlleg.Height) / 2
-            );
-
-            aux.Add(labAlleg); // for mirroring on the right side
-
-            rosterLeft.Add(rostItem, labName);
-        }
-
-        // right side
-
-        static Label mirrorLabel(Control parent, Label src, string name, int tab, string text)
-        {
-            var lab = AddLabel(parent, Point.Empty, name, tab, text);
-            lab.Font = src.Font;
-
-            lab.Location = new Point(
-                parent.Width - lab.Width - src.Location.X,
-                src.Location.Y
-            );
-
-            lab.Cursor = src.Cursor;
-
-            return lab;
-        }
-
-        tab = 0;
-        mirrorLabel(panelRight, headerLeft, "headerRight", tab++, "Player Right");
-        mirrorLabel(panelRight, allegLeft, "allegRight", tab++, "Origin");
-        mirrorLabel(panelRight, identityLeft, "identityRight", tab++, "Identity");
-
-        foreach(var (rostItem, identityLab) in rosterLeft)
-        {
-            var lab = mirrorLabel(panelRight, identityLab, identityLab.Name.Replace("Left", "Right"), tab++, identityLab.Text);
-
-            rosterRight.Add(rostItem, lab);
-        }
-
-        foreach(var rec in aux)
-            mirrorLabel(panelRight, rec, "Right" + rec.Name, tab++, rec.Text);
-    }
+    readonly List<ChoiceItem> roster = new();
 
     static Label AddLabel(Control parent, Point loc, string name, int tab, string text)
     {
@@ -99,6 +38,13 @@ public partial class SetupForm : Form
         ForeColor = theme.Text;
         BackColor = theme.Prime;
 
+        foreLeft = ColorExtensions.BlendOver(tintLeft, ForeColor);
+        foreRight = ColorExtensions.BlendOver(tintRight, ForeColor);
+        foreLeftDim = ColorExtensions.BlendOver(UIColors.Black, foreLeft);
+        foreRightDim = ColorExtensions.BlendOver(foreRight, UIColors.Black);
+
+        panelLeft.ForeColor = foreLeft;
+        panelRight.ForeColor = foreRight;
         panelLeft.BackColor = UIColors.Transparent;
         panelRight.BackColor = UIColors.Transparent;
 
@@ -118,30 +64,160 @@ public partial class SetupForm : Form
 
         CreateChoiceLists();
 
-        // mouse events
-
-        AddClickHandlers(rosterLeft);
-        AddClickHandlers(rosterRight);
-
         // panelLeft.BackgroundImage = Resource.AILeft;
     }
 
-    void AddClickHandlers(Dictionary<Game.Roster, Label> roster)
+    void CreateChoiceLists()
     {
-        var otherRoster = (roster == rosterLeft) ? rosterLeft : rosterRight;    
+        // left side
 
-        foreach (var (rostItem, identLab) in roster) identLab.Click += OnChoiceClick;
+        int tab = -1;
+        Point locId = identityLeft.Location;
+        int allegX = allegLeft.Location.X + allegLeft.Width;
+        locId.Y += 15;
+        foreach (var (rostItem, identity) in Game.rosterIdentity)
+        {
+            tab++;
+            locId.Y += 25;
+
+            var labName = AddLabel(panelLeft, locId, $"{identity}{tab}", tab, identity);
+            labName.Font = UIFonts.regular;
+            labName.Cursor = Cursors.Hand;
+
+            var alleg = rostItem.ToString().Split('_')[0];
+            var labAlleg = AddLabel(panelLeft, Point.Empty, $"{alleg}{tab}", tab, alleg);
+            labAlleg.Font = UIFonts.tiny;
+
+            labAlleg.Location = new Point(
+                allegX - labAlleg.Width,
+                labName.Location.Y + (labName.Height - labAlleg.Height) / 2
+            );
+
+            roster.Add(new(rostItem, ChoiceItem.Side.Left, labAlleg, labName, foreLeft, foreLeftDim));
+        }
+
+        // right side
+
+        static Label AddMirrorLabel(Control parent, Label src, string name, int tab, string text)
+        {
+            var lab = AddLabel(parent, Point.Empty, name, tab, text);
+            lab.Font = src.Font;
+
+            lab.Location = new Point(
+                parent.Width - lab.Width - src.Location.X,
+                src.Location.Y
+            );
+
+            lab.Cursor = src.Cursor;
+
+            return lab;
+        }
+
+        tab = 0;
+        AddMirrorLabel(panelRight, headerLeft, "headerRight", tab++, "Right Player");
+        AddMirrorLabel(panelRight, allegLeft, "allegRight", tab++, "Origin");
+        AddMirrorLabel(panelRight, identityLeft, "identityRight", tab++, "Identity");
+
+        var rosterLeft = roster.ToList();
+        foreach (var choiceItem in rosterLeft)
+        {
+            var (origLab, identLab) = choiceItem;
+            var _origLab = AddMirrorLabel(panelRight, origLab, "Right" + origLab.Name, tab++, origLab.Text);
+            var _identLab = AddMirrorLabel(panelRight, identLab, identLab.Name.Replace("Left", "Right"), tab++, identLab.Text);
+
+            roster.Add(new(choiceItem.rosterId, ChoiceItem.Side.Right, _origLab, _identLab, foreRight, foreRightDim));
+        }
+
+        foreach (var rec in roster)
+            MakeOnClickHandler(rec, roster);
     }
 
-    readonly EventHandler OnChoiceClick = (object? sender, EventArgs e) =>
+    EventHandler MakeOnClickHandler(ChoiceItem choiceItem, List<ChoiceItem> roster)
     {
-        Utils.Msg("boom");
-    };
+        EventHandler handler = (object? sender, EventArgs e) =>
+        {
+            choiceItem.chosen = true;
+
+            var side = choiceItem.side;
+
+            var rosterThisSide = roster.Where(itm => itm.side == side && itm != choiceItem);
+            var rosterOtherSide = roster.Where(itm => itm.side != side);
+
+            foreach (var rec in rosterThisSide)
+            {
+                choiceItem.chosen = false;
+                rec.Deactivate();
+            }
+
+            var rosterId = choiceItem.rosterId;
+
+            var mirrorItem = rosterOtherSide.FirstOrDefault(itm => itm.chosen && itm.rosterId == rosterId);
+
+            if (mirrorItem != null)
+                foreach(var rec in rosterOtherSide) rec.Deactivate();
+        };
+
+        choiceItem.SetOnClickHandler(handler);
+
+        return handler;
+    }
+
 
     private void button1_Click(object sender, EventArgs e)
     {
         DialogResult = DialogResult.OK;
     }
+}
 
+class ChoiceItem
+{
+    public bool chosen;
+
+    public readonly Game.Roster rosterId;
+
+    public readonly Label origin;
+    public readonly Label identity;
+
+    public enum Side
+    {
+        None,
+        Left,
+        Right
+    }
+
+    public readonly Side side;
+    readonly Color foreOn;
+    readonly Color foreOff;
+
+    public ChoiceItem(Game.Roster _rosterId, Side _side, Label _origin, Label _identity, Color _foreOn, Color _foreOff)
+    {
+        chosen = false;
+        rosterId = _rosterId;
+        side = _side;
+        origin = _origin;
+        identity = _identity;
+        foreOn = _foreOn;
+        foreOff = _foreOff;
+    }
+
+    public void Activate()
+    {
+        identity.Cursor = Cursors.Hand;
+        identity.ForeColor = foreOn;
+        origin.ForeColor = foreOn;
+    }
+    public void Deactivate()
+    {
+        identity.Cursor = Cursors.Default;
+        identity.ForeColor = foreOff;
+        origin.ForeColor = foreOff;
+    }
+    public void SetOnClickHandler(EventHandler handler) => identity.Click += handler;
+
+    public void Deconstruct(out Label _origin, out Label _identity)
+    {
+        _identity = identity;
+        _origin = origin;
+    }
 }
 

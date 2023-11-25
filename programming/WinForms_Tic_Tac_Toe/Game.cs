@@ -21,9 +21,9 @@ internal class Game
     static public Dictionary<Roster, string> rosterIdentity = new()
     {
         { Roster.Human_One, "Ironheart" },
-        { Roster.Human_Two, "Moonshadow" },
+        { Roster.Human_Two, "Silverlight" },
         { Roster.AI_One, "Quantum" },
-        { Roster.AI_Two, "Synthstorm" }
+        { Roster.AI_Two, "Syncstorm" }
     };
 
     static Roster[] _turnList = 
