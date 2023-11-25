@@ -1,5 +1,6 @@
 ﻿
-using System.Resources;
+using System.Drawing.Drawing2D;
+using static System.Windows.Forms.AxHost;
 
 namespace WinFormsApp1;
 
@@ -7,12 +8,24 @@ public partial class SetupForm : Form
 {
     static public readonly UIColors.ColorTheme theme = UIColors.Steel;
 
-    static public readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
-    static public readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
+    static readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
+    static readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
 
     public Color foreLeft, foreRight, foreLeftDim, foreRightDim;
 
     readonly List<ChoiceItem> roster = new();
+
+    readonly ToolStripRendererOverride buttonRenderer;
+
+    public enum btnMessage
+    {
+        Ready_AI,
+        Ready_Human,
+        Ready_Mix,
+        Both_Missing,
+        Left_Missing,
+        Right_Missing,
+    }
 
     public SetupForm()
     {
@@ -23,21 +36,19 @@ public partial class SetupForm : Form
 
         foreLeft = ColorExtensions.BlendOver(tintLeft, ForeColor);
         foreRight = ColorExtensions.BlendOver(tintRight, ForeColor);
-        foreLeftDim = ColorExtensions.BlendOver(UIColors.Dim, foreLeft);
-        foreRightDim = ColorExtensions.BlendOver(UIColors.Dim, foreRight);
+        foreLeftDim = ColorExtensions.BlendOver(Color.FromArgb(96, 0, 0, 0), foreLeft);
+        foreRightDim = ColorExtensions.BlendOver(Color.FromArgb(96, 0, 0, 0), foreRight);
+
+        panelLeft.SuspendLayout();
+        panelRight.SuspendLayout();
 
         panelLeft.ForeColor = foreLeft;
         panelRight.ForeColor = foreRight;
         panelLeft.BackColor = UIColors.Transparent;
         panelRight.BackColor = UIColors.Transparent;
 
-        panelLeft.BackgroundImageLayout = 
+        panelLeft.BackgroundImageLayout =
         panelRight.BackgroundImageLayout = ImageLayout.Stretch;
-
-        button1.BackColor = theme.Light;
-        button1.FlatAppearance.BorderSize = 0;
-        button1.FlatAppearance.MouseDownBackColor = theme.Dark;
-        button1.FlatAppearance.MouseOverBackColor = theme.Noon;
 
         var off = headerLeft.Location.X;
         foreach (Control ctrl in panelRight.Controls)
@@ -49,6 +60,18 @@ public partial class SetupForm : Form
         headerLeft.Font = UIFonts.header;
 
         CreateChoiceLists();
+
+        buttonRenderer = new ToolStripRendererOverride(toolStrip);
+        toolStrip.Renderer = buttonRenderer;
+
+        toolStrip.BackColor = toolStripLabel.BackColor = UIColors.Transparent;
+
+        UpdateButton(btnMessage.Both_Missing);
+
+        panelLeft.ResumeLayout(false);
+        panelRight.ResumeLayout(false);
+        panelLeft.PerformLayout();
+        panelRight.PerformLayout();
 
         AppForm.ApplyDoubleBuffer(panelLeft);
         AppForm.ApplyDoubleBuffer(panelRight);
@@ -168,9 +191,47 @@ public partial class SetupForm : Form
                 mirrorItem.chosen = false;
                 foreach (var rec in rosterOtherSide) rec.Activate();
             }
+
+            // update button messages
+
+            var thisChosen = choiceItem;
+            var otherChosen = rosterOtherSide.FirstOrDefault(itm => itm.chosen);
+
+            if (thisChosen != null && otherChosen != null)
+            {
+                if (thisChosen.originType != otherChosen.originType)
+                {
+                    UpdateButton(btnMessage.Ready_Mix);
+
+                } else if (Enum.TryParse($"Ready_{thisChosen.originType}", out btnMessage msg))
+                {
+                    UpdateButton(msg);
+                }
+
+            } else
+            {
+                var missingSide = side == ChoiceItem.Side.Left ? btnMessage.Right_Missing : btnMessage.Left_Missing;
+                UpdateButton(missingSide);
+            }
+
         };
 
         choiceItem.SetOnClickHandler(handler);
+    }
+
+    void UpdateButton(btnMessage msg)
+    {
+        Dictionary<btnMessage, string> buttonMessages = new() {
+            { btnMessage.Ready_AI, "I like to watch...o_o" },
+            { btnMessage.Ready_Human, "Fight, Mortals!" },
+            { btnMessage.Ready_Mix, "For the Organics!" },
+            { btnMessage.Both_Missing, "Choose players" },
+            { btnMessage.Left_Missing, "Choose left player" },
+            { btnMessage.Right_Missing, "Choose right player" },
+        };
+
+        toolStripLabel.Text = buttonMessages[msg];
+        buttonRenderer.Disabled = msg.ToString().Contains("Missing");
     }
 
     static Image? GetBackgroundImage(Game.Roster rosterId, ChoiceItem.Side side)
@@ -178,6 +239,18 @@ public partial class SetupForm : Form
         var imageName = $"{rosterId}_{side}";
         return (Image?)Resource.ResourceManager.GetObject(imageName);
     }
+
+    private void ToolStrip_SizeChanged(object sender, EventArgs e)
+    {
+        if (sender is Control ctrl) ctrl.Location = new((ClientSize.Width - ctrl.Width) / 2, ctrl.Location.Y);
+    }
+
+    private void ToolStrip_Click(object sender, EventArgs e)
+    {
+        // toolStrip.Invalidate();
+    }
+    private void ToolStrip_MouseEnter(object sender, EventArgs e) => buttonRenderer.SetOverState(sender, true);
+    private void ToolStrip_MouseLeave(object sender, EventArgs e) => buttonRenderer.SetOverState(sender, false);
 
     private void button1_Click(object sender, EventArgs e)
     {
@@ -205,6 +278,8 @@ public class ChoiceItem
     readonly Color foreOn;
     readonly Color foreOff;
 
+    public readonly string originType;
+
     public ChoiceItem(Game.Roster _rosterId, Side _side, Label _origin, Label _identity, Color _foreOn, Color _foreOff)
     {
         chosen = false;
@@ -214,6 +289,8 @@ public class ChoiceItem
         identity = _identity;
         foreOn = _foreOn;
         foreOff = _foreOff;
+
+        originType = _rosterId.ToString().Split('_')[0];
     }
 
     public void Activate()
@@ -239,5 +316,72 @@ public class ChoiceItem
     }
 
     public override string ToString() => $"{identity.Text} | {side} | chosen: {chosen}";
+}
+
+public class ToolStripRendererOverride : ToolStripProfessionalRenderer
+{
+    Color gTop, gBot;
+    static readonly Color gradTop = Color.FromArgb(52, 26, 79).ScaleRGB(1.25);
+    static readonly Color gradBot = Color.FromArgb(110, 18, 0).ScaleRGB(1.25);
+    static readonly Color gradBotOver = Color.FromArgb(52, 26, 79).ScaleRGB(1.4);
+    static readonly Color gradTopOver = Color.FromArgb(110, 18, 0).ScaleRGB(1.4);
+    static readonly Color gradTopDisabled = Color.FromArgb(200, 104, 34).ScaleRGB(0.10);
+    static readonly Color gradBotDisabled = Color.FromArgb(185, 36, 199).ScaleRGB(0.10);
+
+    bool _disabled = false;
+    public bool Disabled
+    {
+        private get => _disabled;
+        set
+        {
+            if (value != _disabled)
+            {
+                _disabled = value;
+
+                UpdateColors(false);
+                parent.Invalidate();
+            }
+        }
+    }
+
+    readonly Control parent;
+
+    public ToolStripRendererOverride(Control _parent)
+    {
+        parent = _parent;
+    }
+
+    void UpdateColors(bool state)
+    {
+        gTop = Disabled ? gradTopDisabled : (state ? gradTopOver : gradTop);
+        gBot = Disabled ? gradBotDisabled : (state ? gradBotOver : gradBot);
+    }
+
+    public void SetOverState(object sender, bool state)
+    {
+        UpdateColors(state);
+
+        if (sender is Control ctrl)
+        {
+            ctrl.Cursor = (!Disabled && state) ? Cursors.Hand : Cursors.Default;
+            ctrl.Invalidate();
+        }
+    }
+
+    protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e) { }
+
+    protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
+    {
+        base.OnRenderToolStripBackground(e);
+
+        using var brush = new LinearGradientBrush(
+            e.AffectedBounds,
+            gTop,
+            gBot,
+            LinearGradientMode.Vertical
+        );
+
+        e.Graphics.FillRectangle(brush, e.AffectedBounds);
+    }
 }
 

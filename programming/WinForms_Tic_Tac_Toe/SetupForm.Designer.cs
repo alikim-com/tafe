@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace WinFormsApp1;
 partial class SetupForm
@@ -30,29 +31,16 @@ partial class SetupForm
     /// </summary>
     private void InitializeComponent()
     {
-        button1 = new Button();
         headerLeft = new Label();
         allegLeft = new Label();
         identityLeft = new Label();
         panelLeft = new Panel();
+        toolStrip = new ToolStrip();
+        toolStripLabel = new ToolStripLabel();
         panelRight = new Panel();
         panelLeft.SuspendLayout();
+        toolStrip.SuspendLayout();
         SuspendLayout();
-        // 
-        // button1
-        // 
-        button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        button1.AutoSize = true;
-        button1.Cursor = Cursors.Hand;
-        button1.FlatStyle = FlatStyle.Flat;
-        button1.Location = new Point(160, 445);
-        button1.Margin = new Padding(0);
-        button1.Name = "button1";
-        button1.Size = new Size(120, 27);
-        button1.TabIndex = 1;
-        button1.Text = "Leave the narrative";
-        button1.UseVisualStyleBackColor = false;
-        button1.Click += button1_Click;
         // 
         // headerLeft
         // 
@@ -92,6 +80,31 @@ partial class SetupForm
         panelLeft.Size = new Size(220, 490);
         panelLeft.TabIndex = 0;
         // 
+        // toolStrip
+        // 
+        toolStrip.Anchor = AnchorStyles.None;
+        toolStrip.Dock = DockStyle.None;
+        toolStrip.GripMargin = new Padding(0);
+        toolStrip.GripStyle = ToolStripGripStyle.Hidden;
+        toolStrip.Items.AddRange(new ToolStripItem[] { toolStripLabel });
+        toolStrip.Location = new Point(140, 420);
+        toolStrip.Name = "toolStrip";
+        toolStrip.Padding = new Padding(10);
+        toolStrip.Size = new Size(163, 39);
+        toolStrip.TabIndex = 3;
+        toolStrip.MouseEnter += ToolStrip_MouseEnter;
+        toolStrip.MouseLeave += ToolStrip_MouseLeave;
+        toolStrip.Click += ToolStrip_Click;
+        toolStrip.SizeChanged += ToolStrip_SizeChanged;
+        // 
+        // toolStripButton1
+        // 
+        toolStripLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        toolStripLabel.Margin = new Padding(0);
+        toolStripLabel.Name = "toolStripButton";
+        toolStripLabel.Size = new Size(110, 19);
+        toolStripLabel.Text = "...";
+        // 
         // panelRight
         // 
         panelRight.Location = new Point(220, 0);
@@ -106,7 +119,7 @@ partial class SetupForm
         BackgroundImage = Resource.SetupBackImg;
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(440, 490);
-        Controls.Add(button1);
+        Controls.Add(toolStrip);
         Controls.Add(panelRight);
         Controls.Add(panelLeft);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -117,15 +130,18 @@ partial class SetupForm
         Text = "Player setup";
         panelLeft.ResumeLayout(false);
         panelLeft.PerformLayout();
+        toolStrip.ResumeLayout(false);
+        toolStrip.PerformLayout();
         ResumeLayout(false);
         PerformLayout();
     }
 
     #endregion
-    private Button button1;
     private Label headerLeft;
     private Label allegLeft;
     private Label identityLeft;
     private Panel panelLeft;
     private Panel panelRight;
+    private ToolStrip toolStrip;
+    private ToolStripLabel toolStripLabel;
 }

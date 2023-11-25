@@ -15,6 +15,13 @@ public static class ColorExtensions
 
         public override readonly string ToString() => $"a: {a}, r: {r}, g: {g}, b: {b}";
     }
+
+    public static Color ScaleRGB(this Color c, double scale) =>
+        Color.FromArgb((int)(c.R * scale), (int)(c.G * scale), (int)(c.B * scale));
+
+    public static Color Scale(this Color c, double scale) =>
+        Color.FromArgb((int)(c.A * scale), (int)(c.R * scale), (int)(c.G * scale), (int)(c.B * scale));
+
     public static _argb Normalise(this Color c)
     {
         double k = 1.0 / 255;
