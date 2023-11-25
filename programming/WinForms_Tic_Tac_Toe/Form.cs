@@ -20,7 +20,7 @@ public partial class AppForm : Form
 
     readonly LabelManager labMgr;
 
-    static void ApplyDoubleBuffer(Control control)
+    static public void ApplyDoubleBuffer(Control control)
     {
         control.GetType().InvokeMember(
             "DoubleBuffered",

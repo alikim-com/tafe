@@ -13,7 +13,9 @@ public class UIFonts
 
 public class UIColors
 {
+
     static readonly public Color Black = Color.FromArgb(0, 0, 0);
+    static readonly public Color Dim = Color.FromArgb(96, 0, 0, 0);
     static readonly public Color Transparent = Color.FromArgb(0, 0, 0, 0);
 
     public struct ColorTheme

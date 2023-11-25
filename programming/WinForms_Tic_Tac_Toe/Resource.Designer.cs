@@ -63,9 +63,9 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AILeft {
+        internal static System.Drawing.Bitmap AI_One_Left {
             get {
-                object obj = ResourceManager.GetObject("AILeft", resourceCulture);
+                object obj = ResourceManager.GetObject("AI_One_Left", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,29 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AIRight {
+        internal static System.Drawing.Bitmap AI_One_Right {
             get {
-                object obj = ResourceManager.GetObject("AIRight", resourceCulture);
+                object obj = ResourceManager.GetObject("AI_One_Right", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AI_Two_Left {
+            get {
+                object obj = ResourceManager.GetObject("AI_Two_Left", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AI_Two_Right {
+            get {
+                object obj = ResourceManager.GetObject("AI_Two_Right", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +123,9 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap HumanLeft {
+        internal static System.Drawing.Bitmap Human_One_Left {
             get {
-                object obj = ResourceManager.GetObject("HumanLeft", resourceCulture);
+                object obj = ResourceManager.GetObject("Human_One_Left", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,9 +133,29 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap HumanRight {
+        internal static System.Drawing.Bitmap Human_One_Right {
             get {
-                object obj = ResourceManager.GetObject("HumanRight", resourceCulture);
+                object obj = ResourceManager.GetObject("Human_One_Right", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Human_Two_Left {
+            get {
+                object obj = ResourceManager.GetObject("Human_Two_Left", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Human_Two_Right {
+            get {
+                object obj = ResourceManager.GetObject("Human_Two_Right", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

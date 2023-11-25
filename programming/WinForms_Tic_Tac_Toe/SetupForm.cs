@@ -1,5 +1,5 @@
 ﻿
-using System.Linq;
+using System.Resources;
 
 namespace WinFormsApp1;
 
@@ -14,23 +14,6 @@ public partial class SetupForm : Form
 
     readonly List<ChoiceItem> roster = new();
 
-    static Label AddLabel(Control parent, Point loc, string name, int tab, string text)
-    {
-        var label = new Label
-        {
-            AutoSize = true,
-            Location = loc,
-            Name = name,
-            Size = new Size(62, 15),
-            TabIndex = tab,
-            Text = text
-        };
-
-        parent.Controls.Add(label);
-
-        return label;
-    }
-
     public SetupForm()
     {
         InitializeComponent();
@@ -40,13 +23,16 @@ public partial class SetupForm : Form
 
         foreLeft = ColorExtensions.BlendOver(tintLeft, ForeColor);
         foreRight = ColorExtensions.BlendOver(tintRight, ForeColor);
-        foreLeftDim = ColorExtensions.BlendOver(UIColors.Black, foreLeft);
-        foreRightDim = ColorExtensions.BlendOver(foreRight, UIColors.Black);
+        foreLeftDim = ColorExtensions.BlendOver(UIColors.Dim, foreLeft);
+        foreRightDim = ColorExtensions.BlendOver(UIColors.Dim, foreRight);
 
         panelLeft.ForeColor = foreLeft;
         panelRight.ForeColor = foreRight;
         panelLeft.BackColor = UIColors.Transparent;
         panelRight.BackColor = UIColors.Transparent;
+
+        panelLeft.BackgroundImageLayout = 
+        panelRight.BackgroundImageLayout = ImageLayout.Stretch;
 
         button1.BackColor = theme.Light;
         button1.FlatAppearance.BorderSize = 0;
@@ -64,7 +50,25 @@ public partial class SetupForm : Form
 
         CreateChoiceLists();
 
-        // panelLeft.BackgroundImage = Resource.AILeft;
+        AppForm.ApplyDoubleBuffer(panelLeft);
+        AppForm.ApplyDoubleBuffer(panelRight);
+    }
+
+    static Label AddLabel(Control parent, Point loc, string name, int tab, string text)
+    {
+        var label = new Label
+        {
+            AutoSize = true,
+            Location = loc,
+            Name = name,
+            Size = new Size(62, 15),
+            TabIndex = tab,
+            Text = text
+        };
+
+        parent.Controls.Add(label);
+
+        return label;
     }
 
     void CreateChoiceLists()
@@ -132,20 +136,24 @@ public partial class SetupForm : Form
             MakeOnClickHandler(rec, roster);
     }
 
-    EventHandler MakeOnClickHandler(ChoiceItem choiceItem, List<ChoiceItem> roster)
+    void MakeOnClickHandler(ChoiceItem choiceItem, List<ChoiceItem> roster)
     {
         EventHandler handler = (object? sender, EventArgs e) =>
         {
-            choiceItem.chosen = true;
-
             var side = choiceItem.side;
-
             var rosterThisSide = roster.Where(itm => itm.side == side && itm != choiceItem);
             var rosterOtherSide = roster.Where(itm => itm.side != side);
 
+            var (panelThisSide, panelOtherSide) = side == ChoiceItem.Side.Left ? (panelLeft, panelRight) : (panelRight, panelLeft);
+
+            panelThisSide.BackgroundImage = GetBackgroundImage(choiceItem.rosterId, side);
+
+            choiceItem.chosen = true;
+            choiceItem.Activate();
+
             foreach (var rec in rosterThisSide)
             {
-                choiceItem.chosen = false;
+                rec.chosen = false;
                 rec.Deactivate();
             }
 
@@ -154,14 +162,22 @@ public partial class SetupForm : Form
             var mirrorItem = rosterOtherSide.FirstOrDefault(itm => itm.chosen && itm.rosterId == rosterId);
 
             if (mirrorItem != null)
-                foreach(var rec in rosterOtherSide) rec.Deactivate();
+            {
+                panelOtherSide.BackgroundImage = null;
+
+                mirrorItem.chosen = false;
+                foreach (var rec in rosterOtherSide) rec.Activate();
+            }
         };
 
         choiceItem.SetOnClickHandler(handler);
-
-        return handler;
     }
 
+    static Image? GetBackgroundImage(Game.Roster rosterId, ChoiceItem.Side side)
+    {
+        var imageName = $"{rosterId}_{side}";
+        return (Image?)Resource.ResourceManager.GetObject(imageName);
+    }
 
     private void button1_Click(object sender, EventArgs e)
     {
@@ -169,7 +185,7 @@ public partial class SetupForm : Form
     }
 }
 
-class ChoiceItem
+public class ChoiceItem
 {
     public bool chosen;
 
@@ -202,22 +218,26 @@ class ChoiceItem
 
     public void Activate()
     {
-        identity.Cursor = Cursors.Hand;
         identity.ForeColor = foreOn;
         origin.ForeColor = foreOn;
     }
     public void Deactivate()
     {
-        identity.Cursor = Cursors.Default;
         identity.ForeColor = foreOff;
         origin.ForeColor = foreOff;
     }
-    public void SetOnClickHandler(EventHandler handler) => identity.Click += handler;
+    public void SetOnClickHandler(EventHandler handler)
+    {
+        identity.Click += handler;
+        identity.Cursor = Cursors.Hand;
+    }
 
     public void Deconstruct(out Label _origin, out Label _identity)
     {
         _identity = identity;
         _origin = origin;
     }
+
+    public override string ToString() => $"{identity.Text} | {side} | chosen: {chosen}";
 }
 

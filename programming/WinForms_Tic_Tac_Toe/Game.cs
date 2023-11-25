@@ -4,7 +4,7 @@ namespace WinFormsApp1;
 /// <summary>
 /// Defines players roster, evaluates the board and winning conditions
 /// </summary>
-internal class Game
+public class Game
 {
     /// <summary>
     /// Pattern for human player names Human*, for AI players - AI*

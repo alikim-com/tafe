@@ -29,7 +29,7 @@ public class Utils
             {
                 dynamic dynObj = (dynamic)obj;
                 foreach (var rec in dynObj)
-                    outp += $"{rec.Key}: {rec.Value}";
+                    outp += $"{rec.Key}: {rec.Value}\n";
             }
 
         } else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
@@ -41,7 +41,7 @@ public class Utils
             {
                 dynamic dynObj = (dynamic)obj;
                 foreach (var rec in dynObj)
-                    outp += rec.ToString();
+                    outp += rec.ToString() + '\n';
             }
 
         } else
