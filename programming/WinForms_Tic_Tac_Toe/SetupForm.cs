@@ -13,7 +13,7 @@ public partial class SetupForm : Form
 
     public Color foreLeft, foreRight, foreLeftDim, foreRightDim;
 
-    readonly List<ChoiceItem> roster = new();
+    public static readonly List<ChoiceItem> roster = new();
 
     readonly ToolStripRendererOverride buttonRenderer;
 
@@ -29,6 +29,8 @@ public partial class SetupForm : Form
 
     public SetupForm()
     {
+        ControlBox = false;
+
         InitializeComponent();
 
         ForeColor = theme.Text;
@@ -247,15 +249,10 @@ public partial class SetupForm : Form
 
     private void ToolStrip_Click(object sender, EventArgs e)
     {
-        // toolStrip.Invalidate();
+        DialogResult = DialogResult.OK;
     }
     private void ToolStrip_MouseEnter(object sender, EventArgs e) => buttonRenderer.SetOverState(sender, true);
     private void ToolStrip_MouseLeave(object sender, EventArgs e) => buttonRenderer.SetOverState(sender, false);
-
-    private void button1_Click(object sender, EventArgs e)
-    {
-        DialogResult = DialogResult.OK;
-    }
 }
 
 public class ChoiceItem
@@ -349,6 +346,7 @@ public class ToolStripRendererOverride : ToolStripProfessionalRenderer
     public ToolStripRendererOverride(Control _parent)
     {
         parent = _parent;
+        this.RoundedEdges = false;
     }
 
     void UpdateColors(bool state)

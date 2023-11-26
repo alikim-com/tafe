@@ -69,6 +69,51 @@ public static class ColorExtensions
 
 public static class ImageExtensions
 {
+    /// <summary>
+    /// Best fit the current image into dstSize box while preserving its aspect ratio.<br/>
+    /// Paint the image over dst background at the specified offDst.
+    /// </summary>
+    public static Image GetOverlayOnBackground(this Image src,
+        Image dst,
+        Point dstOff,
+        Size dstSize,
+        Color? bg,
+        string hAlign,
+        string vAlign)
+    {
+        Size scaledSrc = GeomUtility.FitRect(dstSize, src.Size);
+        int offsetLeft = hAlign switch
+        {
+            "left" => 0,
+            "right" => dstSize.Width - scaledSrc.Width,
+            "center" => (dstSize.Width - scaledSrc.Width) / 2,
+            _ => throw new NotImplementedException($"GetOverlayOnBackground : hAlign '{hAlign}'"),
+        };
+        int offsetTop = vAlign switch
+        {
+            "top" => 0,
+            "bottom" => dstSize.Height - scaledSrc.Height,
+            "center" => (dstSize.Height - scaledSrc.Height) / 2,
+            _ => throw new NotImplementedException($"GetOverlayOnBackground : vAlign '{vAlign}'"),
+        };
+
+        using Graphics g = Graphics.FromImage(dst);
+
+        var rect = new Rectangle(dstOff, dstSize);
+        if (bg != null) {
+            using var brush = new SolidBrush(bg ?? Color.Transparent);
+            using var pen = new Pen(brush);
+            g.DrawRectangle(pen, rect);
+        }
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.DrawImage(src, offsetLeft + rect.Left, offsetTop + rect.Top, scaledSrc.Width, scaledSrc.Height);
+
+        return dst;
+    }
+
+    /// <summary>
+    /// Create new image of dstSize and best fit the current image into it while preserving its aspect ratio
+    /// </summary>
     public static Image GetOverlayOnBackground(this Image src,
         Size dstSize,
         Color? bg,
@@ -92,13 +137,12 @@ public static class ImageExtensions
         };
 
         Bitmap dst = new(dstSize.Width, dstSize.Height);
-        using (Graphics g = Graphics.FromImage(dst))
-        {
-            g.Clear(bg ?? Color.Transparent);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(src, offsetLeft, offsetTop, scaledSrc.Width, scaledSrc.Height);
-            g.Save();
-        }
+        using Graphics g = Graphics.FromImage(dst);
+
+        g.Clear(bg ?? Color.Transparent);
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.DrawImage(src, offsetLeft, offsetTop, scaledSrc.Width, scaledSrc.Height);
+
         return dst;
     }
 

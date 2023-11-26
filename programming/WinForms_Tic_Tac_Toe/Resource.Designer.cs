@@ -73,6 +73,16 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AI_One_Left_Head {
+            get {
+                object obj = ResourceManager.GetObject("AI_One_Left_Head", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AI_One_Right {
             get {
                 object obj = ResourceManager.GetObject("AI_One_Right", resourceCulture);
@@ -123,6 +133,16 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GameBackImg {
+            get {
+                object obj = ResourceManager.GetObject("GameBackImg", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Human_One_Left {
             get {
                 object obj = ResourceManager.GetObject("Human_One_Left", resourceCulture);
@@ -156,6 +176,16 @@ namespace WinFormsApp1 {
         internal static System.Drawing.Bitmap Human_Two_Right {
             get {
                 object obj = ResourceManager.GetObject("Human_Two_Right", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Human_Two_Right_Head {
+            get {
+                object obj = ResourceManager.GetObject("Human_Two_Right_Head", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

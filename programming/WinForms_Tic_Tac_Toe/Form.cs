@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace WinFormsApp1;
 
@@ -20,6 +21,8 @@ public partial class AppForm : Form
 
     readonly LabelManager labMgr;
 
+    static readonly Dictionary<KeyValuePair<Game.Roster, Game.Roster>, Image> mainBg = new();
+
     static public void ApplyDoubleBuffer(Control control)
     {
         control.GetType().InvokeMember(
@@ -30,8 +33,6 @@ public partial class AppForm : Form
     }
 
     UIColors.ColorTheme theme;
-
-
 
     void InitializeMenu()
     {
@@ -91,14 +92,15 @@ public partial class AppForm : Form
         InitializeMenu();
 
         // for scaling font
-        lChoiceWidth = choice.Width;
-        lChoiceFontSize = choice.Font.Size;
+        //lChoiceWidth = choice.Width;
+        //lChoiceFontSize = choice.Font.Size;
 
         // prevent backgound flickering for components
         Control[] dbuffed =
             new Control[]
             {
-                pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice
+                tLayout,
+               //pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice
             };
 
         foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
@@ -129,6 +131,8 @@ public partial class AppForm : Form
         // BLOCKS: player setup pop-up 
         SetupFormPopup();
 
+        CreateBackground();
+
         // raise reset event
         Game.Reset();
 
@@ -150,6 +154,51 @@ public partial class AppForm : Form
         EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
     }
 
+    void CreateBackground()
+    {
+        //mainBg.Add(new(Game.Roster.AI_One, Game.Roster.Human_Two), Resource.AI_Two_Left);
+
+        Image ? leftHead = null;
+        Image? rightHead = null;
+        foreach (var choiceItem in SetupForm.roster)
+        {
+            if (!choiceItem.chosen) continue;
+            var side = choiceItem.side;
+            var headImage = (Image?)Resource.ResourceManager.GetObject($"{choiceItem.rosterId}_{side}_Head");
+            if (side == ChoiceItem.Side.Left)
+                leftHead = headImage;
+            else
+                rightHead = headImage;
+
+            if (leftHead != null && rightHead != null)
+            {
+                int botPanelHeight = 206;
+                var botPanelOff = new Point(0, Resource.GameBackImg.Height - botPanelHeight);
+                var botPanelSize = new Size(Resource.GameBackImg.Width, botPanelHeight);
+
+                BackgroundImage = Resource.GameBackImg;
+                using var g = Graphics.FromImage(BackgroundImage);
+
+                Color dimColor = Color.FromArgb(128, 0, 0, 0);
+                var rect = new Rectangle(botPanelOff, botPanelSize);
+
+                using var brush = new SolidBrush(dimColor);
+                g.FillRectangle(brush, rect);
+
+                leftHead.GetOverlayOnBackground(
+                    BackgroundImage,
+                    botPanelOff,
+                    new Size(BackgroundImage.Width / 2, botPanelHeight),
+                    null,
+                    "left",
+                    "top");
+
+                return;
+            }
+        }
+
+    }
+
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
     {
         if (e.Control == tLayout)
@@ -168,27 +217,27 @@ public partial class AppForm : Form
                 { PanelWrapper.BgMode.MouseLeave, defColor }
             };
 
-            pwLeft = new PanelWrapper(
-                pLeft,
-                Resource.FaceLeft,
-                "left",
-                "top",
-                colorsLeft,
-                new Control[] { sTL, sBL },
-                CellWrapper.BgMode.Player1
-            );
-            pwRight = new PanelWrapper(
-                pRight,
-                Resource.FaceRight,
-                "right",
-                "top",
-                colorsRight,
-                new Control[] { sTR, sBR },
-                CellWrapper.BgMode.Player2
-            );
+            //pwLeft = new PanelWrapper(
+            //    pLeft,
+            //    Resource.FaceLeft,
+            //    "left",
+            //    "top",
+            //    colorsLeft,
+            //    new Control[] { sTL, sBL },
+            //    CellWrapper.BgMode.Player1
+            //);
+            //pwRight = new PanelWrapper(
+            //    pRight,
+            //    Resource.FaceRight,
+            //    "right",
+            //    "top",
+            //    colorsRight,
+            //    new Control[] { sTR, sBR },
+            //    CellWrapper.BgMode.Player2
+            //);
 
             // data bindings
-            choice.DataBindings.Add(new Binding("Text", labMgr, "ChoicePanel"));
+          //  choice.DataBindings.Add(new Binding("Text", labMgr, "ChoicePanel"));
             info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanel"));
 
             // --------- board cells ----------
@@ -277,9 +326,9 @@ public partial class AppForm : Form
 
             // adjust components
 
-            float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
-            choice.Font = new Font(choice.Font.FontFamily, newFontSize);
-            info.Font = new Font(info.Font.FontFamily, newFontSize);
+            //float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
+            //choice.Font = new Font(choice.Font.FontFamily, newFontSize);
+            //info.Font = new Font(info.Font.FontFamily, newFontSize);
 
         }
 

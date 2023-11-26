@@ -121,6 +121,9 @@
   <data name="AI_One_Left" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>assets\setup_ai_left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AI_One_Left_Head" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>assets\game_ai_left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="AI_One_Right" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>assets\setup_ai_right2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -136,6 +139,9 @@
   <data name="FaceRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>assets\face_right_alpha.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="GameBackImg" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>assets\game_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Human_One_Left" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>assets\setup_human_left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -147,6 +153,9 @@
   </data>
   <data name="Human_Two_Right" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>assets\setup_human_right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Human_Two_Right_Head" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>assets\game_human_right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SetupBackImg" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>assets\setup_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
