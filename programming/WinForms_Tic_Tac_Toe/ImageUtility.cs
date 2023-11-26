@@ -38,7 +38,7 @@ public static class ColorExtensions
     /// <summary>
     /// Blends top ARGB pixel over bottom ARGB pixel
     /// --- no pre ---
-    /// a = a1 + a2 - a1 * a2
+    /// a = a1 + a2 - a1 * a2 = a2 + a1 * (1 - a2)
     /// aR = R2 * a2 + R1 * a1 * (1 - a2)
     /// R = aR / a
     /// ---  pre  ---
@@ -77,9 +77,9 @@ public static class ImageExtensions
         Image dst,
         Point dstOff,
         Size dstSize,
-        Color? bg,
         string hAlign,
-        string vAlign)
+        string vAlign,
+        string blendMode = "add")
     {
         Size scaledSrc = GeomUtility.FitRect(dstSize, src.Size);
         int offsetLeft = hAlign switch
@@ -99,14 +99,45 @@ public static class ImageExtensions
 
         using Graphics g = Graphics.FromImage(dst);
 
-        var rect = new Rectangle(dstOff, dstSize);
-        if (bg != null) {
-            using var brush = new SolidBrush(bg ?? Color.Transparent);
-            using var pen = new Pen(brush);
-            g.DrawRectangle(pen, rect);
+        // a1 = 1
+        // a = a2 + (1 - a2) = 1
+        // R = R2 * a2 + R1 * (1 - a2) -> (srcAlpha, 1 - srcAlpha)
+        if (blendMode == "over")
+        {
+            var dstBitmap = (Bitmap)dst;
+            var scaledSrcImg = new Bitmap(scaledSrc.Width, scaledSrc.Height);
+            using Graphics sg = Graphics.FromImage(scaledSrcImg);
+            sg.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            sg.DrawImage(src, 0, 0, scaledSrc.Width, scaledSrc.Height);
+
+            // blend
+            double norm = 1.0 / 255;
+            int dstLeft = offsetLeft + dstOff.X;
+            int dstTop = offsetTop + dstOff.Y;
+            for (int y = 0; y < scaledSrc.Height; y++)
+            {
+                int dstY = dstTop + y;
+                for (int x = 0; x < scaledSrc.Width; x++)
+                {
+                    int dstX = dstLeft + x;
+                    Color srcARGB = scaledSrcImg.GetPixel(x, y);
+                    Color dstARGB = dstBitmap.GetPixel(dstX, dstY);
+                    double srcAlpha = srcARGB.A * norm;
+                    double oneMinusSrcAlpha = 1 - srcAlpha;
+                    Color blendOver = Color.FromArgb(
+                        (int)(srcARGB.R * srcAlpha + dstARGB.R * oneMinusSrcAlpha),
+                        (int)(srcARGB.G * srcAlpha + dstARGB.G * oneMinusSrcAlpha),
+                        (int)(srcARGB.B * srcAlpha + dstARGB.B * oneMinusSrcAlpha)
+                    );
+                    dstBitmap.SetPixel(dstX, dstY, blendOver);
+                }
+            }
+
+        } else
+        {
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(src, offsetLeft + dstOff.X, offsetTop + dstOff.Y, scaledSrc.Width, scaledSrc.Height);
         }
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        g.DrawImage(src, offsetLeft + rect.Left, offsetTop + rect.Top, scaledSrc.Width, scaledSrc.Height);
 
         return dst;
     }
@@ -136,7 +167,7 @@ public static class ImageExtensions
             _ => throw new NotImplementedException($"GetOverlayOnBackground : vAlign '{vAlign}'"),
         };
 
-        Bitmap dst = new(dstSize.Width, dstSize.Height);
+        var dst = new Bitmap(dstSize.Width, dstSize.Height);
         using Graphics g = Graphics.FromImage(dst);
 
         g.Clear(bg ?? Color.Transparent);
@@ -178,8 +209,8 @@ public static class ImageExtensions
             throw new NotImplementedException($"Image.Desaturate : mode '{mode}'");
 
         int w = src.Width, h = src.Height;
-        Bitmap srcBmp = new Bitmap(src);
-        Bitmap dst = new Bitmap(w, h);
+        var srcBmp = new Bitmap(src);
+        var dst = new Bitmap(w, h);
 
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)

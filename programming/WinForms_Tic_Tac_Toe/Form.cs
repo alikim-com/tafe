@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace WinFormsApp1;
 
@@ -156,45 +155,61 @@ public partial class AppForm : Form
 
     void CreateBackground()
     {
-        //mainBg.Add(new(Game.Roster.AI_One, Game.Roster.Human_Two), Resource.AI_Two_Left);
+        var chosen = SetupForm.roster.Where(itm => itm.chosen);
+        var chosenArr = chosen.ToArray();
+        if (chosenArr.Length != 2) throw new Exception($"Form.CreateBackground : wrong number of players '{chosenArr.Length}'");
 
-        Image ? leftHead = null;
-        Image? rightHead = null;
-        foreach (var choiceItem in SetupForm.roster)
-        {
-            if (!choiceItem.chosen) continue;
-            var side = choiceItem.side;
-            var headImage = (Image?)Resource.ResourceManager.GetObject($"{choiceItem.rosterId}_{side}_Head");
-            if (side == ChoiceItem.Side.Left)
-                leftHead = headImage;
-            else
-                rightHead = headImage;
+        var firstChosenIsLeft = chosenArr[0].side == ChoiceItem.Side.Left;
 
-            if (leftHead != null && rightHead != null)
+        KeyValuePair<Game.Roster, Game.Roster> leftRightBg = firstChosenIsLeft ? 
+            new(chosenArr[0].rosterId, chosenArr[1].rosterId) :
+            new(chosenArr[1].rosterId, chosenArr[0].rosterId);
+
+        foreach(var (_leftRightBg, bgImage) in mainBg)
+            if(_leftRightBg.Key == leftRightBg.Key && _leftRightBg.Value == leftRightBg.Value) // cache exists
             {
-                int botPanelHeight = 206;
-                var botPanelOff = new Point(0, Resource.GameBackImg.Height - botPanelHeight);
-                var botPanelSize = new Size(Resource.GameBackImg.Width, botPanelHeight);
-
-                BackgroundImage = Resource.GameBackImg;
-                using var g = Graphics.FromImage(BackgroundImage);
-
-                Color dimColor = Color.FromArgb(128, 0, 0, 0);
-                var rect = new Rectangle(botPanelOff, botPanelSize);
-
-                using var brush = new SolidBrush(dimColor);
-                g.FillRectangle(brush, rect);
-
-                leftHead.GetOverlayOnBackground(
-                    BackgroundImage,
-                    botPanelOff,
-                    new Size(BackgroundImage.Width / 2, botPanelHeight),
-                    null,
-                    "left",
-                    "top");
-
+                BackgroundImage = bgImage;
                 return;
             }
+
+        Image?[] headImage = chosen.Select(itm => 
+            (Image?)Resource.ResourceManager.GetObject($"{itm.rosterId}_{itm.side}_Head")).ToArray();
+
+        KeyValuePair<Image?, Image?> leftRightImage = firstChosenIsLeft ?
+            new(headImage[0], headImage[1]) : new(headImage[1], headImage[0]);
+
+        if (leftRightImage.Key != null && leftRightImage.Value != null)
+        {
+            int botPanelHeight = 206;
+            var botPanelOff = new Point(0, Resource.GameBackImg.Height - botPanelHeight);
+            var botPanelSize = new Size(Resource.GameBackImg.Width, botPanelHeight);
+
+            BackgroundImage = Resource.GameBackImg;
+            using var g = Graphics.FromImage(BackgroundImage);
+
+            Color dimColor = Color.FromArgb(128, 0, 0, 0);
+            var rect = new Rectangle(botPanelOff, botPanelSize);
+
+            using var brush = new SolidBrush(dimColor);
+            g.FillRectangle(brush, rect);
+
+            leftRightImage.Key.GetOverlayOnBackground(
+                BackgroundImage,
+                botPanelOff,
+                new Size(BackgroundImage.Width / 2, botPanelHeight),
+                "left",
+                "top");
+
+            leftRightImage.Value.GetOverlayOnBackground(
+                BackgroundImage,
+                new Point(Resource.GameBackImg.Width / 2, botPanelOff.Y),
+                new Size(BackgroundImage.Width / 2, botPanelHeight),
+                "right",
+                "top");
+
+            mainBg.Add(leftRightBg, BackgroundImage);
+
+            return;
         }
 
     }
@@ -237,7 +252,7 @@ public partial class AppForm : Form
             //);
 
             // data bindings
-          //  choice.DataBindings.Add(new Binding("Text", labMgr, "ChoicePanel"));
+            //  choice.DataBindings.Add(new Binding("Text", labMgr, "ChoicePanel"));
             info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanel"));
 
             // --------- board cells ----------
