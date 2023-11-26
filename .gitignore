@@ -1,4 +1,6 @@
-**/obj/
-**/bin/
 **/.vs/
+**/obj/
+programming/**/bin/*/*/*
+!programming/**/*.dll
+!programming/**/*.exe
 !programming/__dll/vcode/utils/bin/
