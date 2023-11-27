@@ -1,6 +1,5 @@
 ﻿
 using System.Drawing.Drawing2D;
-using static System.Windows.Forms.AxHost;
 
 namespace WinFormsApp1;
 
@@ -8,8 +7,8 @@ public partial class SetupForm : Form
 {
     static public readonly UIColors.ColorTheme theme = UIColors.Steel;
 
-    static readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
-    static readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
+    public static readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
+    public static readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
 
     public Color foreLeft, foreRight, foreLeftDim, foreRightDim;
 
@@ -253,6 +252,7 @@ public partial class SetupForm : Form
 
     private void ToolStrip_Click(object sender, EventArgs e)
     {
+        if (buttonRenderer.Disabled) return;
         DialogResult = DialogResult.OK;
     }
     private void ToolStrip_MouseEnter(object sender, EventArgs e) => buttonRenderer.SetOverState(sender, true);
@@ -332,7 +332,7 @@ public class ToolStripRendererOverride : ToolStripProfessionalRenderer
     bool _disabled = false;
     public bool Disabled
     {
-        private get => _disabled;
+        get => _disabled;
         set
         {
             if (value != _disabled)

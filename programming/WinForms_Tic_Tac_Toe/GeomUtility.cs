@@ -1,4 +1,5 @@
-﻿namespace geomUtility;
+﻿
+namespace geomUtility;
 
 public class GeomUtility
 {
@@ -24,39 +25,76 @@ public class GeomUtility
 
 }
 
+public class RatioPosControl
+{
+    public enum Anchor
+    {
+        Left, Top, Right, Bottom
+    }
+
+    public readonly Anchor hor, ver;
+
+    public readonly Control control;
+    public readonly Control parent;
+
+    public readonly RectangleF ratioAnchors;
+
+    public RatioPosControl(Control _control, Control _parent, Anchor _hor, Anchor _ver)
+    {
+        control = _control;
+        parent = _parent;
+        hor = _hor;
+        ver = _ver;
+
+        var clSize = parent.ClientSize;
+        ratioAnchors = new RectangleF(
+            (float)control.Location.X / clSize.Width,
+            (float)control.Location.Y / clSize.Height,
+            (float)control.ClientSize.Width / clSize.Width,
+            (float)control.ClientSize.Height / clSize.Height
+        );
+    }
+}
+
 /// <summary>
 /// For keeping fractional position of a control inside its parent
 /// </summary>
 public class RatioPosition
 {
-    static readonly Dictionary<Control, Control> fam = new();
-    static readonly Dictionary<Control, RectangleF> anchors = new();
+    static public readonly List<RatioPosControl> rpControls = new();
 
-    static public void Add(Control ctrl, Control parent)
+    static public void Add(Control ctrl, Control parent, RatioPosControl.Anchor hor, RatioPosControl.Anchor ver) =>
+        rpControls.Add(new RatioPosControl(ctrl, parent, hor, ver));       
+
+    static public void Remove(Control control) => rpControls.RemoveAll(rpCtrl => rpCtrl.control == control);
+
+    static public void Update(Control control)
     {
-        fam.Add(ctrl, parent);
-        var clSize = parent.ClientSize;
-        anchors.Add(ctrl, new RectangleF(
-            (float)ctrl.Location.X / clSize.Width,
-            (float)ctrl.Location.Y / clSize.Height,
-            (float)ctrl.ClientSize.Width / clSize.Width,
-            (float)ctrl.ClientSize.Height / clSize.Height
-        ));
-    }
+        var rpCtrl = rpControls.Find(rpCtrl => rpCtrl.control == control);
+        if (rpCtrl == null) return;
 
-    static public void Remove(Control ctrl)
-    {
-        fam.Remove(ctrl); 
-        anchors.Remove(ctrl);
-    }
+        var ctrl = rpCtrl.control;
+        var rect = rpCtrl.ratioAnchors;
+        var clSize = rpCtrl.parent.ClientSize;
+        var hor = rpCtrl.hor; 
+        var ver = rpCtrl.ver;
 
-    static public void Update(Control ctrl)
-    {
-        if (!fam.TryGetValue(ctrl, out Control? parent) || !anchors.TryGetValue(ctrl, out RectangleF rect)) return;
+        int x;
+        if (hor == RatioPosControl.Anchor.Left)
+            x = (int)(rect.Left * clSize.Width);
+        else if (hor == RatioPosControl.Anchor.Right)
+            x = (int)(rect.Right * clSize.Width) - ctrl.Width;
+        else
+            throw new Exception($"RatioPosition.Update : wrong hor Anchor type '{hor}'");
 
-        ctrl.Location = new Point(
-            (int)(rect.Left * parent.ClientSize.Width),
-            (int)(rect.Top * parent.ClientSize.Height)
-        );
+        int y;
+        if (ver == RatioPosControl.Anchor.Top)
+            y = (int)(rect.Top * clSize.Height);
+        else if (ver == RatioPosControl.Anchor.Bottom)
+            y = (int)(rect.Bottom * clSize.Height) - ctrl.Height;
+        else
+            throw new Exception($"RatioPosition.Update : wrong ver Anchor type '{ver}'");
+
+        rpCtrl.control.Location = new Point(x, y);
     }
 }

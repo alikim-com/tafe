@@ -31,6 +31,7 @@ partial class AppForm
     {
         tLayout = new TableLayoutPanel();
         info = new Label();
+        labelVS = new Label();
         labelLeft = new Label();
         labelRight = new Label();
         menuStrip1 = new MenuStrip();
@@ -56,6 +57,7 @@ partial class AppForm
         tLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333359F));
         tLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333359F));
         tLayout.Controls.Add(info, 0, 3);
+        tLayout.Controls.Add(labelVS, 1, 4);
         tLayout.Dock = DockStyle.Fill;
         tLayout.Location = new Point(0, 27);
         tLayout.Margin = new Padding(0);
@@ -82,11 +84,24 @@ partial class AppForm
         info.TabIndex = 3;
         info.TextAlign = ContentAlignment.TopCenter;
         // 
+        // labelVS
+        // 
+        labelVS.AutoSize = true;
+        labelVS.Dock = DockStyle.Fill;
+        labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
+        labelVS.ForeColor = Color.FromArgb(200, 200, 200);
+        labelVS.Location = new Point(166, 520);
+        labelVS.Margin = new Padding(0);
+        labelVS.Name = "labelVS";
+        labelVS.Size = new Size(166, 203);
+        labelVS.TabIndex = 4;
+        labelVS.Text = "VS";
+        labelVS.TextAlign = ContentAlignment.MiddleCenter;
+        // 
         // labelLeft
         // 
         labelLeft.AutoSize = true;
         labelLeft.BackColor = Color.Thistle;
-        labelLeft.ForeColor = SystemColors.ControlText;
         labelLeft.Location = new Point(0, 520);
         labelLeft.Margin = new Padding(0);
         labelLeft.Name = "labelLeft";
@@ -185,7 +200,7 @@ partial class AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.Purple;
+        BackColor = Color.FromArgb(64, 0, 64);
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(500, 750);
         Controls.Add(labelLeft);
@@ -225,4 +240,5 @@ partial class AppForm
     private ToolStripTextBox menuDummy;
     private Label labelLeft;
     private Label labelRight;
+    private Label labelVS;
 }

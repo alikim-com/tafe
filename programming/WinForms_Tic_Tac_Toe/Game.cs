@@ -18,7 +18,7 @@ public class Game
         AI_Two
     }
 
-    static public Dictionary<Roster, string> rosterIdentity = new()
+    static public readonly Dictionary<Roster, string> rosterIdentity = new()
     {
         { Roster.Human_One, "Ironheart" },
         { Roster.Human_Two, "Silverlight" },

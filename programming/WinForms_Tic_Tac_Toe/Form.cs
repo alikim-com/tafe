@@ -102,7 +102,7 @@ public partial class AppForm : Form
 
         // prevent backgound flickering components
         var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight };
-        foreach(var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
+        foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
 
         // subscriptions to reset from Game.Reset()
         EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
@@ -133,6 +133,7 @@ public partial class AppForm : Form
         // retrieve players list
         AssertPlayers();
 
+        // create player defined bg
         CreateBackground();
 
         // adjust labels & setup percentage positioning
@@ -157,6 +158,8 @@ public partial class AppForm : Form
             );
         };
         EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
+
+        // menuHelpAbout.Click += (object? sender, EventArgs e) => { labelRight.Text += "add some text to it"; };
     }
 
     void AssertPlayers()
@@ -182,6 +185,20 @@ public partial class AppForm : Form
                 return;
             }
 
+        BackgroundImage = Resource.GameBackImg;
+
+        int botPanelHeight = 206;
+        var botPanelOff = new Point(0, Resource.GameBackImg.Height - botPanelHeight);
+        var botPanelSize = new Size(Resource.GameBackImg.Width, botPanelHeight);
+
+        var rect = new Rectangle(botPanelOff, botPanelSize);
+
+        Color dimColor = Color.FromArgb(128, 0, 0, 0);
+        using var brush = new SolidBrush(dimColor);
+        using var g = Graphics.FromImage(BackgroundImage);
+
+        g.FillRectangle(brush, rect);
+
         Image?[] headImage = chosen.Select(itm =>
             (Image?)Resource.ResourceManager.GetObject($"{itm.rosterId}_{itm.side}_Head")).ToArray();
 
@@ -190,19 +207,6 @@ public partial class AppForm : Form
 
         if (leftRightImage.Key != null && leftRightImage.Value != null)
         {
-            int botPanelHeight = 206;
-            var botPanelOff = new Point(0, Resource.GameBackImg.Height - botPanelHeight);
-            var botPanelSize = new Size(Resource.GameBackImg.Width, botPanelHeight);
-
-            BackgroundImage = Resource.GameBackImg;
-            using var g = Graphics.FromImage(BackgroundImage);
-
-            Color dimColor = Color.FromArgb(128, 0, 0, 0);
-            var rect = new Rectangle(botPanelOff, botPanelSize);
-
-            using var brush = new SolidBrush(dimColor);
-            g.FillRectangle(brush, rect);
-
             leftRightImage.Key.GetOverlayOnBackground(
                 BackgroundImage,
                 botPanelOff,
@@ -226,18 +230,36 @@ public partial class AppForm : Form
 
     void SetupLabels()
     {
-        var menuHeight = menuStrip1.Size.Height;
+        Color foreLeft = ColorExtensions.BlendOver(SetupForm.tintLeft, theme.Text);
+        Color foreRight = ColorExtensions.BlendOver(SetupForm.tintRight, theme.Text);
+
+        labelLeft.ForeColor = foreLeft;
+        labelRight.ForeColor = foreRight;
+        labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
+        labelLeft.Font = labelRight.Font = UIFonts.regular;
+
+        var (rIdLeft, rIdRight) = firstChosenIsLeft ?
+            (chosenArr[0].rosterId, chosenArr[1].rosterId) : (chosenArr[1].rosterId, chosenArr[0].rosterId);
+
+        labelLeft.Text = Game.rosterIdentity[rIdLeft];
+        labelRight.Text = Game.rosterIdentity[rIdRight];
+
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
+
+        int botPanelHeight = 206;
         var off = new Point(160, 50);
-        labelLeft.Location = new Point(labelLeft.Location.X + off.X, labelLeft.Location.Y + menuHeight + off.Y);
-        labelRight.Location = new Point(labelRight.Location.X, labelRight.Location.Y + menuHeight);
-        RatioPosition.Add(labelLeft, this);
+        labelLeft.Location = new Point(off.X, ClientSize.Height - botPanelHeight + off.Y);
+        labelRight.Location = new Point(ClientSize.Width - labelRight.Width - off.X, ClientSize.Height - labelRight.Height - off.Y);
+
+        RatioPosition.Add(labelLeft, this, RatioPosControl.Anchor.Left, RatioPosControl.Anchor.Top);
+        RatioPosition.Add(labelRight, this, RatioPosControl.Anchor.Right, RatioPosControl.Anchor.Bottom);
     }
 
     void FormAspect_ClientSizeChanged(object? sender, EventArgs e)
     {
         // adjust components
         RatioPosition.Update(labelLeft);
+        RatioPosition.Update(labelRight);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
