@@ -6,7 +6,7 @@ namespace WinFormsApp1;
 public partial class AppForm : Form
 {
     double cRatio; // main window
-    Size marginSize; // non-client area
+    Size ncSize; // non-client area
 
     readonly int lChoiceWidth;
     readonly float lChoiceFontSize;
@@ -61,6 +61,12 @@ public partial class AppForm : Form
 
     SetupForm? setupForm;
 
+    IEnumerable<ChoiceItem> chosen = Enumerable.Empty<ChoiceItem>();
+
+    ChoiceItem[] chosenArr = Array.Empty<ChoiceItem>();
+
+    bool firstChosenIsLeft = false;
+
     void SetupFormPopup()
     {
         setupForm ??= new SetupForm();
@@ -94,15 +100,9 @@ public partial class AppForm : Form
         //lChoiceWidth = choice.Width;
         //lChoiceFontSize = choice.Font.Size;
 
-        // prevent backgound flickering for components
-        Control[] dbuffed =
-            new Control[]
-            {
-                tLayout,
-               //pLeft, pRight, tLayout, tSplit, sTL, sTR, sBL, sBR, choice
-            };
-
-        foreach (var ctrl in dbuffed) ApplyDoubleBuffer(ctrl);
+        // prevent backgound flickering components
+        var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight };
+        foreach(var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
 
         // subscriptions to reset from Game.Reset()
         EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
@@ -130,7 +130,13 @@ public partial class AppForm : Form
         // BLOCKS: player setup pop-up 
         SetupFormPopup();
 
+        // retrieve players list
+        AssertPlayers();
+
         CreateBackground();
+
+        // adjust labels & setup percentage positioning
+        SetupLabels();
 
         // raise reset event
         Game.Reset();
@@ -153,26 +159,30 @@ public partial class AppForm : Form
         EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
     }
 
+    void AssertPlayers()
+    {
+        chosen = SetupForm.roster.Where(itm => itm.chosen);
+        chosenArr = chosen.ToArray();
+        if (chosenArr.Length != 2)
+            throw new Exception($"Form.CreateBackground : wrong number of players '{chosenArr.Length}'");
+
+        firstChosenIsLeft = chosenArr[0].side == ChoiceItem.Side.Left;
+    }
+
     void CreateBackground()
     {
-        var chosen = SetupForm.roster.Where(itm => itm.chosen);
-        var chosenArr = chosen.ToArray();
-        if (chosenArr.Length != 2) throw new Exception($"Form.CreateBackground : wrong number of players '{chosenArr.Length}'");
-
-        var firstChosenIsLeft = chosenArr[0].side == ChoiceItem.Side.Left;
-
-        KeyValuePair<Game.Roster, Game.Roster> leftRightBg = firstChosenIsLeft ? 
+        KeyValuePair<Game.Roster, Game.Roster> leftRightBg = firstChosenIsLeft ?
             new(chosenArr[0].rosterId, chosenArr[1].rosterId) :
             new(chosenArr[1].rosterId, chosenArr[0].rosterId);
 
-        foreach(var (_leftRightBg, bgImage) in mainBg)
-            if(_leftRightBg.Key == leftRightBg.Key && _leftRightBg.Value == leftRightBg.Value) // cache exists
+        foreach (var (_leftRightBg, bgImage) in mainBg)
+            if (_leftRightBg.Key == leftRightBg.Key && _leftRightBg.Value == leftRightBg.Value) // cache exists
             {
                 BackgroundImage = bgImage;
                 return;
             }
 
-        Image?[] headImage = chosen.Select(itm => 
+        Image?[] headImage = chosen.Select(itm =>
             (Image?)Resource.ResourceManager.GetObject($"{itm.rosterId}_{itm.side}_Head")).ToArray();
 
         KeyValuePair<Image?, Image?> leftRightImage = firstChosenIsLeft ?
@@ -212,6 +222,22 @@ public partial class AppForm : Form
             return;
         }
 
+    }
+
+    void SetupLabels()
+    {
+        var menuHeight = menuStrip1.Size.Height;
+        labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
+        var off = new Point(160, 50);
+        labelLeft.Location = new Point(labelLeft.Location.X + off.X, labelLeft.Location.Y + menuHeight + off.Y);
+        labelRight.Location = new Point(labelRight.Location.X, labelRight.Location.Y + menuHeight);
+        RatioPosition.Add(labelLeft, this);
+    }
+
+    void FormAspect_ClientSizeChanged(object? sender, EventArgs e)
+    {
+        // adjust components
+        RatioPosition.Update(labelLeft);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -281,10 +307,9 @@ public partial class AppForm : Form
 
     void FormAspect_Load(object sender, EventArgs e)
     {
-        marginSize = Size - ClientSize;
+        ncSize = Size - ClientSize;
         cRatio = (double)ClientSize.Width / ClientSize.Height;
     }
-
 
     // ---------------   constant client aspect ratio   ---------------
 
@@ -321,8 +346,8 @@ public partial class AppForm : Form
                 case WMSZ.LEFT:
                 case WMSZ.RIGHT:
                     // width has changed, adjust height
-                    newWidth = rc.Right - rc.Left - marginSize.Width;
-                    newHeight = (int)(newWidth / cRatio) + marginSize.Height;
+                    newWidth = rc.Right - rc.Left - ncSize.Width;
+                    newHeight = (int)(newWidth / cRatio) + ncSize.Height;
                     rc.Bottom = rc.Top + newHeight;
                     break;
                 case WMSZ.TOP:
@@ -332,14 +357,12 @@ public partial class AppForm : Form
                 case WMSZ.BOTTOMLEFT:
                 case WMSZ.BOTTOMRIGHT:
                     // height has changed, adjust width
-                    newHeight = rc.Bottom - rc.Top - marginSize.Height;
-                    newWidth = (int)(newHeight * cRatio) + marginSize.Width;
+                    newHeight = rc.Bottom - rc.Top - ncSize.Height;
+                    newWidth = (int)(newHeight * cRatio) + ncSize.Width;
                     rc.Right = rc.Left + newWidth;
                     break;
             }
             Marshal.StructureToPtr(rc, m.LParam, true);
-
-            // adjust components
 
             //float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
             //choice.Font = new Font(choice.Font.FontFamily, newFontSize);

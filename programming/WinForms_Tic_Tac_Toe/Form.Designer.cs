@@ -31,6 +31,8 @@ partial class AppForm
     {
         tLayout = new TableLayoutPanel();
         info = new Label();
+        labelLeft = new Label();
+        labelRight = new Label();
         menuStrip1 = new MenuStrip();
         menuLoad = new ToolStripMenuItem();
         menuLoadOpen = new ToolStripMenuItem();
@@ -79,6 +81,30 @@ partial class AppForm
         info.Size = new Size(500, 43);
         info.TabIndex = 3;
         info.TextAlign = ContentAlignment.TopCenter;
+        // 
+        // labelLeft
+        // 
+        labelLeft.AutoSize = true;
+        labelLeft.BackColor = Color.Thistle;
+        labelLeft.ForeColor = SystemColors.ControlText;
+        labelLeft.Location = new Point(0, 520);
+        labelLeft.Margin = new Padding(0);
+        labelLeft.Name = "labelLeft";
+        labelLeft.Size = new Size(52, 15);
+        labelLeft.TabIndex = 4;
+        labelLeft.Text = "labelLeft";
+        // 
+        // labelRight
+        // 
+        labelRight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        labelRight.AutoSize = true;
+        labelRight.BackColor = Color.Thistle;
+        labelRight.Location = new Point(440, 708);
+        labelRight.Margin = new Padding(0);
+        labelRight.Name = "labelRight";
+        labelRight.Size = new Size(60, 15);
+        labelRight.TabIndex = 4;
+        labelRight.Text = "labelRight";
         // 
         // menuStrip1
         // 
@@ -159,9 +185,11 @@ partial class AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(0, 0, 0);
+        BackColor = Color.Purple;
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(500, 750);
+        Controls.Add(labelLeft);
+        Controls.Add(labelRight);
         Controls.Add(tLayout);
         Controls.Add(menuStrip1);
         MainMenuStrip = menuStrip1;
@@ -170,7 +198,9 @@ partial class AppForm
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Tic-Tac-Toe";
         Load += FormAspect_Load;
+        ClientSizeChanged += FormAspect_ClientSizeChanged;
         tLayout.ResumeLayout(false);
+        tLayout.PerformLayout();
         menuStrip1.ResumeLayout(false);
         menuStrip1.PerformLayout();
         ResumeLayout(false);
@@ -193,4 +223,6 @@ partial class AppForm
     private ToolStripLabel menuLabel;
     private ToolStripTextBox menuLayout;
     private ToolStripTextBox menuDummy;
+    private Label labelLeft;
+    private Label labelRight;
 }

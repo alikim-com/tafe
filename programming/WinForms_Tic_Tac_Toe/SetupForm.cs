@@ -29,6 +29,9 @@ public partial class SetupForm : Form
 
     public SetupForm()
     {
+        // prevent main window flickering
+        DoubleBuffered = true;
+
         ControlBox = false;
 
         InitializeComponent();
@@ -70,13 +73,14 @@ public partial class SetupForm : Form
 
         UpdateButton(btnMessage.Both_Missing);
 
+        AppForm.ApplyDoubleBuffer(panelLeft);
+        AppForm.ApplyDoubleBuffer(panelRight);
+
         panelLeft.ResumeLayout(false);
         panelRight.ResumeLayout(false);
         panelLeft.PerformLayout();
         panelRight.PerformLayout();
 
-        AppForm.ApplyDoubleBuffer(panelLeft);
-        AppForm.ApplyDoubleBuffer(panelRight);
     }
 
     static Label AddLabel(Control parent, Point loc, string name, int tab, string text)

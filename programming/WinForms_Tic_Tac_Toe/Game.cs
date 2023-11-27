@@ -84,7 +84,7 @@ public class Game
                 update.Add(new Point(i, j), board[i, j]);
 
         // sync the board
-        // also allows to save/load games TODO
+        // also allows to save/load games
         EM.Raise(EM.Evt.SyncBoard, new { }, update);
         
         // reset everything, new game
