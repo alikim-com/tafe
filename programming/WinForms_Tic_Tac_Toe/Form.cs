@@ -81,7 +81,7 @@ public partial class AppForm : Form
         EM.uiThread = this;
 
         // set the order of players turns, needed before clicking on cfg panels
-        Game.SetTurns("random");
+        //Game.SetTurns("random");
 
         // init label manager
         labMgr = new();
@@ -101,31 +101,31 @@ public partial class AppForm : Form
         //lChoiceFontSize = choice.Font.Size;
 
         // prevent backgound flickering components
-        var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight };
+        var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight, labelVS };
         foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
 
         // subscriptions to reset from Game.Reset()
-        EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
-        if (pwLeft != null)
-            EM.Subscribe(EM.Evt.Reset, pwLeft.ResetHandler);
-        if (pwRight != null)
-            EM.Subscribe(EM.Evt.Reset, pwRight.ResetHandler);
+        //EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
+        //if (pwLeft != null)
+        //    EM.Subscribe(EM.Evt.Reset, pwLeft.ResetHandler);
+        //if (pwRight != null)
+        //    EM.Subscribe(EM.Evt.Reset, pwRight.ResetHandler);
 
-        // update labels
-        EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
+        //// update labels
+        //EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
-        // issued after game board changes 
-        EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
-        // translation to board cell bgs
-        foreach (var cw in cellWrap)
-            EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
+        //// issued after game board changes 
+        //EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
+        //// translation to board cell bgs
+        //foreach (var cw in cellWrap)
+        //    EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
 
-        // raised by bot panels after clicking 
-        EM.Subscribe(EM.Evt.PlayerConfigured, VBridge.PlayerConfiguredHandler);
-        EM.Subscribe(EM.Evt.PlayerConfigured, TurnWheel.PlayerConfiguredHandler);
+        //// raised by bot panels after clicking 
+        //EM.Subscribe(EM.Evt.PlayerConfigured, VBridge.PlayerConfiguredHandler);
+        //EM.Subscribe(EM.Evt.PlayerConfigured, TurnWheel.PlayerConfiguredHandler);
 
-        // raised by board cells after clicking
-        EM.Subscribe(EM.Evt.PlayerMoved, Game.PlayerMovedHandler);
+        //// raised by board cells after clicking
+        //EM.Subscribe(EM.Evt.PlayerMoved, Game.PlayerMovedHandler);
 
         // BLOCKS: player setup pop-up 
         SetupFormPopup();
@@ -139,27 +139,39 @@ public partial class AppForm : Form
         // adjust labels & setup percentage positioning
         SetupLabels();
 
-        // raise reset event
-        Game.Reset();
+        // ready new game
+        Reset();
 
-        // start listening to players config choices
-        if (pwLeft != null && pwRight != null)
-            TurnWheel.Start(
-                new List<IComponent>() { pwLeft, pwRight },
-                AI.Logic.ConfigRNG
-            );
+        //// start listening to players config choices
+        //if (pwLeft != null && pwRight != null)
+        //    TurnWheel.Start(
+        //        new List<IComponent>() { pwLeft, pwRight },
+        //        AI.Logic.ConfigRNG
+        //    );
 
-        // when config is done, start game
-        EventHandler OnConfigFinished = (object? _, EventArgs __) =>
-        {
-            TurnWheel.Start(
-                cellWrap.Cast<IComponent>().ToList(), // unwraps in row-major order
-                AI.Logic.BoardRNG
-            );
-        };
-        EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
+        //// when config is done, start game
+        //EventHandler OnConfigFinished = (object? _, EventArgs __) =>
+        //{
+        //    TurnWheel.Start(
+        //        cellWrap.Cast<IComponent>().ToList(), // unwraps in row-major order
+        //        AI.Logic.BoardRNG
+        //    );
+        //};
+        //EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
 
         // menuHelpAbout.Click += (object? sender, EventArgs e) => { labelRight.Text += "add some text to it"; };
+    }
+
+    void Reset()
+    {
+        // update labels
+        LabelManager.Reset();  //   <---- TODO add labels
+
+        // rebuild visual bridge
+        VBridge.Reset(chosen);
+
+        // reset the game and the board
+        Game.Reset(chosen.Select(chItm => chItm.rosterId).ToArray());
     }
 
     void AssertPlayers()
@@ -266,19 +278,19 @@ public partial class AppForm : Form
     {
         if (e.Control == tLayout)
         {
-            Color defColor = Color.FromArgb(128, 0, 0, 0);
-            Dictionary<PanelWrapper.BgMode, Color?> colorsLeft = new() {
-                { PanelWrapper.BgMode.Default, defColor },
-                { PanelWrapper.BgMode.MouseEnter,
-                  ColorExtensions.BlendOver(Color.FromArgb(15, 200, 104, 34), defColor) },
-                { PanelWrapper.BgMode.MouseLeave, defColor }
-            };
-            Dictionary<PanelWrapper.BgMode, Color?> colorsRight = new() {
-                { PanelWrapper.BgMode.Default, defColor },
-                { PanelWrapper.BgMode.MouseEnter,
-                  ColorExtensions.BlendOver(Color.FromArgb(20, 185, 36, 199), defColor) },
-                { PanelWrapper.BgMode.MouseLeave, defColor }
-            };
+            //Color defColor = Color.FromArgb(128, 0, 0, 0);
+            //Dictionary<PanelWrapper.BgMode, Color?> colorsLeft = new() {
+            //    { PanelWrapper.BgMode.Default, defColor },
+            //    { PanelWrapper.BgMode.MouseEnter,
+            //      ColorExtensions.BlendOver(Color.FromArgb(15, 200, 104, 34), defColor) },
+            //    { PanelWrapper.BgMode.MouseLeave, defColor }
+            //};
+            //Dictionary<PanelWrapper.BgMode, Color?> colorsRight = new() {
+            //    { PanelWrapper.BgMode.Default, defColor },
+            //    { PanelWrapper.BgMode.MouseEnter,
+            //      ColorExtensions.BlendOver(Color.FromArgb(20, 185, 36, 199), defColor) },
+            //    { PanelWrapper.BgMode.MouseLeave, defColor }
+            //};
 
             //pwLeft = new PanelWrapper(
             //    pLeft,

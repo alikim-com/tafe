@@ -26,9 +26,7 @@ public class Game
         { Roster.AI_Two, "Syncstorm" }
     };
 
-    static Roster[] _turnList = 
-        ((IEnumerable<Roster>)Enum.GetValues(typeof(Roster)))
-        .Where(e => e != Roster.None).ToArray(); // exclude None
+    static Roster[] _turnList = Array.Empty<Roster>();
 
     /// <summary>
     /// Players from Roster in the order of their turns;<br/>
@@ -37,10 +35,10 @@ public class Game
     static public Roster[] TurnList
     {
         get => _turnList;
-        set => _turnList = value;
+        private set => _turnList = value;
     }
 
-    public static Roster _curPlayer;
+    static Roster _curPlayer;
     public static Roster CurPlayer
     {
         get => _curPlayer;
@@ -48,7 +46,7 @@ public class Game
     }
 
     static readonly Roster[,] board = new Roster[3, 3];
-    public static Size boardSize = new(board.GetLength(0), board.GetLength(1));
+    public static readonly Size boardSize = new(board.GetLength(0), board.GetLength(1));
     public static Roster[,] Board => board;
 
     /// <summary>
@@ -72,9 +70,12 @@ public class Game
     };
     public static Point[][] Lines => lines;
 
-    public static void Reset()
+    public static void Reset(Roster[] turnlist)
     {
         CurPlayer = Roster.None;
+
+        TurnList = turnlist;
+
         ResetBoard();
 
         // add all the board cells to the update
@@ -84,11 +85,7 @@ public class Game
                 update.Add(new Point(i, j), board[i, j]);
 
         // sync the board
-        // also allows to save/load games
         EM.Raise(EM.Evt.SyncBoard, new { }, update);
-        
-        // reset everything, new game
-        EM.Raise(EM.Evt.Reset, new { }, new EventArgs());
     }
 
     /// <summary>

@@ -9,18 +9,6 @@ namespace WinFormsApp1;
 internal class LabelManager : INotifyPropertyChanged
 {
     /// <summary>
-    /// Bottom config panel states
-    /// </summary>
-    public enum Choice
-    {
-        None,
-        HumanLeft,
-        HumanRight,
-        // for TurnWheel.AvH case
-        HumanFirst,
-        AIFirst,
-    }
-    /// <summary>
     /// Middle info panel states
     /// </summary>
     public enum Info
@@ -41,12 +29,6 @@ internal class LabelManager : INotifyPropertyChanged
 
     static public readonly Dictionary<Enum, string> labels = new()
     {
-        { Choice.None, "" },
-        { Choice.HumanLeft, "YOU  -vs-  AI   " },
-        { Choice.HumanRight, "   AI  -vs-  YOU" },
-        { Choice.HumanFirst, "CHOOSE\nYOUR\nSIDE" },
-        { Choice.AIFirst, "TAKE\nYOUR\nSIDE" },
-        //
         { Info.None, "" },
         { Info.HumanTurn, "Your turn..." },
         { Info.AITurn, "AI is thinking..." },
@@ -65,24 +47,16 @@ internal class LabelManager : INotifyPropertyChanged
         foreach (Enum state in e) SetLabel(state);
     };
 
-    /// <summary>
-    /// Subscribed to EM.EvtReset event
-    /// </summary>
-    static public EventHandler ResetHandler = (object? _, EventArgs __) =>
+    static public void Reset()
     {
-        SetLabel(Choice.None);
         SetLabel(Info.None);
-    };
+    }
 
     static void SetLabel(Enum state)
     {
         if (_this == null) return;
         switch (state)
         {
-            case Choice:
-                _this.ChoicePanel = labels[state];
-                RaiseEvtPropertyChanged(nameof(ChoicePanel));
-                break;
             case Info:
                 _this.InfoPanel = labels[state];
                 RaiseEvtPropertyChanged(nameof(InfoPanel));

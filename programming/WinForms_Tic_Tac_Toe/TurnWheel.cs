@@ -29,12 +29,12 @@ internal class TurnWheel
     /// <summary>
     /// AvH case, final cfg label
     /// </summary>
-    static Choice cfgEndedLabel;
-    /// <summary>
-    /// AvH case, human confirm label
-    /// </summary>
-    static readonly Enum[] cfgConfirmLabel = PlayerIsAI(0) ?
-        new Enum[] { Choice.AIFirst } : new Enum[] { Choice.HumanFirst };
+    //static Choice cfgEndedLabel;
+    ///// <summary>
+    ///// AvH case, human confirm label
+    ///// </summary>
+    //static readonly Enum[] cfgConfirmLabel = PlayerIsAI(0) ?
+    //    new Enum[] { Choice.AIFirst } : new Enum[] { Choice.HumanFirst };
 
     /// <summary>
     /// Clickable UI elements
@@ -102,8 +102,8 @@ internal class TurnWheel
         if (s == null) return;
         IComponent comp = (IComponent)s;
 
-        if (AvH && comp.Name == "pLeft")
-            cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
+        //if (AvH && comp.Name == "pLeft")
+        //    cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
 
         if (CurPlayerIsHuman) comp.Highlight();
 
@@ -152,8 +152,8 @@ internal class TurnWheel
     /// </summary>
     static void AssertPlayer()
     {
-        if (AvH && mode == AI.Logic.ConfigRNG)
-            EM.Raise(EM.Evt.UpdateLabels, new { }, cfgConfirmLabel);
+        //if (AvH && mode == AI.Logic.ConfigRNG)
+        //    EM.Raise(EM.Evt.UpdateLabels, new { }, cfgConfirmLabel);
 
         if (CurPlayerIsAI)
         {
@@ -174,7 +174,7 @@ internal class TurnWheel
     {
         if (mode == AI.Logic.ConfigRNG)
         {
-            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { cfgEndedLabel, Info.None });
+            //EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { cfgEndedLabel, Info.None });
             GameCountdown();
 
         }

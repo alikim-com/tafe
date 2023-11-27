@@ -75,7 +75,7 @@ internal class CellWrapper : IComponent
         backgr.Add(BgMode.MouseEnter, bgHover);
         backgr.Add(BgMode.MouseLeave, bgDef);
 
-        Image tokenLeft = Resource.TokenLeft.GetOverlayOnBackground(
+        Image token1 = Resource.TokenLeft.GetOverlayOnBackground(
             new Size(
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
@@ -84,7 +84,7 @@ internal class CellWrapper : IComponent
             "center"
         );
 
-        Image tokenRight = Resource.TokenRight.GetOverlayOnBackground(
+        Image token2= Resource.TokenRight.GetOverlayOnBackground(
             new Size(
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
@@ -93,11 +93,11 @@ internal class CellWrapper : IComponent
             "center"
         );
 
-        backgr.Add(BgMode.Player1, tokenLeft);
-        backgr.Add(BgMode.Player2, tokenRight);
+        backgr.Add(BgMode.Player1, token1);
+        backgr.Add(BgMode.Player2, token2);
 
-        backgr.Add(BgMode.Lost1, tokenLeft.Desaturate("PS"));
-        backgr.Add(BgMode.Lost2, tokenRight.Desaturate("PS"));
+        backgr.Add(BgMode.Lost1, token1.Desaturate("PS"));
+        backgr.Add(BgMode.Lost2, token2.Desaturate("PS"));
 
     }
 

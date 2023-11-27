@@ -6,23 +6,35 @@ namespace WinFormsApp1;
 /// </summary>
 internal class VBridge
 {
+    static Dictionary<ChoiceItem.Side, CellWrapper.BgMode> sideBg = new()
+    {
+        { ChoiceItem.Side.Left, CellWrapper.BgMode.Player1 },
+        { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 }
+    };
+
     static readonly Dictionary<Game.Roster, CellWrapper.BgMode> toCellDef = new()
     {
         { Game.Roster.None, CellWrapper.BgMode.Default },
     };
 
-    static Dictionary<Game.Roster, CellWrapper.BgMode> toCell = new(toCellDef);
+    static Dictionary<Game.Roster, CellWrapper.BgMode> toCell = new();
 
     /// <summary>
-    /// Adds all players choices from clicking on cfg panels to the dictionary
+    /// Create translation table from game states to cell backgrounds
     /// </summary>
-    static public EventHandler<CellWrapper.BgMode> PlayerConfiguredHandler = 
-        (object? _, CellWrapper.BgMode e) => toCell.Add(TurnWheel.CurPlayer, e);
+    static public void Reset(IEnumerable<ChoiceItem> chosen)
+    {
+        toCell = new(toCellDef);
 
-    /// <summary>
-    /// Subscribed to EM.EvtReset event
-    /// </summary>
-    static public void ResetHandler(object? s, EventArgs e) => toCell = new(toCellDef);
+        foreach (var chItem in chosen)
+        {
+            var side = chItem.side;
+            if (!sideBg.TryGetValue(side, out CellWrapper.BgMode bg))
+                throw new Exception($"VBridge.Reset : can't translate '{side}'");
+
+            toCell.Add(chItem.rosterId, bg);
+        }
+    }
 
     /// <summary>
     /// Subscribed to EM.EvtSyncBoard event<br/>

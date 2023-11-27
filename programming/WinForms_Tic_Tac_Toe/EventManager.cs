@@ -19,18 +19,10 @@ internal class EM
     /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
     static event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
     /// <summary>
-    /// Resets UI, except the board
-    /// </summary>
-    static event EventHandler EvtReset = delegate { };
-    /// <summary>
     /// Raised when a player clicks on a cell
     /// </summary>
     /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
     static event EventHandler<Point> EvtPlayerMoved = delegate { };
-    /// <summary>
-    /// Confirms a player visual appearance (cell bg) on PanelWrapper click
-    /// </summary>
-    static event EventHandler<CellWrapper.BgMode> EvtPlayerConfigured = delegate { };
     /// <summary>
     /// AI choice of a config panel for TurnWheel to simulate click on it
     /// </summary>
@@ -64,9 +56,7 @@ internal class EM
     static readonly Dictionary<Evt, Delegate> dict = new() {
         { Evt.SyncBoard, EvtSyncBoard },
         { Evt.SyncBoardUI, EvtSyncBoardUI },
-        { Evt.Reset, EvtReset },
         { Evt.PlayerMoved, EvtPlayerMoved },
-        { Evt.PlayerConfigured, EvtPlayerConfigured },
         { Evt.AIMoved, EvtAIMoved },
         { Evt.ConfigFinished, EvtConfigFinished },
         { Evt.UpdateLabels, EvtUpdateLabels },
@@ -88,10 +78,15 @@ internal class EM
         bool generic = dict[enm].GetType() == typeof(EventHandler);
 
         if (generic)
-            ((EventHandler)dict[enm])?.Invoke(sender, new EventArgs());
+        {
+            var handler = (EventHandler)dict[enm];
+            handler?.Invoke(sender, new EventArgs());
 
-        else
-            ((EventHandler<E>)dict[enm])?.Invoke(sender, e);
+        } else
+        {
+            var handler = (EventHandler<E>)dict[enm];
+            handler?.Invoke(sender, e);
+        }
     }
 
     static public void Subscribe(Evt enm, Delegate handler)
