@@ -32,6 +32,8 @@ public class LabelManager : INotifyPropertyChanged
         One
     }
 
+    // <----------------how to add extra messages from Ai
+
     static public readonly Dictionary<Enum, string> stateToString = new()
     {
         { Info.None, "" },

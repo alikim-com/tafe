@@ -1,70 +1,74 @@
 ﻿
 namespace WinFormsApp1;
 
-internal class AI
+public class AI
 {
     public enum Logic
     {
+        None,
         RNG,
         Easy
     }
 
-    static readonly Dictionary<Logic, Action<int, Logic>> action = new()
-    {
-        { Logic.RNG, MakeBoardMove },
-        { Logic.Easy, MakeBoardMove },
-    };
+    readonly Logic logic;
+    readonly Game.Roster rosterId;
 
-    /// <summary>
-    /// Called from TurnWheel to choose a UI element
-    /// </summary>
-    public static void MakeMove(int count, Logic L) => action[L](count, L);
+    public AI(Logic _logic, Game.Roster _rosterId)
+    {
+        logic = _logic;
+        rosterId = _rosterId;
+    }
 
     /// <summary>
     /// Choose a board cell
     /// </summary>
     /// <param name="count">The number of remaining UI elements to click</param>
-    public static void MakeBoardMove(int count, Logic L)
+    public EventHandler<Game.Roster> AIMakeMoveHandler()
     {
-        Thread thread = new(() =>
+        return logic switch
         {
-            Thread.Sleep(750);
-
-            switch (L)
+            Logic.RNG =>
+            (object? _, Game.Roster curPlayer) =>
             {
-                case Logic.RNG:
-                    {
-                        Random random = new();
-                        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
-                        break;
-                    }
+                Thread thread = new(() =>
+                {
+                    Thread.Sleep(750);
 
-                case Logic.Easy:
-                    {
-                        int move = LogicEasy();
-                        
-                        Thread.Sleep(250); // to see the reason for the decision in case AI vs AI
+                    Random random = new();
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, Point.Empty));
+                });
 
-                        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException($"AI.MakeConfigMove : logic '{L}'");
+                thread.Start();
             }
+            ,
+            Logic.Easy => 
+            (object? _, Game.Roster curPlayer) =>
+            {
+                Thread thread = new(() =>
+                {
+                    Thread.Sleep(750);
 
-        });
+                    Point move = LogicEasy();
 
-        thread.Start();
+                    Thread.Sleep(250); // to see the reason for the decision in case AI vs AI
+
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
+                });
+
+                thread.Start();
+            }
+            ,
+            _ => throw new NotImplementedException($"AI.AIMakeMoveHandler : logic '{logic}' not supported"),
+        };
+        ;
     }
 
     /// <summary>
     /// Simple AI logic (esay mode) for playing the game
     /// </summary>
-    static int LogicEasy()
+    static Point LogicEasy()
     {
         static bool CanTake(Point pnt) => Game.Board[pnt.X, pnt.Y] == Game.Roster.None;
-
-        static int LinearOffset(Point pnt) => pnt.X * Game.boardSize.Width + pnt.Y;
 
         // examine lines
         foreach (var line in Game.Lines)
@@ -81,15 +85,16 @@ internal class AI
                 if (player == Game.Roster.None) free.Add(pnt);
             }
             // search the line for 2 cells taken by same player
-            foreach(var rec in stat)
+            foreach (var rec in stat)
             {
                 if (rec.Value == 2 && rec.Key != Game.Roster.None && free.Count > 0)
                     // block player (rec.Key != self) or
                     // win the game (rec.Key == self)
 
                     // TODO send labels update
-                    
-                    return LinearOffset(free[0]);
+
+                    //return LinearOffset(free[0]);
+                    return Point.Empty;
             }
 
         }
@@ -109,10 +114,11 @@ internal class AI
             if (CanTake(spot))
             {
                 // TODO send labels
-                return LinearOffset(spot);
+                //return LinearOffset(spot);
+                return Point.Empty;
             }
 
 
-        return 0;
+        return Point.Empty;
     }
 }

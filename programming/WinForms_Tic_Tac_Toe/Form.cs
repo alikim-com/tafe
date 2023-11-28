@@ -63,6 +63,8 @@ public partial class AppForm : Form
 
     bool firstChosenIsLeft = false;
 
+    readonly List<AI> AIAgents = new();
+
     void SetupFormPopup()
     {
         setupForm ??= new SetupForm();
@@ -138,7 +140,15 @@ public partial class AppForm : Form
         Reset();
 
         // create AIs, if needed
-        // subscribe them to EM.Evt.AIMakeMove
+        AIAgents.Clear();
+        foreach(var chItm in chosenArr)
+            if(chItm.originType == "AI")
+            {
+                var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
+                var aiAgent = new AI(logic, chItm.rosterId);
+                AIAgents.Add(aiAgent);
+                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.AIMakeMoveHandler());
+            }
 
         // start game
         TurnWheel.GameCountdown();
