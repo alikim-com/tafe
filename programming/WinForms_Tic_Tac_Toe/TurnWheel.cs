@@ -17,8 +17,6 @@ internal class TurnWheel
     static bool CheckPlayerType(Game.Roster player, string type) => player.ToString().StartsWith(type);
     static bool CurPlayerIsHuman => CheckPlayerType(CurPlayer, "Human");
     static bool CurPlayerIsAI => CheckPlayerType(CurPlayer, "AI");
-    static bool PlayerIsHuman(int ind) => CheckPlayerType(Game.TurnList[ind], "Human");
-    static bool PlayerIsAI(int ind) => CheckPlayerType(Game.TurnList[ind], "AI");
 
     static Action EnableUICb = () => { };
     static Action DisableUICb = () => { };
@@ -49,7 +47,7 @@ internal class TurnWheel
 
     };
 
-    static void Advance() 
+    static void Advance()
     {
         AdvancePlayer();
 
@@ -63,22 +61,18 @@ internal class TurnWheel
     /// </summary>
     static void AssertPlayer()
     {
-        //if (AvH && mode == AI.Logic.ConfigRNG)
-        //    EM.Raise(EM.Evt.UpdateLabels, new { }, cfgConfirmLabel);
+        if (CurPlayerIsAI)
+        {
+            DisableUICb();
 
-        //if (CurPlayerIsAI)
-        //{
-        //    DisableAll();
+            EM.Raise(EM.Evt.AIMakeMove, new { }, CurPlayer);
 
-        //    AI.MakeMove(uiChoice.Count, mode);
-        //    //EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.AITurn });
-        //}
-        //else
-        //{ // Human*
+        } else if(CurPlayerIsHuman)
+        { 
+            EnableUICb();
+        }
 
-        //    EnableAll();
-        //   // EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.HumanTurn });
-        //}
+        EM.Raise(EM.Evt.SyncMoveLabels, new { }, CurPlayer);
     }
 
     static public void GameCountdown()

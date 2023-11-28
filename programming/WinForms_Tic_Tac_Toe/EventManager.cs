@@ -19,13 +19,22 @@ internal class EM
     /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
     static event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
     /// <summary>
+    /// Issued by TurnWheel to make AI take action
+    /// </summary>
+    static event EventHandler<Game.Roster> EvtAIMakeMove = delegate { };
+    /// <summary>
+    /// Issued by TurnWheel for VBridge to update labels on player move
+    /// </summary>
+    static event EventHandler<Game.Roster> EvtSyncMoveLabels = delegate { };
+    /// <summary>
     /// Raised by clicking or simulating a click on a cell
     /// </summary>
     /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
     static event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
-    /// Raised by AI to simulate a click on a cell
+    /// Raised by AI for a cell to simulate a click on it
     /// </summary>
+    /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
     static event EventHandler<Point> EvtAIMoved = delegate { };
     /// <summary>
     /// Updates labels in LabelManager
@@ -39,6 +48,8 @@ internal class EM
     {
         SyncBoard,
         SyncBoardUI,
+        AIMakeMove,
+        SyncMoveLabels,
         PlayerMoved,
         AIMoved,
         UpdateLabels
@@ -49,6 +60,8 @@ internal class EM
     static readonly Dictionary<Evt, Delegate> dict = new() {
         { Evt.SyncBoard, EvtSyncBoard },
         { Evt.SyncBoardUI, EvtSyncBoardUI },
+        { Evt.AIMakeMove, EvtAIMakeMove },
+        { Evt.SyncMoveLabels, EvtSyncMoveLabels },
         { Evt.PlayerMoved, EvtPlayerMoved },
         { Evt.AIMoved, EvtAIMoved },
         { Evt.UpdateLabels, EvtUpdateLabels },

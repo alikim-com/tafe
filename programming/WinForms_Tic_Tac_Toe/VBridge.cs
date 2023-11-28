@@ -8,12 +8,18 @@ internal class VBridge
 {
     // CellWrapper
 
+    /// <summary>
+    /// Auxiliary map
+    /// </summary>
     static readonly Dictionary<ChoiceItem.Side, CellWrapper.BgMode> sideToCellBg = new()
     {
         { ChoiceItem.Side.Left, CellWrapper.BgMode.Player1 },
         { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 }
     };
 
+    /// <summary>
+    /// used in SyncBoardHandler
+    /// </summary>
     static readonly Dictionary<Game.Roster, CellWrapper.BgMode> rosterToCellBg = new()
     {
         { Game.Roster.None, CellWrapper.BgMode.Default }
@@ -21,12 +27,18 @@ internal class VBridge
 
     // LabelManager
 
+    /// <summary>
+    /// Auxiliary map
+    /// </summary>
     static readonly Dictionary<ChoiceItem.Side, LabelManager.Info> sideToLabMgr = new()
     {
         { ChoiceItem.Side.Left, LabelManager.Info.Player1 },
         { ChoiceItem.Side.Right, LabelManager.Info.Player2 }
     };
 
+    /// <summary>
+    /// used in SyncMoveLabelsHandler
+    /// </summary>
     static readonly Dictionary<Game.Roster, LabelManager.Info> rosterToLabMgr = new();
 
     /// <summary>
@@ -60,24 +72,17 @@ internal class VBridge
                 throw new Exception($"VBridge.Reset : couldn't find '{state}Move'");
 
             playerInfo.Add(stateMove, msg);
+
+            rosterToLabMgr.Add(chItem.rosterId, stateMove);
         }
 
         LabelManager.Reset(playerInfo);
 
-        // set players names on the bottom labels
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { 
             LabelManager.Info.Player1, 
             LabelManager.Info.Player2,
         });
     }
-
-    /*
-     // from turnWheel
-     stsic public EvenhHandler UpdateLabel () => {
-            EM.Raise(EM.Evt.UpdateLabelUI, s ?? new { }, t); -> lanMgr
-        }
-     */
-
 
     /// <summary>
     /// Subscribed to EM.EvtSyncBoard event<br/>
@@ -94,5 +99,16 @@ internal class VBridge
         }
 
         EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
+    };
+
+    /// <summary>
+    /// Subscribed to EM.SyncMoveLabels event raised by TurnWheel to update labels on player move
+    /// </summary>
+    static public EventHandler<Game.Roster> SyncMoveLabelsHandler = (object? _, Game.Roster rostId) =>
+    {
+        if (!rosterToLabMgr.TryGetValue(rostId, out LabelManager.Info stateMove))
+            throw new Exception($"VBridge.SyncMoveLabelsHandler : can't translate '{rostId}'");
+
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove });
     };
 }

@@ -109,7 +109,7 @@ public partial class AppForm : Form
         // Event subscriptions & callbacks
         SetupSubsAndCb();
 
-        // reset everything and start the game
+        // MULTI-USE: reset everything and start the game
         StartGame();
 
         //menuHelpAbout.Click += (object? sender, EventArgs e) => { BackgroundImage = Resource.GameBackImg; };
@@ -137,6 +137,9 @@ public partial class AppForm : Form
         // ready new game
         Reset();
 
+        // create AIs, if needed
+        // subscribe them to EM.Evt.AIMakeMove
+
         // start game
         TurnWheel.GameCountdown();
     }
@@ -144,8 +147,10 @@ public partial class AppForm : Form
     void SetupSubsAndCb()
     {
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
+
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
-        
+        EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
+
         foreach (var cw in cellWrap)
             EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
 
@@ -170,8 +175,6 @@ public partial class AppForm : Form
         // reset the game and the board
         Game.Reset(chosen.Select(chItm => chItm.rosterId).ToArray());
         // Game.SetTurns("random");
-
-        // create AIs if needed
 
         TurnWheel.Reset();
     }
