@@ -5,50 +5,20 @@ internal class AI
 {
     public enum Logic
     {
-        ConfigRNG,
-        BoardRNG,
-        BoardEasy
+        RNG,
+        Easy
     }
 
     static readonly Dictionary<Logic, Action<int, Logic>> action = new()
     {
-        { Logic.ConfigRNG, MakeConfigMove },
-        { Logic.BoardRNG, MakeBoardMove },
-        { Logic.BoardEasy, MakeBoardMove },
+        { Logic.RNG, MakeBoardMove },
+        { Logic.Easy, MakeBoardMove },
     };
 
     /// <summary>
     /// Called from TurnWheel to choose a UI element
     /// </summary>
     public static void MakeMove(int count, Logic L) => action[L](count, L);
-
-    /// <summary>
-    /// Choose a config panel
-    /// </summary>
-    /// <param name="count">The number of remaining UI elements to click</param>
-    public static void MakeConfigMove(int count, Logic L)
-    {
-        Thread thread = new(() =>
-        {
-            Thread.Sleep(750);
-
-            switch (L)
-            {
-                case Logic.ConfigRNG:
-                    {
-                        Random random = new();
-                        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
-                        break;
-                    }
-
-                default:
-                    throw new NotImplementedException($"AI.MakeConfigMove : logic '{L}'");
-            }
-
-        });
-
-        thread.Start();
-    }
 
     /// <summary>
     /// Choose a board cell
@@ -62,14 +32,14 @@ internal class AI
 
             switch (L)
             {
-                case Logic.BoardRNG:
+                case Logic.RNG:
                     {
                         Random random = new();
                         EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
                         break;
                     }
 
-                case Logic.BoardEasy:
+                case Logic.Easy:
                     {
                         int move = LogicEasy();
                         
@@ -94,7 +64,7 @@ internal class AI
     {
         static bool CanTake(Point pnt) => Game.Board[pnt.X, pnt.Y] == Game.Roster.None;
 
-        static int LinearOffset(Point pnt) => pnt.X * Game.boardSize.Width + pnt.Y; // <------------ array removed
+        static int LinearOffset(Point pnt) => pnt.X * Game.boardSize.Width + pnt.Y;
 
         // examine lines
         foreach (var line in Game.Lines)

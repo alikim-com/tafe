@@ -19,18 +19,14 @@ internal class EM
     /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
     static event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
     /// <summary>
-    /// Raised when a player clicks on a cell
+    /// Raised by clicking or simulating a click on a cell
     /// </summary>
     /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
     static event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
-    /// AI choice of a config panel for TurnWheel to simulate click on it
+    /// Raised by AI to simulate a click on a cell
     /// </summary>
-    static event EventHandler<int> EvtAIMoved = delegate { };
-    /// <summary>
-    /// Issued by TurnWheel when the game is ready to be played
-    /// </summary>
-    static event EventHandler EvtConfigFinished = delegate { };
+    static event EventHandler<Point> EvtAIMoved = delegate { };
     /// <summary>
     /// Updates labels in LabelManager
     /// </summary>
@@ -43,11 +39,8 @@ internal class EM
     {
         SyncBoard,
         SyncBoardUI,
-        Reset,
         PlayerMoved,
-        PlayerConfigured,
         AIMoved,
-        ConfigFinished,
         UpdateLabels
     }
     /// <summary>
@@ -58,7 +51,6 @@ internal class EM
         { Evt.SyncBoardUI, EvtSyncBoardUI },
         { Evt.PlayerMoved, EvtPlayerMoved },
         { Evt.AIMoved, EvtAIMoved },
-        { Evt.ConfigFinished, EvtConfigFinished },
         { Evt.UpdateLabels, EvtUpdateLabels },
     };
 
@@ -72,20 +64,20 @@ internal class EM
     /// <param name="e">Event arguments</param>
     static public void Raise<E>(Evt enm, object sender, E e)
     {
-        if (!dict.TryGetValue(enm, out var evt))
+        if (!dict.TryGetValue(enm, out var _evt))
             throw new NotImplementedException($"EM.Raise : no event for Evt.{enm}");
 
-        bool generic = dict[enm].GetType() == typeof(EventHandler);
+        bool nonGeneric = _evt.GetType() == typeof(EventHandler);
 
-        if (generic)
+        if (nonGeneric)
         {
-            var handler = (EventHandler)dict[enm];
-            handler?.Invoke(sender, new EventArgs());
+            var evtNG = (EventHandler)_evt;
+            evtNG?.Invoke(sender, new EventArgs());
 
         } else
         {
-            var handler = (EventHandler<E>)dict[enm];
-            handler?.Invoke(sender, e);
+            var evtG = (EventHandler<E>)_evt;
+            evtG?.Invoke(sender, e);
         }
     }
 

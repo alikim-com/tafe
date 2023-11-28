@@ -11,10 +11,6 @@ public partial class AppForm : Form
     readonly int lChoiceWidth;
     readonly float lChoiceFontSize;
 
-    // player cfg panels bg manager
-    PanelWrapper? pwLeft;
-    PanelWrapper? pwRight;
-
     // board cell bg manager
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
@@ -80,9 +76,6 @@ public partial class AppForm : Form
 
         EM.uiThread = this;
 
-        // set the order of players turns, needed before clicking on cfg panels
-        //Game.SetTurns("random");
-
         // init label manager
         labMgr = new();
 
@@ -104,37 +97,8 @@ public partial class AppForm : Form
         var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight, labelVS };
         foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
 
-        // subscriptions to reset from Game.Reset()
-        //EM.Subscribe(EM.Evt.Reset, LabelManager.ResetHandler);
-        //if (pwLeft != null)
-        //    EM.Subscribe(EM.Evt.Reset, pwLeft.ResetHandler);
-        //if (pwRight != null)
-        //    EM.Subscribe(EM.Evt.Reset, pwRight.ResetHandler);
-
-        //// update labels
-        //EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
-
-        //// issued after game board changes 
-        //EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
-        //// translation to board cell bgs
-        //foreach (var cw in cellWrap)
-        //    EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
-
-        //// raised by bot panels after clicking 
-        //EM.Subscribe(EM.Evt.PlayerConfigured, VBridge.PlayerConfiguredHandler);
-        //EM.Subscribe(EM.Evt.PlayerConfigured, TurnWheel.PlayerConfiguredHandler);
-
-        //// raised by board cells after clicking
-        //EM.Subscribe(EM.Evt.PlayerMoved, Game.PlayerMovedHandler);
-
         // BLOCKS: player setup pop-up 
         SetupFormPopup();
-
-        // retrieve players list
-        AssertPlayers();
-
-        // create player defined bg
-        CreateBackground();
 
         // adjust labels & setup percentage positioning
         SetupLabels();
@@ -142,36 +106,52 @@ public partial class AppForm : Form
         // LabelManager properties -> Labels
         SetupBinds();
 
-        // Event subscriptions
-        // must be called before Reset(), which will trigger events
-        SetupSubs();
+        // Event subscriptions & callbacks
+        SetupSubsAndCb();
+
+        // reset everything and start the game
+        StartGame();
+
+        //menuHelpAbout.Click += (object? sender, EventArgs e) => { BackgroundImage = Resource.GameBackImg; };
+    }
+
+    void EnableUI()
+    {
+        foreach (var cw in cellWrap)
+            if (cw is IComponent iComp) iComp.Enable();
+    }
+    void DisableUI()
+    {
+        foreach (var cw in cellWrap)
+            if (cw is IComponent iComp) iComp.Disable();
+    }
+
+    void StartGame()
+    {
+        // retrieve players list
+        AssertPlayers();
+
+        // create player defined bg
+        CreateBackground();
 
         // ready new game
         Reset();
 
-        //// start listening to players config choices
-        //if (pwLeft != null && pwRight != null)
-        //    TurnWheel.Start(
-        //        new List<IComponent>() { pwLeft, pwRight },
-        //        AI.Logic.ConfigRNG
-        //    );
-
-        //// when config is done, start game
-        //EventHandler OnConfigFinished = (object? _, EventArgs __) =>
-        //{
-        //    TurnWheel.Start(
-        //        cellWrap.Cast<IComponent>().ToList(), // unwraps in row-major order
-        //        AI.Logic.BoardRNG
-        //    );
-        //};
-        //EM.Subscribe(EM.Evt.ConfigFinished, OnConfigFinished);
-
-        // menuHelpAbout.Click += (object? sender, EventArgs e) => { labelRight.Text += "add some text to it"; };
+        // start game
+        TurnWheel.GameCountdown();
     }
 
-    void SetupSubs()
+    void SetupSubsAndCb()
     {
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
+        EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
+        
+        foreach (var cw in cellWrap)
+            EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
+
+        EM.Subscribe(EM.Evt.PlayerMoved, TurnWheel.PlayerMovedHandler);
+
+        TurnWheel.SetCallbacks(EnableUI, DisableUI);
     }
 
     void SetupBinds()
@@ -189,6 +169,11 @@ public partial class AppForm : Form
 
         // reset the game and the board
         Game.Reset(chosen.Select(chItm => chItm.rosterId).ToArray());
+        // Game.SetTurns("random");
+
+        // create AIs if needed
+
+        TurnWheel.Reset();
     }
 
     void AssertPlayers()
@@ -251,8 +236,6 @@ public partial class AppForm : Form
                 "top");
 
             mainBg.Add(leftRightBg, BackgroundImage);
-
-            return;
         }
 
     }
@@ -289,39 +272,6 @@ public partial class AppForm : Form
     {
         if (e.Control == tLayout)
         {
-            //Color defColor = Color.FromArgb(128, 0, 0, 0);
-            //Dictionary<PanelWrapper.BgMode, Color?> colorsLeft = new() {
-            //    { PanelWrapper.BgMode.Default, defColor },
-            //    { PanelWrapper.BgMode.MouseEnter,
-            //      ColorExtensions.BlendOver(Color.FromArgb(15, 200, 104, 34), defColor) },
-            //    { PanelWrapper.BgMode.MouseLeave, defColor }
-            //};
-            //Dictionary<PanelWrapper.BgMode, Color?> colorsRight = new() {
-            //    { PanelWrapper.BgMode.Default, defColor },
-            //    { PanelWrapper.BgMode.MouseEnter,
-            //      ColorExtensions.BlendOver(Color.FromArgb(20, 185, 36, 199), defColor) },
-            //    { PanelWrapper.BgMode.MouseLeave, defColor }
-            //};
-
-            //pwLeft = new PanelWrapper(
-            //    pLeft,
-            //    Resource.FaceLeft,
-            //    "left",
-            //    "top",
-            //    colorsLeft,
-            //    new Control[] { sTL, sBL },
-            //    CellWrapper.BgMode.Player1
-            //);
-            //pwRight = new PanelWrapper(
-            //    pRight,
-            //    Resource.FaceRight,
-            //    "right",
-            //    "top",
-            //    colorsRight,
-            //    new Control[] { sTR, sBR },
-            //    CellWrapper.BgMode.Player2
-            //);
-
             // --------- board cells ----------
 
             int tabInd = 0;

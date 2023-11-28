@@ -16,7 +16,7 @@ public partial class SetupForm : Form
 
     readonly ToolStripRendererOverride buttonRenderer;
 
-    public enum btnMessage
+    public enum BtnMessage
     {
         Ready_AI,
         Ready_Human,
@@ -70,7 +70,7 @@ public partial class SetupForm : Form
 
         toolStrip.BackColor = toolStripLabel.BackColor = UIColors.Transparent;
 
-        UpdateButton(btnMessage.Both_Missing);
+        UpdateButton(BtnMessage.Both_Missing);
 
         AppForm.ApplyDoubleBuffer(panelLeft);
         AppForm.ApplyDoubleBuffer(panelRight);
@@ -206,16 +206,16 @@ public partial class SetupForm : Form
             {
                 if (thisChosen.originType != otherChosen.originType)
                 {
-                    UpdateButton(btnMessage.Ready_Mix);
+                    UpdateButton(BtnMessage.Ready_Mix);
 
-                } else if (Enum.TryParse($"Ready_{thisChosen.originType}", out btnMessage msg))
+                } else if (Enum.TryParse($"Ready_{thisChosen.originType}", out BtnMessage msg))
                 {
                     UpdateButton(msg);
                 }
 
             } else
             {
-                var missingSide = side == ChoiceItem.Side.Left ? btnMessage.Right_Missing : btnMessage.Left_Missing;
+                var missingSide = side == ChoiceItem.Side.Left ? BtnMessage.Right_Missing : BtnMessage.Left_Missing;
                 UpdateButton(missingSide);
             }
 
@@ -224,15 +224,15 @@ public partial class SetupForm : Form
         choiceItem.SetOnClickHandler(handler);
     }
 
-    void UpdateButton(btnMessage msg)
+    void UpdateButton(BtnMessage msg)
     {
-        Dictionary<btnMessage, string> buttonMessages = new() {
-            { btnMessage.Ready_AI, "I like to watch...o_o" },
-            { btnMessage.Ready_Human, "Fight, Mortals!" },
-            { btnMessage.Ready_Mix, "For the Organics!" },
-            { btnMessage.Both_Missing, "Choose players" },
-            { btnMessage.Left_Missing, "Choose left player" },
-            { btnMessage.Right_Missing, "Choose right player" },
+        Dictionary<BtnMessage, string> buttonMessages = new() {
+            { BtnMessage.Ready_AI, "I like to watch...o_o" },
+            { BtnMessage.Ready_Human, "Fight, Mortals!" },
+            { BtnMessage.Ready_Mix, "For the Organics!" },
+            { BtnMessage.Both_Missing, "Choose players" },
+            { BtnMessage.Left_Missing, "Choose left player" },
+            { BtnMessage.Right_Missing, "Choose right player" },
         };
 
         toolStripLabel.Text = buttonMessages[msg];

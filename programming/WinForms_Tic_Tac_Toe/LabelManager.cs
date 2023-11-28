@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel;
+using static WinFormsApp1.ChoiceItem;
 using static WinFormsApp1.Game;
 
 namespace WinFormsApp1;
@@ -55,7 +56,13 @@ public class LabelManager : INotifyPropertyChanged
     /// </summary>
     static public void Reset(Dictionary<Info, string> playerInfo)
     {
-        foreach (var (enm, msg) in playerInfo) stateToString.Add(enm, msg);
+        foreach (var (enm, msg) in playerInfo)
+        {
+            if (!stateToString.ContainsKey(enm))
+                stateToString.Add(enm, msg);
+            else
+                stateToString[enm] = msg;
+        }
     }
 
     static void SetLabel(Enum state)

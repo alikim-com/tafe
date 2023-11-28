@@ -6,22 +6,10 @@ namespace WinFormsApp1;
 /// </summary>
 internal class CellWrapper : IComponent
 {
-    public string Name { get => box.Name; } // interface
-
     readonly Panel box;
     readonly Point rc;
     readonly Dictionary<BgMode, Image> backgr = new();
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
-
-    /// <summary>
-    /// Event driven readable state
-    /// </summary>
-    BgMode _curBgMode;
-    public BgMode CurBgMode
-    {
-        get => _curBgMode;
-        private set => _curBgMode = value;
-    }
 
     public enum BgMode
     {
@@ -36,6 +24,8 @@ internal class CellWrapper : IComponent
         Lost1,
         Lost2
     }
+
+    public bool IsLocked { get; set; } = false;
 
     public CellWrapper(Panel _box, int _row, int _col)
     {
@@ -109,7 +99,6 @@ internal class CellWrapper : IComponent
             if (box.BackgroundImage != image)
             {
                 box.BackgroundImage = image;
-                CurBgMode = evtName;
             }
         };
     }
@@ -134,6 +123,8 @@ internal class CellWrapper : IComponent
 
     public void Enable()
     {
+        if (IsLocked) return;
+
         AddHoverEventHandlers();
         box.Click += OnClick;
         box.Cursor = Cursors.Hand;
@@ -141,6 +132,8 @@ internal class CellWrapper : IComponent
 
     public void Disable()
     {
+        if (IsLocked) return;
+
         box.Click -= OnClick;
         RemoveHoverEventHandlers();
         box.Cursor = Cursors.Default;
@@ -151,6 +144,8 @@ internal class CellWrapper : IComponent
     /// </summary>
     void OnClick(object? _, EventArgs __)
     {
+        if (IsLocked) return;
+
         EM.Raise(EM.Evt.PlayerMoved, this, rc);
     }
 

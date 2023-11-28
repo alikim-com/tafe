@@ -1,10 +1,9 @@
 ﻿
 namespace WinFormsApp1;
 
-internal interface IComponent
+public interface IComponent
 {
+    bool IsLocked { get; set; }
     void Enable();
     void Disable();
-    void SimulateOnClick();
-    string Name { get; }
 }

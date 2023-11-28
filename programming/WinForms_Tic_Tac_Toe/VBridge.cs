@@ -1,6 +1,4 @@
 ﻿
-using System.Security.Cryptography;
-
 namespace WinFormsApp1;
 
 /// <summary>
@@ -16,7 +14,7 @@ internal class VBridge
         { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 }
     };
 
-    static readonly Dictionary<Game.Roster, CellWrapper.BgMode> rosterToCell = new()
+    static readonly Dictionary<Game.Roster, CellWrapper.BgMode> rosterToCellBg = new()
     {
         { Game.Roster.None, CellWrapper.BgMode.Default }
     };
@@ -36,7 +34,7 @@ internal class VBridge
     /// </summary>
     static public void Reset(IEnumerable<ChoiceItem> chosen)
     {
-        while (rosterToCell.Count > 1) rosterToCell.Remove(rosterToCell.Keys.Last());
+        while (rosterToCellBg.Count > 1) rosterToCellBg.Remove(rosterToCellBg.Keys.Last());
 
         rosterToLabMgr.Clear();
 
@@ -48,7 +46,7 @@ internal class VBridge
             if (!sideToCellBg.TryGetValue(side, out CellWrapper.BgMode bg))
                 throw new Exception($"VBridge.Reset : can't translate '{side}'");
 
-            rosterToCell.Add(chItem.rosterId, bg);
+            rosterToCellBg.Add(chItem.rosterId, bg);
 
             if (!sideToLabMgr.TryGetValue(side, out LabelManager.Info state))
                 throw new Exception($"VBridge.Reset : can't translate '{side}'");
@@ -70,7 +68,6 @@ internal class VBridge
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { 
             LabelManager.Info.Player1, 
             LabelManager.Info.Player2,
-            LabelManager.Info.Player2Move,
         });
     }
 
@@ -88,14 +85,14 @@ internal class VBridge
     /// </summary>
     static public EventHandler<Dictionary<Point, Game.Roster>> SyncBoardHandler = (object? s, Dictionary<Point, Game.Roster> e) =>
     {
-        Dictionary<Point, CellWrapper.BgMode> t = new();
-        foreach (var rec in e)
+        Dictionary<Point, CellWrapper.BgMode> cellBgs = new();
+        foreach (var (rowCol, rostId) in e)
         {
-            if (!rosterToCell.TryGetValue(rec.Value, out CellWrapper.BgMode bg))
-                throw new Exception($"VBridge.SyncBoardHandler : can't translate '{rec.Value}'");
-            t.Add(rec.Key, bg);
+            if (!rosterToCellBg.TryGetValue(rostId, out CellWrapper.BgMode bg))
+                throw new Exception($"VBridge.SyncBoardHandler : can't translate '{rostId}'");
+            cellBgs.Add(rowCol, bg);
         }
 
-        EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, t);
+        EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
     };
 }

@@ -38,13 +38,6 @@ public class Game
         private set => _turnList = value;
     }
 
-    static Roster _curPlayer;
-    public static Roster CurPlayer
-    {
-        get => _curPlayer;
-        private set => _curPlayer = value;
-    }
-
     static readonly Roster[,] board = new Roster[3, 3];
     public static readonly Size boardSize = new(board.GetLength(0), board.GetLength(1));
     public static Roster[,] Board => board;
@@ -72,8 +65,6 @@ public class Game
 
     public static void Reset(Roster[] turnlist)
     {
-        CurPlayer = Roster.None;
-
         TurnList = turnlist;
 
         ResetBoard();
@@ -120,14 +111,14 @@ public class Game
         // return;
 
         // else, turn the wheel
-        TurnWheel.Advance((IComponent)s);
+        //TurnWheel.Advance((IComponent)s);
     }
 
     /// <summary>
     /// Subscribed to cell click event;<br/>
     /// asserts the game state (win/loss), issues board sync event, turns the wheel
     /// </summary>
-    static public EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
+    static public readonly EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
     {
         if (s == null) throw new Exception("Game.PlayerMovedHandler : cell is null");
 
