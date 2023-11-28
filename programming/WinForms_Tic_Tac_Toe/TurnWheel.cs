@@ -89,26 +89,26 @@ internal class TurnWheel
         foreach (IComponent e in uiChoice) e.Disable();
     }
 
-    /// <summary>
-    /// Subscribed to cfg panels clicks
-    /// </summary>
-    /// <param name="_">BgMode is not used here;<br/>
-    /// used instead by VBridge, which is also subscribed.
-    /// </param>
-    static public EventHandler<CellWrapper.BgMode> PlayerConfiguredHandler = 
+    ///// <summary>
+    ///// Subscribed to cfg panels clicks
+    ///// </summary>
+    ///// <param name="_">BgMode is not used here;<br/>
+    ///// used instead by VBridge, which is also subscribed.
+    ///// </param>
+    //static public EventHandler<CellWrapper.BgMode> PlayerConfiguredHandler = 
 
-    (object? s, CellWrapper.BgMode _) =>
-    {
-        if (s == null) return;
-        IComponent comp = (IComponent)s;
+    //(object? s, CellWrapper.BgMode _) =>
+    //{
+    //    if (s == null) return;
+    //    IComponent comp = (IComponent)s;
 
-        //if (AvH && comp.Name == "pLeft")
-        //    cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
+    //    //if (AvH && comp.Name == "pLeft")
+    //    //    cfgEndedLabel = CurPlayerIsHuman ? Choice.HumanLeft : Choice.HumanRight;
 
-        if (CurPlayerIsHuman) comp.Highlight();
+    //    if (CurPlayerIsHuman) comp.Highlight();
 
-        Advance(comp);
-    };
+    //    Advance(comp);
+    //};
 
     /// <summary>
     /// Turns the wheel: asserts remaining active UI elements to click,<br/>
@@ -160,13 +160,13 @@ internal class TurnWheel
             DisableAll();
 
             AI.MakeMove(uiChoice.Count, mode);
-            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.AITurn });
+            //EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.AITurn });
         }
         else
         { // Human*
 
             EnableAll();
-            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.HumanTurn });
+           // EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { Info.HumanTurn });
         }
     }
 

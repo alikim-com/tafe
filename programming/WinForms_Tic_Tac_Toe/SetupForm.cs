@@ -267,6 +267,7 @@ public class ChoiceItem
 
     public readonly Label origin;
     public readonly Label identity;
+    public readonly string identityName;
 
     public enum Side
     {
@@ -292,6 +293,7 @@ public class ChoiceItem
         foreOff = _foreOff;
 
         originType = _rosterId.ToString().Split('_')[0];
+        identityName = identity.Text;
     }
 
     public void Activate()

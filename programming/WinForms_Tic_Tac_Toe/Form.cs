@@ -139,6 +139,13 @@ public partial class AppForm : Form
         // adjust labels & setup percentage positioning
         SetupLabels();
 
+        // LabelManager properties -> Labels
+        SetupBinds();
+
+        // Event subscriptions
+        // must be called before Reset(), which will trigger events
+        SetupSubs();
+
         // ready new game
         Reset();
 
@@ -162,12 +169,22 @@ public partial class AppForm : Form
         // menuHelpAbout.Click += (object? sender, EventArgs e) => { labelRight.Text += "add some text to it"; };
     }
 
+    void SetupSubs()
+    {
+        EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
+    }
+
+    void SetupBinds()
+    {
+        info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanelBind"));
+        labelLeft.DataBindings.Add(new Binding("Text", labMgr, "LabelLeftBind"));
+        labelRight.DataBindings.Add(new Binding("Text", labMgr, "LabelRightBind"));
+    }
+
     void Reset()
     {
-        // update labels
-        LabelManager.Reset();  //   <---- TODO add labels
-
-        // rebuild visual bridge
+        // rebuild visual bridge for translation between
+        // Game <-> (CellWrapper, LabelManager)
         VBridge.Reset(chosen);
 
         // reset the game and the board
@@ -191,7 +208,7 @@ public partial class AppForm : Form
             new(chosenArr[1].rosterId, chosenArr[0].rosterId);
 
         foreach (var (_leftRightBg, bgImage) in mainBg)
-            if (_leftRightBg.Key == leftRightBg.Key && _leftRightBg.Value == leftRightBg.Value) // cache exists
+            if (_leftRightBg.Equals(leftRightBg)) // cache exists
             {
                 BackgroundImage = bgImage;
                 return;
@@ -250,12 +267,6 @@ public partial class AppForm : Form
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
 
-        var (rIdLeft, rIdRight) = firstChosenIsLeft ?
-            (chosenArr[0].rosterId, chosenArr[1].rosterId) : (chosenArr[1].rosterId, chosenArr[0].rosterId);
-
-        labelLeft.Text = Game.rosterIdentity[rIdLeft];
-        labelRight.Text = Game.rosterIdentity[rIdRight];
-
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
 
         int botPanelHeight = 206;
@@ -310,10 +321,6 @@ public partial class AppForm : Form
             //    new Control[] { sTR, sBR },
             //    CellWrapper.BgMode.Player2
             //);
-
-            // data bindings
-            //  choice.DataBindings.Add(new Binding("Text", labMgr, "ChoicePanel"));
-            info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanel"));
 
             // --------- board cells ----------
 

@@ -1,21 +1,25 @@
 ﻿
 using System.ComponentModel;
+using static WinFormsApp1.Game;
 
 namespace WinFormsApp1;
 
 /// <summary>
 /// Updates UI labels based on subscribed events
 /// </summary>
-internal class LabelManager : INotifyPropertyChanged
+public class LabelManager : INotifyPropertyChanged
 {
     /// <summary>
-    /// Middle info panel states
+    /// Middle & bottom info panel states
     /// </summary>
     public enum Info
     {
         None,
-        HumanTurn,
-        AITurn,
+        //
+        Player1,
+        Player2,
+        Player1Move,
+        Player2Move,
     }
     /// <summary>
     /// Pre-game countdown info panel states
@@ -27,11 +31,9 @@ internal class LabelManager : INotifyPropertyChanged
         One
     }
 
-    static public readonly Dictionary<Enum, string> labels = new()
+    static public readonly Dictionary<Enum, string> stateToString = new()
     {
         { Info.None, "" },
-        { Info.HumanTurn, "Your turn..." },
-        { Info.AITurn, "AI is thinking..." },
         //
         { Countdown.Three, "Game starts in 3..." },
         { Countdown.Two, "Game starts in 2..." },
@@ -42,14 +44,18 @@ internal class LabelManager : INotifyPropertyChanged
     /// Subscribed to EM.EvtUpdateLabels event
     /// </summary>
     /// <param name="e">An array of states to set for each panel</param>
-    static public EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
+    static public readonly EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
     {
         foreach (Enum state in e) SetLabel(state);
     };
 
-    static public void Reset()
+    /// <summary>
+    /// Called from VBridge.Reset
+    /// defines Info labels when the game starts
+    /// </summary>
+    static public void Reset(Dictionary<Info, string> playerInfo)
     {
-        SetLabel(Info.None);
+        foreach (var (enm, msg) in playerInfo) stateToString.Add(enm, msg);
     }
 
     static void SetLabel(Enum state)
@@ -57,13 +63,18 @@ internal class LabelManager : INotifyPropertyChanged
         if (_this == null) return;
         switch (state)
         {
-            case Info:
-                _this.InfoPanel = labels[state];
-                RaiseEvtPropertyChanged(nameof(InfoPanel));
+            case Info.Player1:
+                _this.LabelLeftBind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelLeftBind));
                 break;
+            case Info.Player2:
+                _this.LabelRightBind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelRightBind));
+                break;
+            case Info:
             case Countdown:
-                _this.InfoPanel = labels[state];
-                RaiseEvtPropertyChanged(nameof(InfoPanel));
+                _this.InfoPanelBind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(InfoPanelBind));
                 break;
             default:
                 throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
@@ -88,8 +99,9 @@ internal class LabelManager : INotifyPropertyChanged
     /// <summary>
     /// Data bindings
     /// </summary>
-    public string ChoicePanel { get; private set; } = "";
-    public string InfoPanel { get; private set; } = "";
+    public string LabelLeftBind { get; private set; } = "";
+    public string LabelRightBind { get; private set; } = "";
+    public string InfoPanelBind { get; private set; } = "";
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public LabelManager()
