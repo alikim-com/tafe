@@ -60,6 +60,18 @@ class Game
     static internal readonly ArraySegment<Line> cols = new(lines, 3, 3);
     static internal readonly ArraySegment<Line> diags = new(lines, 6, 2);
 
+    static internal bool CanTakeBoardTile(Point pnt, out Roster owner)
+    {
+        owner = board[pnt.X, pnt.Y];
+        return owner == Roster.None;
+    }
+
+    static internal bool CanTakeLineTile(Line line, int index, out Roster owner)
+    {
+        owner = line[index];
+        return owner == Roster.None;
+    }
+
     static internal void Reset(Roster[] turnlist)
     {
         TurnList = turnlist;

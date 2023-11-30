@@ -106,7 +106,7 @@ class BoardEtor : IEnumerator<Game.Roster>
 
 class Line : IEnumerable<Game.Roster>
 {
-   readonly int Length;
+   internal readonly int Length;
    readonly Tile[] rc;
    readonly Board board;
 
@@ -117,7 +117,7 @@ class Line : IEnumerable<Game.Roster>
       board = _board;
    }
 
-   Game.Roster this[int index]
+   internal Game.Roster this[int index]
    {
         get
         {

@@ -11,12 +11,12 @@ class AI
     }
 
     readonly Logic logic;
-    readonly Game.Roster rosterId;
+    readonly Game.Roster selfId;
 
-    internal AI(Logic _logic, Game.Roster _rosterId)
+    internal AI(Logic _logic, Game.Roster _selfId)
     {
         logic = _logic;
-        rosterId = _rosterId;
+        selfId = _selfId;
     }
 
     /// <summary>
@@ -64,9 +64,7 @@ class AI
         ;
     }
 
-    static bool CanTake(Point pnt) => Game.board[pnt.X, pnt.Y] == Game.Roster.None;
-
-    static Point LogicRNG()
+     static Point LogicRNG()
     {
         var canTake = new List<Point>();
 
@@ -74,7 +72,7 @@ class AI
             for (int j = 0; j < Game.board.height; j++)
             {
                 var pnt = new Point(i, j);
-                if(CanTake(pnt)) canTake.Add(pnt);
+                if(Game.CanTakeBoardTile(pnt, out Game.Roster _)) canTake.Add(pnt);
             }
 
         if (canTake.Count == 0)
@@ -86,38 +84,40 @@ class AI
         return canTake[choice];
     }
 
+    class LineInfo
+    {
+        readonly Line line;
+        internal readonly List<int> canTake = new();
+        readonly Dictionary<Game.Roster, int> taken = new();
+        int selfTaken = 0;
+
+        internal LineInfo(Line _line)
+        {
+            line = _line;
+        }
+    }
+
     /// <summary>
     /// Simple AI logic (esay mode) for playing the game
     /// </summary>
     static Point LogicEasy()
     {
+        var linesInfo = new List<LineInfo>();
+
         // examine lines
         foreach (var line in Game.lines)
         {
-            // gather stats for the line
-            Dictionary<Game.Roster, int> stat = new();
+            var info = new LineInfo(line);
 
-            var canTake = new List<Point>();
+            for (int i = 0; i < line.Length; i++)
+                if (Game.CanTakeLineTile(line, i, out Game.Roster player))
+                {
+                    info.canTake.Add(i);
+                }else
+                {
 
-            foreach (var pnt in line)
-            {
-                //var player = Game.board[pnt.X, pnt.Y];
-                //if (!stat.ContainsKey(player)) stat.Add(player, 0);
-                //stat[player]++;
-                //if (player == Game.Roster.None) free.Add(pnt);
-            }
-            // search the line for 2 cells taken by same player
-            foreach (var rec in stat)
-            {
-                //if (rec.Value == 2 && rec.Key != Game.Roster.None && free.Count > 0)
-                    // block player (rec.Key != self) or
-                    // win the game (rec.Key == self)
-
-                    // TODO send labels update
-
-                    //return LinearOffset(free[0]);
-                    return Point.Empty;
-            }
+                }
+            
 
         }
 
