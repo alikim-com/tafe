@@ -5,7 +5,7 @@ partial class AppForm
 {
     AboutForm? aboutForm;
 
-    List<Profile> profiles = new();
+    readonly List<Profile> profiles = new();
 
     private void MenuHelpAbout_Click(object sender, EventArgs e)
     {
@@ -17,8 +17,8 @@ partial class AppForm
     private void MenuSaveAs_Click(object sender, EventArgs e)
     {
         string layoutName = menuLayout.Text.Trim();
-        layoutName = string.IsNullOrEmpty(layoutName) ? "Default" : layoutName;
-       // var prof = new Profile(layoutName, boxes);
+        //layoutName = string.IsNullOrEmpty(layoutName) ? "Default" : layoutName;
+        //var prof = new Profile();// layoutName, boxes);
        // Utils.SaveProfile(profPath, layoutName, prof);
        // AddProfile(prof);
     }
@@ -98,15 +98,15 @@ partial class AppForm
     }
 }
 
-public class BoxInfo
+class BoxInfo
 {
-    public string Name { get; set; } = "";
-    public Point Pos { get; set; } = new();
-    public Size Size { get; set; } = new();
+    internal string Name { get; set; } = "";
+    internal Point Pos { get; set; } = new();
+    internal Size Size { get; set; } = new();
 
-    public BoxInfo() { }
+    internal BoxInfo() { }
 
-    public BoxInfo(string _name, Point _pos, Size _size)
+    internal BoxInfo(string _name, Point _pos, Size _size)
     {
         Name = _name;
         Pos = _pos;
@@ -114,19 +114,19 @@ public class BoxInfo
     }
 }
 
-public class Profile
+class Profile
 {
-    public string Name { get; set; } = "";
-    public List<BoxInfo> Boxes { get; set; } = new();
+    internal string Name { get; set; } = "";
+    internal List<BoxInfo> Boxes { get; set; } = new();
 
-    //public Profile(string _name, List<ClassBox> _boxes)
+    //Profile(string _name, List<ClassBox> _boxes)
     //{
     //    Name = _name;
     //    foreach (var _box in _boxes)
     //        Boxes.Add(new BoxInfo(_box.name, _box.pos, _box.size));
     //}
 
-    public Profile()
+    internal Profile()
     {
 
     }

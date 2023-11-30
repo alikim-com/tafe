@@ -44,7 +44,7 @@ internal class VBridge
     /// <summary>
     /// Create translation table from game states to cell backgrounds
     /// </summary>
-    static public void Reset(IEnumerable<ChoiceItem> chosen)
+    static internal void Reset(IEnumerable<ChoiceItem> chosen)
     {
         while (rosterToCellBg.Count > 1) rosterToCellBg.Remove(rosterToCellBg.Keys.Last());
 
@@ -88,7 +88,7 @@ internal class VBridge
     /// Subscribed to EM.EvtSyncBoard event<br/>
     /// Translates game board state into UI states
     /// </summary>
-    static public EventHandler<Dictionary<Point, Game.Roster>> SyncBoardHandler = (object? s, Dictionary<Point, Game.Roster> e) =>
+    static internal EventHandler<Dictionary<Point, Game.Roster>> SyncBoardHandler = (object? s, Dictionary<Point, Game.Roster> e) =>
     {
         Dictionary<Point, CellWrapper.BgMode> cellBgs = new();
         foreach (var (rowCol, rostId) in e)
@@ -104,7 +104,7 @@ internal class VBridge
     /// <summary>
     /// Subscribed to EM.SyncMoveLabels event raised by TurnWheel to update labels on player move
     /// </summary>
-    static public EventHandler<Game.Roster> SyncMoveLabelsHandler = (object? _, Game.Roster rostId) =>
+    static internal EventHandler<Game.Roster> SyncMoveLabelsHandler = (object? _, Game.Roster rostId) =>
     {
         if (!rosterToLabMgr.TryGetValue(rostId, out LabelManager.Info stateMove))
             throw new Exception($"VBridge.SyncMoveLabelsHandler : can't translate '{rostId}'");

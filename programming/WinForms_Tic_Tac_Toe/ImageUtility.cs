@@ -4,9 +4,9 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-public static class ColorExtensions
+static public class ColorExtensions
 {
-    public struct _argb
+    public struct Argb
     {
         public double a;
         public double r;
@@ -16,19 +16,19 @@ public static class ColorExtensions
         public override readonly string ToString() => $"a: {a}, r: {r}, g: {g}, b: {b}";
     }
 
-    public static Color ScaleRGB(this Color c, double scale) =>
+    static public Color ScaleRGB(this Color c, double scale) =>
         Color.FromArgb((int)(c.R * scale), (int)(c.G * scale), (int)(c.B * scale));
 
-    public static Color Scale(this Color c, double scale) =>
+    static public Color Scale(this Color c, double scale) =>
         Color.FromArgb((int)(c.A * scale), (int)(c.R * scale), (int)(c.G * scale), (int)(c.B * scale));
 
-    public static _argb Normalise(this Color c)
+    static public Argb Normalise(this Color c)
     {
         double k = 1.0 / 255;
-        return new _argb { a = c.A * k, r = c.R * k, g = c.G * k, b = c.B * k };
+        return new Argb { a = c.A * k, r = c.R * k, g = c.G * k, b = c.B * k };
     }
 
-    public static Color FromNormalised(_argb nrm) => Color.FromArgb(
+    static public Color FromNormalised(Argb nrm) => Color.FromArgb(
         (byte)(nrm.a * 255),
         (byte)(nrm.r * 255),
         (byte)(nrm.g * 255),
@@ -49,7 +49,7 @@ public static class ColorExtensions
     /// <param name="bot">Transparent pixel below</param>
     /// <param name="pre">Whether RGBs are premultiplied by alpha</param>
     /// <returns></returns>
-    public static Color BlendOver(Color top, Color bot, bool pre = false)
+    static public Color BlendOver(Color top, Color bot, bool pre = false)
     {
         var t = top.Normalise();
         var b = bot.Normalise();
@@ -63,17 +63,17 @@ public static class ColorExtensions
         double _g = pre ? t.g + b.g * f : (t.g * t.a + b.g * b.a * f) * ar;
         double _b = pre ? t.b + b.b * f : (t.b * t.a + b.b * b.a * f) * ar;
 
-        return FromNormalised(new _argb() { a = a, r = _r, g = _g, b = _b });
+        return FromNormalised(new Argb() { a = a, r = _r, g = _g, b = _b });
     }
 }
 
-public static class ImageExtensions
+static public class ImageExtensions
 {
     /// <summary>
     /// Best fit the current image into dstSize box while preserving its aspect ratio.<br/>
     /// Paint the image over dst background at the specified offDst.
     /// </summary>
-    public static Image GetOverlayOnBackground(this Image src,
+    static public Image GetOverlayOnBackground(this Image src,
         Image dst,
         Point dstOff,
         Size dstSize,
@@ -145,7 +145,7 @@ public static class ImageExtensions
     /// <summary>
     /// Create new image of dstSize and best fit the current image into it while preserving its aspect ratio
     /// </summary>
-    public static Image GetOverlayOnBackground(this Image src,
+    static public Image GetOverlayOnBackground(this Image src,
         Size dstSize,
         Color? bg,
         string hAlign,
@@ -177,7 +177,7 @@ public static class ImageExtensions
         return dst;
     }
 
-    public static Image GetImageCopyWithAlpha(this Image src, float opacity)
+    static public Image GetImageCopyWithAlpha(this Image src, float opacity)
     {
         Bitmap dst = new(src.Width, src.Height);
         using (Graphics g = Graphics.FromImage(dst))
@@ -203,7 +203,7 @@ public static class ImageExtensions
         return dst;
     }
 
-    public static Image Desaturate(this Image src, string mode)
+    static public Image Desaturate(this Image src, string mode)
     {
         if (mode != "PS")
             throw new NotImplementedException($"Image.Desaturate : mode '{mode}'");

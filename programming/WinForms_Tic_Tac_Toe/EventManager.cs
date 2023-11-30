@@ -44,7 +44,7 @@ internal class EM
     /// <summary>
     /// Event associations
     /// </summary>
-    public enum Evt
+    internal enum Evt
     {
         SyncBoard,
         SyncBoardUI,
@@ -75,7 +75,7 @@ internal class EM
     /// <param name="evt">Event to be raised</param>
     /// <param name="sender">Event sender object</param>
     /// <param name="e">Event arguments</param>
-    static public void Raise<E>(Evt enm, object sender, E e)
+    static internal void Raise<E>(Evt enm, object sender, E e)
     {
         if (!dict.TryGetValue(enm, out var _evt))
             throw new NotImplementedException($"EM.Raise : no event for Evt.{enm}");
@@ -94,7 +94,7 @@ internal class EM
         }
     }
 
-    static public void Subscribe(Evt enm, Delegate handler)
+    static internal void Subscribe(Evt enm, Delegate handler)
     {
         if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Subscribe : no event for Evt.{enm}");
@@ -102,7 +102,7 @@ internal class EM
             dict[enm] = Delegate.Combine(evt, handler);
     }
 
-    static public void Unsubscribe(Evt enm, Delegate handler)
+    static internal void Unsubscribe(Evt enm, Delegate handler)
     {
         if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Unsubscribe : no event for Evt.{enm}");
@@ -112,11 +112,11 @@ internal class EM
 
     // ----- cross-thread calls -----
 
-    public static AppForm? uiThread;
+    static internal AppForm? uiThread;
 
     /// <summary>
     /// Raise events from UI thread for safe UI access
     /// </summary>
     /// <param name="lambda"></param>
-    public static void InvokeFromMainThread(Action lambda) => uiThread?.Invoke(lambda);
+    static internal void InvokeFromMainThread(Action lambda) => uiThread?.Invoke(lambda);
 }

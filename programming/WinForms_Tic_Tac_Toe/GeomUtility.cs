@@ -10,7 +10,7 @@ public class GeomUtility
     /// <param name="large">Size of a larger rectangle</param>
     /// <param name="small">Size of a smaller rectangle</param>
     /// <returns>The new size of a scaled small box</returns>
-    public static Size FitRect(Size large, Size small)
+    static public Size FitRect(Size large, Size small)
     {
         double widthRatio = (double)large.Width / small.Width;
         double heightRatio = (double)large.Height / small.Height;
@@ -32,14 +32,14 @@ public class RatioPosControl
         Left, Top, Right, Bottom
     }
 
-    public readonly Anchor hor, ver;
+    internal readonly Anchor hor, ver;
 
-    public readonly Control control;
-    public readonly Control parent;
+    internal readonly Control control;
+    internal readonly Control parent;
 
-    public readonly RectangleF ratioAnchors;
+    internal readonly RectangleF ratioAnchors;
 
-    public RatioPosControl(Control _control, Control _parent, Anchor _hor, Anchor _ver)
+    internal RatioPosControl(Control _control, Control _parent, Anchor _hor, Anchor _ver)
     {
         control = _control;
         parent = _parent;
@@ -61,10 +61,10 @@ public class RatioPosControl
 /// </summary>
 public class RatioPosition
 {
-    static public readonly List<RatioPosControl> rpControls = new();
+    static readonly List<RatioPosControl> rpControls = new();
 
     static public void Add(Control ctrl, Control parent, RatioPosControl.Anchor hor, RatioPosControl.Anchor ver) =>
-        rpControls.Add(new RatioPosControl(ctrl, parent, hor, ver));       
+        rpControls.Add(new RatioPosControl(ctrl, parent, hor, ver));
 
     static public void Remove(Control control) => rpControls.RemoveAll(rpCtrl => rpCtrl.control == control);
 
@@ -76,7 +76,7 @@ public class RatioPosition
         var ctrl = rpCtrl.control;
         var rect = rpCtrl.ratioAnchors;
         var clSize = rpCtrl.parent.ClientSize;
-        var hor = rpCtrl.hor; 
+        var hor = rpCtrl.hor;
         var ver = rpCtrl.ver;
 
         int x;

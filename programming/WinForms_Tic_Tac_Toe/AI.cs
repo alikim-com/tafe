@@ -1,9 +1,9 @@
 ﻿
 namespace WinFormsApp1;
 
-public class AI
+class AI
 {
-    public enum Logic
+    internal enum Logic
     {
         None,
         RNG,
@@ -13,7 +13,7 @@ public class AI
     readonly Logic logic;
     readonly Game.Roster rosterId;
 
-    public AI(Logic _logic, Game.Roster _rosterId)
+    internal AI(Logic _logic, Game.Roster _rosterId)
     {
         logic = _logic;
         rosterId = _rosterId;
@@ -23,7 +23,7 @@ public class AI
     /// Choose a board cell
     /// </summary>
     /// <param name="count">The number of remaining UI elements to click</param>
-    public EventHandler<Game.Roster> AIMakeMoveHandler()
+    internal EventHandler<Game.Roster> AIMakeMoveHandler()
     {
         return logic switch
         {
@@ -34,8 +34,9 @@ public class AI
                 {
                     Thread.Sleep(750);
 
-                    Random random = new();
-                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, Point.Empty));
+                    Point move = LogicRNG();
+
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
                 });
 
                 thread.Start();
@@ -50,7 +51,7 @@ public class AI
 
                     Point move = LogicEasy();
 
-                    Thread.Sleep(250); // to see the reason for the decision in case AI vs AI
+                    Thread.Sleep(250);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
                 });
@@ -63,31 +64,52 @@ public class AI
         ;
     }
 
+    static bool CanTake(Point pnt) => Game.board[pnt.X, pnt.Y] == Game.Roster.None;
+
+    static Point LogicRNG()
+    {
+        var canTake = new List<Point>();
+
+        for (int i = 0; i < Game.board.width; i++)
+            for (int j = 0; j < Game.board.height; j++)
+            {
+                var pnt = new Point(i, j);
+                if(CanTake(pnt)) canTake.Add(pnt);
+            }
+
+        if (canTake.Count == 0)
+            throw new Exception("AI.LogicRNG : run on full board");
+
+        var rng = new Random();
+        var choice = rng.Next(canTake.Count);
+
+        return canTake[choice];
+    }
+
     /// <summary>
     /// Simple AI logic (esay mode) for playing the game
     /// </summary>
     static Point LogicEasy()
     {
-        static bool CanTake(Point pnt) => Game.Board[pnt.X, pnt.Y] == Game.Roster.None;
-
         // examine lines
-        foreach (var line in Game.Lines)
+        foreach (var line in Game.lines)
         {
             // gather stats for the line
             Dictionary<Game.Roster, int> stat = new();
-            // memo free cells
-            List<Point> free = new();
+
+            var canTake = new List<Point>();
+
             foreach (var pnt in line)
             {
-                var player = Game.Board[pnt.X, pnt.Y];
-                if (!stat.ContainsKey(player)) stat.Add(player, 0);
-                stat[player]++;
-                if (player == Game.Roster.None) free.Add(pnt);
+                //var player = Game.board[pnt.X, pnt.Y];
+                //if (!stat.ContainsKey(player)) stat.Add(player, 0);
+                //stat[player]++;
+                //if (player == Game.Roster.None) free.Add(pnt);
             }
             // search the line for 2 cells taken by same player
             foreach (var rec in stat)
             {
-                if (rec.Value == 2 && rec.Key != Game.Roster.None && free.Count > 0)
+                //if (rec.Value == 2 && rec.Key != Game.Roster.None && free.Count > 0)
                     // block player (rec.Key != self) or
                     // win the game (rec.Key == self)
 

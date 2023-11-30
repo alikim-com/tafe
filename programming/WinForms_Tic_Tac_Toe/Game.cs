@@ -4,12 +4,12 @@ namespace WinFormsApp1;
 /// <summary>
 /// Defines players roster, evaluates the board and winning conditions
 /// </summary>
-public class Game
+class Game
 {
     /// <summary>
     /// Pattern for human player names Human*, for AI players - AI*
     /// </summary>
-    public enum Roster
+    internal enum Roster
     {
         None,
         Human_One,
@@ -18,7 +18,7 @@ public class Game
         AI_Two
     }
 
-    static public readonly Dictionary<Roster, string> rosterIdentity = new()
+    static internal readonly Dictionary<Roster, string> rosterIdentity = new()
     {
         { Roster.Human_One, "Ironheart" },
         { Roster.Human_Two, "Silverlight" },
@@ -32,38 +32,35 @@ public class Game
     /// Players from Roster in the order of their turns;<br/>
     /// can be overwritten by SetTurns()
     /// </summary>
-    static public Roster[] TurnList
+    static internal Roster[] TurnList
     {
         get => _turnList;
-        private set => _turnList = value;
+        set => _turnList = value;
     }
 
-    static readonly Roster[,] board = new Roster[3, 3];
-    public static readonly Size boardSize = new(board.GetLength(0), board.GetLength(1));
-    public static Roster[,] Board => board;
+    static internal readonly Board board = new(3, 3, Roster.None);
 
-    /// <summary>
-    /// Utility array Point(row, col) to help assert winning conditions and to assist AI logic
-    /// </summary>
-    static readonly Point[][] lines = new Point[][]
+    static internal readonly Line[] lines = new Line[]
     {
-        // horizontal
-       new Point[] { new Point(0,0), new Point(0,1), new Point(0,2) },
-       new Point[] { new Point(1,0), new Point(1,1), new Point(1,2) },
-       new Point[] { new Point(2,0), new Point(2,1), new Point(2,2) },
+        // rows
+        new(board, new Tile[] { new(0,0), new(0,1), new(0,2) }),
+        new(board, new Tile[] { new(1,0), new(1,1), new(1,2) }),
+        new(board, new Tile[] { new(2,0), new(2,1), new(2,2) }),
+        // columns
+        new(board, new Tile[] { new(0,0), new(1,0), new(2,0) }),
+        new(board, new Tile[] { new(0,1), new(1,1), new(2,1) }),
+        new(board, new Tile[] { new(0,2), new(1,2), new(2,2) }),
+        // diagonals
+        new(board, new Tile[] { new(2,0), new(1,1), new(0,2) }), // Fwd
+        new(board, new Tile[] { new(0,0), new(1,1), new(2,2) }), // Bwd
 
-       // vertical
-       new Point[] { new Point(0,0), new Point(1,0), new Point(2,0) },
-       new Point[] { new Point(0,1), new Point(1,1), new Point(2,1) },
-       new Point[] { new Point(0,2), new Point(1,2), new Point(2,2) },
-
-       // diagonal
-       new Point[] { new Point(0,0), new Point(1,1), new Point(2,2) },
-       new Point[] { new Point(0,2), new Point(1,1), new Point(0,2) },
     };
-    public static Point[][] Lines => lines;
 
-    public static void Reset(Roster[] turnlist)
+    static internal readonly ArraySegment<Line> rows = new(lines, 0, 3);
+    static internal readonly ArraySegment<Line> cols = new(lines, 3, 3);
+    static internal readonly ArraySegment<Line> diags = new(lines, 6, 2);
+
+    static internal void Reset(Roster[] turnlist)
     {
         TurnList = turnlist;
 
@@ -71,8 +68,9 @@ public class Game
 
         // add all the board cells to the update
         var update = new Dictionary<Point, Roster>();
-        for (int i = 0; i < board.GetLength(0); i++)
-            for (int j = 0; j < board.GetLength(1); j++)
+
+        for (int i = 0; i < board.width; i++)
+            for (int j = 0; j < board.height; j++)
                 update.Add(new Point(i, j), board[i, j]);
 
         // sync the board
@@ -82,7 +80,7 @@ public class Game
     /// <summary>
     /// Sets the order of players turns
     /// </summary>
-    public static void SetTurns(string mode)
+    static internal void SetTurns(string mode)
     {
         switch (mode)
         {
@@ -97,14 +95,12 @@ public class Game
 
     static void ResetBoard()
     {
-        for (int i = 0; i < board.GetLength(0); i++)
-            for (int j = 0; j < board.GetLength(1); j++)
-                board[i, j] = Roster.None;
+        for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
     }
 
     static void AssertGame(Point rc, object s)
     {
-        
+
         // assert the game state
 
         // if game over, call TurnWheel.Ended();
@@ -118,7 +114,7 @@ public class Game
     /// Subscribed to cell click event;<br/>
     /// asserts the game state (win/loss), issues board sync event, turns the wheel
     /// </summary>
-    static public readonly EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
+    static internal readonly EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
     {
         if (s == null) throw new Exception("Game.PlayerMovedHandler : cell is null");
 

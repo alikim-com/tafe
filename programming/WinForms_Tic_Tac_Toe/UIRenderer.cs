@@ -3,19 +3,19 @@ namespace uiRenderer;
 
 public class UIFonts
 {
-    static readonly public Font Default = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font Default = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
 
-    static readonly public Font header = new("Arial", 16F, FontStyle.Regular, GraphicsUnit.Point);
-    static readonly public Font regular = new("Arial", 13.5F, FontStyle.Regular, GraphicsUnit.Point);
-    static readonly public Font small = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
-    static readonly public Font tiny = new("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font header = new("Arial", 16F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font regular = new("Arial", 13.5F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font small = new("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font tiny = new("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point);
 }
 
 public class UIColors
 {
 
-    static readonly public Color Black = Color.FromArgb(0, 0, 0);
-    static readonly public Color Transparent = Color.FromArgb(0, 0, 0, 0);
+    static public readonly Color Black = Color.FromArgb(0, 0, 0);
+    static public readonly Color Transparent = Color.FromArgb(0, 0, 0, 0);
 
     public struct ColorTheme
     {
@@ -42,7 +42,7 @@ public class UIColors
     };
 }
 
-public class ColorTableMain : ProfessionalColorTable
+class ColorTableMain : ProfessionalColorTable
 {
     UIColors.ColorTheme theme;
 

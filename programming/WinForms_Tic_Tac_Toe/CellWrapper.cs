@@ -11,7 +11,7 @@ internal class CellWrapper : IComponent
     readonly Dictionary<BgMode, Image> backgr = new();
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
-    public enum BgMode
+    internal enum BgMode
     {
         // star
         Default,
@@ -27,7 +27,7 @@ internal class CellWrapper : IComponent
 
     public bool IsLocked { get; set; } = false;
 
-    public CellWrapper(Panel _box, int _row, int _col)
+    internal CellWrapper(Panel _box, int _row, int _col)
     {
         box = _box;
         rc = new Point(_row, _col);
@@ -45,7 +45,7 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// Subscribed EM.EvtSyncBoardUI event
     /// </summary>
-    public EventHandler<Dictionary<Point, BgMode>> SyncBoardUIHandler;
+    internal EventHandler<Dictionary<Point, BgMode>> SyncBoardUIHandler;
 
     void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());
 
@@ -152,6 +152,6 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// AI mouse clicks
     /// </summary>
-    public void SimulateOnClick() => OnClick(null, new EventArgs());
+    void SimulateOnClick() => OnClick(null, new EventArgs());
 }
 

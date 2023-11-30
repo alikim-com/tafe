@@ -3,20 +3,20 @@ using System.Drawing.Drawing2D;
 
 namespace WinFormsApp1;
 
-public partial class SetupForm : Form
+partial class SetupForm : Form
 {
-    static public readonly UIColors.ColorTheme theme = UIColors.Steel;
+    static readonly UIColors.ColorTheme theme = UIColors.Steel;
 
-    public static readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
-    public static readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
+    static internal readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
+    static internal readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
 
-    public Color foreLeft, foreRight, foreLeftDim, foreRightDim;
+    readonly Color foreLeft, foreRight, foreLeftDim, foreRightDim;
 
-    public static readonly List<ChoiceItem> roster = new();
+    static internal readonly List<ChoiceItem> roster = new();
 
     readonly ToolStripRendererOverride buttonRenderer;
 
-    public enum BtnMessage
+    enum BtnMessage
     {
         Ready_AI,
         Ready_Human,
@@ -26,7 +26,7 @@ public partial class SetupForm : Form
         Right_Missing,
     }
 
-    public SetupForm()
+    internal SetupForm()
     {
         // prevent main window flickering
         DoubleBuffered = true;
@@ -107,6 +107,7 @@ public partial class SetupForm : Form
         Point locId = identityLeft.Location;
         int allegX = allegLeft.Location.X + allegLeft.Width;
         locId.Y += 15;
+        
         foreach (var (rostItem, identity) in Game.rosterIdentity)
         {
             tab++;
@@ -259,30 +260,30 @@ public partial class SetupForm : Form
     private void ToolStrip_MouseLeave(object sender, EventArgs e) => buttonRenderer.SetOverState(sender, false);
 }
 
-public class ChoiceItem
+class ChoiceItem
 {
-    public bool chosen;
+    internal bool chosen;
 
-    public readonly Game.Roster rosterId;
+    internal readonly Game.Roster rosterId;
 
-    public readonly Label origin;
-    public readonly Label identity;
-    public readonly string identityName;
+    readonly Label origin;
+    readonly Label identity;
+    internal readonly string identityName;
 
-    public enum Side
+    internal enum Side
     {
         None,
         Left,
         Right
     }
 
-    public readonly Side side;
+    internal readonly Side side;
     readonly Color foreOn;
     readonly Color foreOff;
 
-    public readonly string originType;
+    internal readonly string originType;
 
-    public ChoiceItem(Game.Roster _rosterId, Side _side, Label _origin, Label _identity, Color _foreOn, Color _foreOff)
+    internal ChoiceItem(Game.Roster _rosterId, Side _side, Label _origin, Label _identity, Color _foreOn, Color _foreOff)
     {
         chosen = false;
         rosterId = _rosterId;
@@ -296,23 +297,23 @@ public class ChoiceItem
         identityName = identity.Text;
     }
 
-    public void Activate()
+    internal void Activate()
     {
         identity.ForeColor = foreOn;
         origin.ForeColor = foreOn;
     }
-    public void Deactivate()
+    internal void Deactivate()
     {
         identity.ForeColor = foreOff;
         origin.ForeColor = foreOff;
     }
-    public void SetOnClickHandler(EventHandler handler)
+    internal void SetOnClickHandler(EventHandler handler)
     {
         identity.Click += handler;
         identity.Cursor = Cursors.Hand;
     }
 
-    public void Deconstruct(out Label _origin, out Label _identity)
+    internal void Deconstruct(out Label _origin, out Label _identity)
     {
         _identity = identity;
         _origin = origin;
@@ -321,7 +322,7 @@ public class ChoiceItem
     public override string ToString() => $"{identity.Text} | {side} | chosen: {chosen}";
 }
 
-public class ToolStripRendererOverride : ToolStripProfessionalRenderer
+class ToolStripRendererOverride : ToolStripProfessionalRenderer
 {
     Color gTop, gBot;
     static readonly Color gradTop = Color.FromArgb(52, 26, 79).ScaleRGB(1.25);
@@ -332,7 +333,7 @@ public class ToolStripRendererOverride : ToolStripProfessionalRenderer
     static readonly Color gradBotDisabled = Color.FromArgb(185, 36, 199).ScaleRGB(0.10);
 
     bool _disabled = false;
-    public bool Disabled
+    internal bool Disabled
     {
         get => _disabled;
         set
@@ -349,7 +350,7 @@ public class ToolStripRendererOverride : ToolStripProfessionalRenderer
 
     readonly Control parent;
 
-    public ToolStripRendererOverride(Control _parent)
+    internal ToolStripRendererOverride(Control _parent)
     {
         parent = _parent;
         this.RoundedEdges = false;
@@ -361,7 +362,7 @@ public class ToolStripRendererOverride : ToolStripProfessionalRenderer
         gBot = Disabled ? gradBotDisabled : (state ? gradBotOver : gradBot);
     }
 
-    public void SetOverState(object sender, bool state)
+    internal void SetOverState(object sender, bool state)
     {
         UpdateColors(state);
 

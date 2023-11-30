@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace WinFormsApp1;
 
-public partial class AppForm : Form
+partial class AppForm : Form
 {
     double cRatio; // main window
     Size ncSize; // non-client area
@@ -18,7 +18,7 @@ public partial class AppForm : Form
 
     static readonly Dictionary<KeyValuePair<Game.Roster, Game.Roster>, Image> mainBg = new();
 
-    static public void ApplyDoubleBuffer(Control control)
+    static internal void ApplyDoubleBuffer(Control control)
     {
         control.GetType().InvokeMember(
             "DoubleBuffered",
@@ -72,7 +72,7 @@ public partial class AppForm : Form
         if (setupForm.ShowDialog(this) == DialogResult.OK) return;
     }
 
-    public AppForm()
+    internal AppForm()
     {
         theme = UIColors.Steel;
 
@@ -320,10 +320,10 @@ public partial class AppForm : Form
     [StructLayout(LayoutKind.Sequential)]
     struct RECT
     {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
+        internal int Left;
+        internal int Top;
+        internal int Right;
+        internal int Bottom;
     }
     private const int WM_SIZING = 0x214;
     enum WMSZ

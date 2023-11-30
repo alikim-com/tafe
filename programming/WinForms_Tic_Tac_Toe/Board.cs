@@ -1,32 +1,13 @@
 using System.Collections;
-using Test;
 
-namespace test;
+namespace WinFormsApp1;
 
-/*
-      var Rows = new Line[] { 
-        new(brd, new Point[] { new(0,0), new(0,1), new(0,2) }),
-        new(brd, new Point[] { new(1,0), new(1,1), new(1,2) }),
-        new(brd, new Point[] { new(2,0), new(2,1), new(2,2) }),
-      };
-      var Cols = new Line[] { 
-        new(brd, new Point[] { new(0,0), new(1,0), new(2,0) }),
-        new(brd, new Point[] { new(0,1), new(1,1), new(2,1) }),
-        new(brd, new Point[] { new(0,2), new(1,2), new(2,2) }),
-      };
-      var Diag = new Line[] {
-        new(brd, new Point[] { new(2,0), new(1,1), new(0,2) }), // Fwd
-        new(brd, new Point[] { new(0,0), new(1,1), new(2,2) }), // Bwd
-      };
-
-*/
-
-public struct Point
+struct Tile
 {
-   public int row;
-   public int col;
+   internal int row;
+   internal int col;
 
-   public Point(int _row, int _col) {
+   internal Tile(int _row, int _col) {
       row = _row;
       col = _col;
    }
@@ -37,11 +18,11 @@ class Board : IEnumerable<Game.Roster>
 
    readonly Game.Roster[] board;
 
-   readonly int width;
-   readonly int height;
-   public readonly int Length;
+   internal readonly int width;
+   internal readonly int height;
+   internal readonly int Length;
 
-   public Board(int _width, int _height, Game.Roster _def)
+   internal Board(int _width, int _height, Game.Roster _def)
    {
       width = _width;
       height = _height;
@@ -51,7 +32,7 @@ class Board : IEnumerable<Game.Roster>
       Array.Fill(board, _def);
    }
 
-   public Game.Roster this[int index]
+   internal Game.Roster this[int index]
    {
       get
       {
@@ -69,7 +50,7 @@ class Board : IEnumerable<Game.Roster>
       }
    }
 
-   public Game.Roster this[int row, int col]
+   internal Game.Roster this[int row, int col]
    {
       get
       {
@@ -102,7 +83,7 @@ class BoardEtor : IEnumerator<Game.Roster>
    readonly Game.Roster[] list;
    int head;
 
-   public BoardEtor(Game.Roster[] _list)
+   internal BoardEtor(Game.Roster[] _list)
    {
       list = _list;
       head = -1;
@@ -125,21 +106,33 @@ class BoardEtor : IEnumerator<Game.Roster>
 
 class Line : IEnumerable<Game.Roster>
 {
-   public readonly int Length;
-   readonly Point[] rc;
+   readonly int Length;
+   readonly Tile[] rc;
    readonly Board board;
 
-   public Line(Board _board, Point[] _rc)
+   internal Line(Board _board, Tile[] _rc)
    {
       rc = _rc;
       Length = _rc.Length;
       board = _board;
    }
 
-   public Game.Roster this[int index]
+   Game.Roster this[int index]
    {
-      get => board[rc[index].row, rc[index].col];
-      set => board[rc[index].row, rc[index].col] = value;
+        get
+        {
+            if (index < 0 || index >= Length)
+                throw new IndexOutOfRangeException("Line.get[] : index is out of range");
+
+            return board[rc[index].row, rc[index].col];
+        }
+        set
+        {
+            if (index < 0 || index >= Length)
+                throw new IndexOutOfRangeException("Line.set[] : index is out of range");
+
+            board[rc[index].row, rc[index].col] = value;
+        }
    }
 
    public IEnumerator<Game.Roster> GetEnumerator() => new LineEtor(board, rc);
@@ -150,10 +143,10 @@ class Line : IEnumerable<Game.Roster>
 class LineEtor : IEnumerator<Game.Roster>
 {
    readonly Board list;
-   readonly Point[] rc;
+   readonly Tile[] rc;
    int head;
 
-   public LineEtor(Board _list, Point[] _rc)
+   internal LineEtor(Board _list, Tile[] _rc)
    {
       list = _list;
       rc = _rc;

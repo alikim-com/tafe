@@ -1,19 +1,17 @@
 ﻿
 using System.ComponentModel;
-using static WinFormsApp1.ChoiceItem;
-using static WinFormsApp1.Game;
 
 namespace WinFormsApp1;
 
 /// <summary>
 /// Updates UI labels based on subscribed events
 /// </summary>
-public class LabelManager : INotifyPropertyChanged
+class LabelManager : INotifyPropertyChanged
 {
     /// <summary>
     /// Middle & bottom info panel states
     /// </summary>
-    public enum Info
+    internal enum Info
     {
         None,
         //
@@ -25,7 +23,7 @@ public class LabelManager : INotifyPropertyChanged
     /// <summary>
     /// Pre-game countdown info panel states
     /// </summary>
-    public enum Countdown
+    internal enum Countdown
     {
         Three,
         Two,
@@ -34,7 +32,7 @@ public class LabelManager : INotifyPropertyChanged
 
     // <----------------how to add extra messages from Ai
 
-    static public readonly Dictionary<Enum, string> stateToString = new()
+    static readonly Dictionary<Enum, string> stateToString = new()
     {
         { Info.None, "" },
         //
@@ -47,7 +45,7 @@ public class LabelManager : INotifyPropertyChanged
     /// Subscribed to EM.EvtUpdateLabels event
     /// </summary>
     /// <param name="e">An array of states to set for each panel</param>
-    static public readonly EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
+    static internal readonly EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
     {
         foreach (Enum state in e) SetLabel(state);
     };
@@ -56,7 +54,7 @@ public class LabelManager : INotifyPropertyChanged
     /// Called from VBridge.Reset
     /// defines Info labels when the game starts
     /// </summary>
-    static public void Reset(Dictionary<Info, string> playerInfo)
+    static internal void Reset(Dictionary<Info, string> playerInfo)
     {
         foreach (var (enm, msg) in playerInfo)
         {
@@ -108,12 +106,13 @@ public class LabelManager : INotifyPropertyChanged
     /// <summary>
     /// Data bindings
     /// </summary>
-    public string LabelLeftBind { get; private set; } = "";
-    public string LabelRightBind { get; private set; } = "";
-    public string InfoPanelBind { get; private set; } = "";
+    public string LabelLeftBind { get; set; } = "";
+    public string LabelRightBind { get; set; } = "";
+    public string InfoPanelBind { get; set; } = "";
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    public LabelManager()
+
+    internal LabelManager()
     {
         _this = this;
     }

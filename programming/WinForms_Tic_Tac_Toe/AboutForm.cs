@@ -1,11 +1,11 @@
 ﻿
 namespace WinFormsApp1;
 
-public partial class AboutForm : Form
+partial class AboutForm : Form
 {
     UIColors.ColorTheme theme;
 
-    public AboutForm()
+    internal AboutForm()
     {
         theme = UIColors.Steel;
 
@@ -21,7 +21,7 @@ public partial class AboutForm : Form
 
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    private void Button1_Click(object sender, EventArgs e)
     {
         DialogResult = DialogResult.OK;
     }

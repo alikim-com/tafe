@@ -12,7 +12,7 @@ internal class TurnWheel
     static int head;
     static bool busy;
 
-    public static Game.Roster CurPlayer => Game.TurnList[head];
+    static internal Game.Roster CurPlayer => Game.TurnList[head];
 
     static bool CheckPlayerType(Game.Roster player, string type) => player.ToString().StartsWith(type);
     static bool CurPlayerIsHuman => CheckPlayerType(CurPlayer, "Human");
@@ -21,19 +21,19 @@ internal class TurnWheel
     static Action EnableUICb = () => { };
     static Action DisableUICb = () => { };
 
-    static public void SetCallbacks(Action _EnableUICb, Action _DisableUICb)
+    static internal void SetCallbacks(Action _EnableUICb, Action _DisableUICb)
     {
         EnableUICb = _EnableUICb;
         DisableUICb = _DisableUICb;
     }
 
-    static public void Reset()
+    static internal void Reset()
     {
         head = -1;
         busy = false;
     }
 
-    public static readonly EventHandler<Point> PlayerMovedHandler = (object? sender, Point e) =>
+    static internal readonly EventHandler<Point> PlayerMovedHandler = (object? sender, Point e) =>
     {
         if (busy) return;
         busy = true;
@@ -75,7 +75,7 @@ internal class TurnWheel
         EM.Raise(EM.Evt.SyncMoveLabels, new { }, CurPlayer);
     }
 
-    static public void GameCountdown()
+    static internal void GameCountdown()
     {
         Thread thread = new(CntDown);
         thread.Start();
