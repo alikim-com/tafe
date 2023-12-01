@@ -11,7 +11,7 @@ internal class EM
     /// </summary>
     /// <param>List of cells to update,<br/>
     /// containing row(X) and column(Y) of a cell and the player occupying it</param>
-    static event EventHandler<Dictionary<Point, Game.Roster>> EvtSyncBoard = delegate { };
+    static event EventHandler<Dictionary<Tile, Game.Roster>> EvtSyncBoard = delegate { };
     /// <summary>
     /// Sync the board with EvtSyncBoard translation done by VBridge
     /// </summary>
@@ -37,6 +37,10 @@ internal class EM
     /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
     static event EventHandler<Point> EvtAIMoved = delegate { };
     /// <summary>
+    /// Raised by Game when the current game is over
+    /// </summary>
+    static event EventHandler<Game.Roster> EvtGameOver = delegate { };
+    /// <summary>
     /// Updates labels in LabelManager
     /// </summary>
     static event EventHandler<Enum[]> EvtUpdateLabels = delegate { };
@@ -52,6 +56,7 @@ internal class EM
         SyncMoveLabels,
         PlayerMoved,
         AIMoved,
+        GameOver,
         UpdateLabels
     }
     /// <summary>
@@ -64,6 +69,7 @@ internal class EM
         { Evt.SyncMoveLabels, EvtSyncMoveLabels },
         { Evt.PlayerMoved, EvtPlayerMoved },
         { Evt.AIMoved, EvtAIMoved },
+        { Evt.GameOver, EvtGameOver },
         { Evt.UpdateLabels, EvtUpdateLabels },
     };
 

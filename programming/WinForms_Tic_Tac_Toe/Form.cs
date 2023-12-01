@@ -167,6 +167,7 @@ partial class AppForm : Form
 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
         EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
+        EM.Subscribe(EM.Evt.GameOver, VBridge.GameOverHandler);
 
         foreach (var cw in cellWrap)
         {

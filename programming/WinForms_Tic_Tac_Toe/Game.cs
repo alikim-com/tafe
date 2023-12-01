@@ -65,9 +65,9 @@ class Game
         owner = board[index];
         return owner == Roster.None;
     }
-    static internal bool CanTakeBoardTile(Point pnt, out Roster owner)
+    static internal bool CanTakeBoardTile(Tile pnt, out Roster owner)
     {
-        owner = board[pnt.X, pnt.Y];
+        owner = board[pnt.row, pnt.col];
         return owner == Roster.None;
     }
 
@@ -77,6 +77,35 @@ class Game
         return owner == Roster.None;
     }
 
+    static internal List<LineInfo> ExamineLines()
+    {
+        var linesInfo = new List<LineInfo>();
+
+        foreach (var line in lines)
+        {
+            var info = new LineInfo(line);
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                var canTake = CanTakeLineTile(line, i, out Roster player);
+
+                if (canTake) info.canTake.Add(i);
+
+                if (TurnList.Contains(player)) // excludes Roster.None in this case
+                {
+                    if (!info.takenStats.ContainsKey(player)) info.takenStats.Add(player, 0);
+                    info.takenStats[player]++;
+                }
+            }
+
+            info.dominant = info.takenStats.MaxBy(rec => rec.Value);
+
+            linesInfo.Add(info);
+        }
+
+        return linesInfo;
+    }
+
     static internal void Reset(Roster[] turnlist)
     {
         TurnList = turnlist;
@@ -84,11 +113,11 @@ class Game
         ResetBoard();
 
         // add all the board cells to the update
-        var update = new Dictionary<Point, Roster>();
+        var update = new Dictionary<Tile, Roster>();
 
         for (int i = 0; i < board.width; i++)
             for (int j = 0; j < board.height; j++)
-                update.Add(new Point(i, j), board[i, j]);
+                update.Add(new Tile(i, j), board[i, j]);
 
         // sync the board
         EM.Raise(EM.Evt.SyncBoard, new { }, update);
@@ -115,38 +144,28 @@ class Game
         for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
     }
 
-    static void AssertGame(Point rc, object s)
-    {
-
-        // assert the game state
-
-        // if game over, call TurnWheel.Ended();
-        // return;
-
-        // else, turn the wheel
-        //TurnWheel.Advance((IComponent)s);
-    }
-
     /// <summary>
-    /// Subscribed to cell click event;<br/>
-    /// asserts the game state (win/loss), issues board sync event, turns the wheel
+    /// Called by TurnWheel.PlayerMovedHandler.<br/>
+    /// Assert the game state, execute game over or<br/>
+    /// advance TurnWheel otherwise
     /// </summary>
-    static internal readonly EventHandler<Point> PlayerMovedHandler = (object? s, Point rc) =>
+    static internal void Update(Roster curPlayer, Tile rc)
     {
-        if (s == null) throw new Exception("Game.PlayerMovedHandler : cell is null");
+        board[rc.row, rc.col] = curPlayer;
 
-        board[rc.X, rc.Y] = TurnWheel.CurPlayer;
-
-        // add the cell to the update
-        var update = new Dictionary<Point, Roster>()
-        {
-            { rc, board[rc.X, rc.Y] }
-        };
-
-        // sync the board
+        // add the cell to the update & sync cells via VBridge
+        var update = new Dictionary<Tile, Roster>() { { rc, curPlayer } };
         EM.Raise(EM.Evt.SyncBoard, new { }, update);
 
-        AssertGame(rc, s);
-    };
+        var linesInfo = ExamineLines();
 
+        var dominant = linesInfo.MaxBy(rec => rec.dominant.Value)?.dominant;
+
+        var gameOver = dominant?.Value == 3;
+
+        if(gameOver)
+        {
+            EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
+        }
+    }
 }

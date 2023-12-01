@@ -11,18 +11,11 @@ internal class VBridge
     /// <summary>
     /// Auxiliary map
     /// </summary>
-    static readonly Dictionary<ChoiceItem.Side, CellWrapper.BgMode> sideToCellBg = new()
+    static readonly Dictionary<ChoiceItem.Side, CellWrapper.BgMode> sideToBg = new()
     {
+        { ChoiceItem.Side.None, CellWrapper.BgMode.Default },
         { ChoiceItem.Side.Left, CellWrapper.BgMode.Player1 },
         { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 }
-    };
-
-    /// <summary>
-    /// used in SyncBoardHandler
-    /// </summary>
-    static readonly Dictionary<Game.Roster, CellWrapper.BgMode> rosterToCellBg = new()
-    {
-        { Game.Roster.None, CellWrapper.BgMode.Default }
     };
 
     // LabelManager
@@ -30,56 +23,51 @@ internal class VBridge
     /// <summary>
     /// Auxiliary map
     /// </summary>
-    static readonly Dictionary<ChoiceItem.Side, LabelManager.Info> sideToLabMgr = new()
+    static readonly Dictionary<ChoiceItem.Side, LabelManager.Info> sideToInfoLab = new()
     {
         { ChoiceItem.Side.Left, LabelManager.Info.Player1 },
         { ChoiceItem.Side.Right, LabelManager.Info.Player2 }
     };
 
     /// <summary>
-    /// used in SyncMoveLabelsHandler
+    /// Memorise players' sides for mapping them into cell bgs & message labels
     /// </summary>
-    static readonly Dictionary<Game.Roster, LabelManager.Info> rosterToLabMgr = new();
+    static readonly Dictionary<Game.Roster, ChoiceItem.Side> rosterToSide = new();
 
     /// <summary>
-    /// Create translation table from game states to cell backgrounds
+    /// Fill in LabelManager.stateToString messages that depend on player names and their sides
     /// </summary>
     static internal void Reset(IEnumerable<ChoiceItem> chosen)
     {
-        while (rosterToCellBg.Count > 1) rosterToCellBg.Remove(rosterToCellBg.Keys.Last());
-
-        rosterToLabMgr.Clear();
+        rosterToSide.Clear();
+        rosterToSide.Add(Game.Roster.None, ChoiceItem.Side.None);
 
         Dictionary<LabelManager.Info, string> playerInfo = new();
 
         foreach (var chItem in chosen)
         {
             var side = chItem.side;
-            if (!sideToCellBg.TryGetValue(side, out CellWrapper.BgMode bg))
-                throw new Exception($"VBridge.Reset : can't translate '{side}'");
 
-            rosterToCellBg.Add(chItem.rosterId, bg);
+            rosterToSide.Add(chItem.rosterId, side);
 
-            if (!sideToLabMgr.TryGetValue(side, out LabelManager.Info state))
-                throw new Exception($"VBridge.Reset : can't translate '{side}'");
+            var state = Utils.SafeDictValue(sideToInfoLab, side);
+            var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
+            var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
 
-            playerInfo.Add(state, chItem.identityName);
-
-            var msg = chItem.originType == "AI" ? 
+            var msgMove = chItem.originType == "AI" ?
                 $"{chItem.identityName} is moving..." : $"Your move, {chItem.identityName}...";
 
-            if(!Enum.TryParse($"{state}Move", out LabelManager.Info stateMove))
-                throw new Exception($"VBridge.Reset : couldn't find '{state}Move'");
+            var msgWon = $"Player {chItem.identityName} is the winner! Congratulations!";
 
-            playerInfo.Add(stateMove, msg);
-
-            rosterToLabMgr.Add(chItem.rosterId, stateMove);
+            playerInfo.Add(state, chItem.identityName);
+            playerInfo.Add(stateMove, msgMove);
+            playerInfo.Add(stateWon, msgWon);
         }
 
         LabelManager.Reset(playerInfo);
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { 
-            LabelManager.Info.Player1, 
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
+            LabelManager.Info.Player1,
             LabelManager.Info.Player2,
         });
     }
@@ -88,14 +76,16 @@ internal class VBridge
     /// Subscribed to EM.EvtSyncBoard event<br/>
     /// Translates game board state into UI states
     /// </summary>
-    static internal EventHandler<Dictionary<Point, Game.Roster>> SyncBoardHandler = (object? s, Dictionary<Point, Game.Roster> e) =>
+    static internal EventHandler<Dictionary<Tile, Game.Roster>> SyncBoardHandler =
+    (object? s, Dictionary<Tile, Game.Roster> e) =>
     {
         Dictionary<Point, CellWrapper.BgMode> cellBgs = new();
-        foreach (var (rowCol, rostId) in e)
+
+        foreach (var (rc, rostId) in e)
         {
-            if (!rosterToCellBg.TryGetValue(rostId, out CellWrapper.BgMode bg))
-                throw new Exception($"VBridge.SyncBoardHandler : can't translate '{rostId}'");
-            cellBgs.Add(rowCol, bg);
+            var side = Utils.SafeDictValue(rosterToSide, rostId);
+            var bg = Utils.SafeDictValue(sideToBg, side);
+            cellBgs.Add(new Point(rc.row, rc.col), bg);
         }
 
         EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
@@ -104,10 +94,22 @@ internal class VBridge
     /// <summary>
     /// Subscribed to EM.SyncMoveLabels event raised by TurnWheel to update labels on player move
     /// </summary>
-    static internal EventHandler<Game.Roster> SyncMoveLabelsHandler = (object? _, Game.Roster rostId) =>
+    static internal EventHandler<Game.Roster> SyncMoveLabelsHandler =
+    (object? _, Game.Roster rostId) =>
     {
-        if (!rosterToLabMgr.TryGetValue(rostId, out LabelManager.Info stateMove))
-            throw new Exception($"VBridge.SyncMoveLabelsHandler : can't translate '{rostId}'");
+        var side = Utils.SafeDictValue(rosterToSide, rostId);
+        var state = Utils.SafeDictValue(sideToInfoLab, side);
+        var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
+
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove });
+    };
+
+    static internal EventHandler<Game.Roster> GameOverHandler =
+    (object? _, Game.Roster winner) =>
+    {
+        var side = Utils.SafeDictValue(rosterToSide, winner);
+        var state = Utils.SafeDictValue(sideToInfoLab, side);
+        var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
 
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove });
     };

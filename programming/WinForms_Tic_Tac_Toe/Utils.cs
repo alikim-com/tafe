@@ -3,9 +3,28 @@ namespace utils;
 
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.AxHost;
+using WinFormsApp1;
 
 public class Utils
 {
+    static public TEnum SafeEnumFromStr<TEnum>(string enm, string caller = "") where TEnum : struct
+    {
+        if (!Enum.TryParse(enm, out TEnum outp))
+            throw new Exception($"{caller} : couldn't find enum '{enm}' of type '{typeof(TEnum)}'");
+
+        return outp;
+    }
+
+    static public TValue SafeDictValue<TKey, TValue>(Dictionary<TKey, TValue> dict, TKey key, string caller = "") where TKey : notnull
+    {
+        if (!dict.TryGetValue(key, out TValue? outp))
+            throw new Exception($"{caller}.SafeDictValue : key '{key}' not found");
+        if (outp == null)
+            throw new Exception($"{caller}.SafeDictValue : null value for the key '{key}'");
+        return outp;
+    }
+
     static public void Msg(object? obj)
     {
         if (obj == null)

@@ -33,6 +33,10 @@ internal class TurnWheel
         busy = false;
     }
 
+    /// <summary>
+    /// For Human players Comes from CellWrapper -> OnClick;<br/>
+    /// For AI players from CellWrapper -> AIMovedHandler -> OnClick
+    /// </summary>
     static internal readonly EventHandler<Point> PlayerMovedHandler = (object? sender, Point e) =>
     {
         if (busy) return;
@@ -45,7 +49,7 @@ internal class TurnWheel
 
         iComp.IsLocked = true;
 
-        // talk to game & advance() if not the end
+        Game.Update(CurPlayer, new Tile(e.X, e.Y));
     };
 
     static void Advance()

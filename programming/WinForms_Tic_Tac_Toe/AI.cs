@@ -36,9 +36,9 @@ class AI
                 {
                     Thread.Sleep(750);
 
-                    Point move = LogicRNG();
+                    var tile = LogicRNG();
 
-                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });
 
                 thread.Start();
@@ -53,11 +53,11 @@ class AI
                 {
                     Thread.Sleep(750);
 
-                    Point move = LogicEasy();
+                    var tile = LogicEasy();
 
                     Thread.Sleep(250);
 
-                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });
 
                 thread.Start();
@@ -68,7 +68,7 @@ class AI
 
     }
 
-    static Point LogicRNG()
+    static Tile LogicRNG()
     {
         var canTake = new List<int>();
 
@@ -85,20 +85,7 @@ class AI
 
         var tile = Game.board.GetTile(choice);
 
-        return new Point(tile.row, tile.col);
-    }
-
-    class LineInfo
-    {
-        internal readonly Line line;
-        internal readonly List<int> canTake = new();
-        internal readonly Dictionary<Game.Roster, int> takenStats = new();
-        internal KeyValuePair<Game.Roster, int> dominant = new(Game.Roster.None, 0);
-
-        internal LineInfo(Line _line)
-        {
-            line = _line;
-        }
+        return tile;
     }
 
     /// <summary>
@@ -107,31 +94,10 @@ class AI
     /// AI participates in the first available (has cells that can be taken) line with the highest presence,<br/>
     /// whether it's its own (to win the game) or a foe's (to stop them from winning)
     /// </summary>
-    Point LogicEasy()
+    Tile LogicEasy()
     {
-        var linesInfo = new List<LineInfo>();
-
-        // examine lines
-        foreach (var line in Game.lines)
-        {
-            var info = new LineInfo(line);
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                var canTake = Game.CanTakeLineTile(line, i, out Game.Roster player);
-
-                if (canTake) info.canTake.Add(i);
-
-                if (Game.TurnList.Contains(player)) // excludes Roster.None in this case
-                {
-                    if (!info.takenStats.ContainsKey(player)) info.takenStats.Add(player, 0);
-                    info.takenStats[player]++;
-                }
-            }
-
-            info.dominant = info.takenStats.MaxBy(rec => rec.Value);
-        }
-
+        var linesInfo = Game.ExamineLines();
+        
         var playableLines = linesInfo.Where(rec => rec.canTake.Count > 0).ToArray();
 
         var playLine = playableLines.MaxBy(rec => rec.dominant.Value) ??
@@ -143,6 +109,6 @@ class AI
 
         EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { msg }));
 
-        return new Point(tile.row, tile.col);
+        return tile;
     }
 }

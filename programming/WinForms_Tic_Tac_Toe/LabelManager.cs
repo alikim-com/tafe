@@ -19,6 +19,8 @@ class LabelManager : INotifyPropertyChanged
         Player2,
         Player1Move,
         Player2Move,
+        Player1Won,
+        Player2Won,
     }
     /// <summary>
     /// Pre-game countdown info panel states
@@ -44,11 +46,12 @@ class LabelManager : INotifyPropertyChanged
     static readonly Dictionary<Enum, string> stateToString = new()
     {
         { Info.None, "" },
-        //
+        // the rest is filled by VBridge.Reset()
+
         { AIMsg.Attack, " (attacking)"},
         { AIMsg.Defend, " (defending)"},
         { AIMsg.Random, " (random choice)"},
-        //
+        
         { Countdown.Three, "Game starts in 3..." },
         { Countdown.Two, "Game starts in 2..." },
         { Countdown.One, "Game starts in 1..." },

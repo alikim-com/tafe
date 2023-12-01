@@ -1,4 +1,4 @@
-using System;
+
 using System.Collections;
 
 namespace WinFormsApp1;
@@ -187,4 +187,20 @@ class LineEtor : IEnumerator<Game.Roster>
     }
 
     public void Reset() { head = -1; }
+}
+
+/// <summary>
+/// For gathering statistics about each line
+/// </summary>
+class LineInfo
+{
+    internal readonly Line line;
+    internal readonly List<int> canTake = new();
+    internal readonly Dictionary<Game.Roster, int> takenStats = new();
+    internal KeyValuePair<Game.Roster, int> dominant = new(Game.Roster.None, 0);
+
+    internal LineInfo(Line _line)
+    {
+        line = _line;
+    }
 }
