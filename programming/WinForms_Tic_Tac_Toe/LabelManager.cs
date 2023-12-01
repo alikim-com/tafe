@@ -14,6 +14,7 @@ class LabelManager : INotifyPropertyChanged
     internal enum Info
     {
         None,
+        Tie,
         //
         Player1,
         Player2,
@@ -46,6 +47,7 @@ class LabelManager : INotifyPropertyChanged
     static readonly Dictionary<Enum, string> stateToString = new()
     {
         { Info.None, "" },
+        { Info.Tie, "It's a tie! No winner this time."},
         // the rest is filled by VBridge.Reset()
 
         { AIMsg.Attack, " (attacking)"},

@@ -91,14 +91,14 @@ class Game
 
                 if (canTake) info.canTake.Add(i);
 
-                if (TurnList.Contains(player)) // excludes Roster.None in this case
+                if (TurnList.Contains(player)) // exclude Roster.None
                 {
                     if (!info.takenStats.ContainsKey(player)) info.takenStats.Add(player, 0);
                     info.takenStats[player]++;
                 }
             }
 
-            info.dominant = info.takenStats.MaxBy(rec => rec.Value);
+            if(info.takenStats.Count > 0) info.dominant = info.takenStats.MaxBy(rec => rec.Value);
 
             linesInfo.Add(info);
         }
@@ -166,6 +166,15 @@ class Game
         if(gameOver)
         {
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
+            return;
         }
+
+        var maxCanTake = linesInfo.MaxBy(rec => rec.canTake.Count)?.canTake.Count;
+
+        if(maxCanTake > 0) 
+            TurnWheel.Advance();
+
+        else
+            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { LabelManager.Info.Tie });
     }
 }

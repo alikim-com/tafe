@@ -34,9 +34,11 @@ class AI
 
                 Thread thread = new(() =>
                 {
-                    Thread.Sleep(750);
+                    Thread.Sleep(500);
 
                     var tile = LogicRNG();
+
+                    Thread.Sleep(2000);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });
@@ -51,11 +53,11 @@ class AI
 
                 Thread thread = new(() =>
                 {
-                    Thread.Sleep(750);
+                    Thread.Sleep(500);
 
                     var tile = LogicEasy();
 
-                    Thread.Sleep(250);
+                    Thread.Sleep(2000);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });
@@ -83,7 +85,7 @@ class AI
 
         EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { LabelManager.AIMsg.Random }));
 
-        var tile = Game.board.GetTile(choice);
+        var tile = Game.board.GetTile(canTake[choice]);
 
         return tile;
     }

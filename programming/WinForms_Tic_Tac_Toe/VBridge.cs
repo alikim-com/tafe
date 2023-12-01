@@ -109,8 +109,8 @@ internal class VBridge
     {
         var side = Utils.SafeDictValue(rosterToSide, winner);
         var state = Utils.SafeDictValue(sideToInfoLab, side);
-        var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
+        var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove });
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateWon });
     };
 }

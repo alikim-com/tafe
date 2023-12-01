@@ -32,7 +32,11 @@ internal class CellWrapper : IComponent
         box = _box;
         rc = new Point(_row, _col);
 
-        AIMovedHandler = (object? _, Point pnt) => OnClick(_, new EventArgs());
+        AIMovedHandler = (object? _, Point pnt) =>
+        {
+            if (pnt != rc) return;
+            OnClick(_, new EventArgs());
+        };
 
         SyncBoardUIHandler = (object? _, Dictionary<Point, BgMode> e) =>
         {

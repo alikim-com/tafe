@@ -52,8 +52,10 @@ internal class TurnWheel
         Game.Update(CurPlayer, new Tile(e.X, e.Y));
     };
 
-    static void Advance()
+    static internal void Advance()
     {
+        busy = false;
+
         GoNextPlayer();
 
         AssertPlayer();
