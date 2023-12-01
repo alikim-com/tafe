@@ -1,124 +1,145 @@
+using System;
 using System.Collections;
 
 namespace WinFormsApp1;
 
 struct Tile
 {
-   internal int row;
-   internal int col;
+    internal int row;
+    internal int col;
 
-   internal Tile(int _row, int _col) {
-      row = _row;
-      col = _col;
-   }
+    internal Tile(int _row, int _col)
+    {
+        row = _row;
+        col = _col;
+    }
 }
 
 class Board : IEnumerable<Game.Roster>
 {
 
-   readonly Game.Roster[] board;
+    readonly Game.Roster[] board;
 
-   internal readonly int width;
-   internal readonly int height;
-   internal readonly int Length;
+    internal readonly int width;
+    internal readonly int height;
+    internal readonly int Length;
 
-   internal Board(int _width, int _height, Game.Roster _def)
-   {
-      width = _width;
-      height = _height;
-      Length = _width * _height;
-      board = new Game.Roster[Length];
+    internal Board(int _width, int _height, Game.Roster _def)
+    {
+        width = _width;
+        height = _height;
+        Length = _width * _height;
+        board = new Game.Roster[Length];
 
-      Array.Fill(board, _def);
-   }
+        Array.Fill(board, _def);
+    }
 
-   internal Game.Roster this[int index]
-   {
-      get
-      {
-         if (index < 0 || index >= board.Length)
-            throw new IndexOutOfRangeException("Board.get[] : index is out of range");
+    internal Tile GetTile(int index)
+    {
+        if (index < 0 || index >= Length)
+            throw new IndexOutOfRangeException("Board.GetTile : index is out of range");
 
-         return board[index];
-      }
-      set
-      {
-         if (index < 0 || index >= board.Length)
-            throw new IndexOutOfRangeException("Board.set[] : index is out of range");
+        var row = index / width;
+        var col = index % width;
 
-         board[index] = value;
-      }
-   }
+        return new Tile(row, col);
+    }
 
-   internal Game.Roster this[int row, int col]
-   {
-      get
-      {
-         if (row < 0 || row >= height)
-            throw new IndexOutOfRangeException("Board.get[,] : row index is out of range");
-         if (col < 0 || col >= width)
-            throw new IndexOutOfRangeException("Board.get[,] : column index is out of range");
-         var index = row * width + col;
-         return board[index];
-      }
-      set
-      {
-         if (row < 0 || row >= height)
-            throw new IndexOutOfRangeException("Board.get[,] : row index is out of range");
-         if (col < 0 || col >= width)
-            throw new IndexOutOfRangeException("Board.get[,] : column index is out of range");
-         var index = row * width + col;
+    internal Game.Roster this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= board.Length)
+                throw new IndexOutOfRangeException("Board.get[] : index is out of range");
 
-         board[index] = value;
-      }
-   }
+            return board[index];
+        }
+        set
+        {
+            if (index < 0 || index >= board.Length)
+                throw new IndexOutOfRangeException("Board.set[] : index is out of range");
 
-   public IEnumerator<Game.Roster> GetEnumerator() => new BoardEtor(board);
+            board[index] = value;
+        }
+    }
 
-   IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    internal Game.Roster this[int row, int col]
+    {
+        get
+        {
+            if (row < 0 || row >= height)
+                throw new IndexOutOfRangeException("Board.get[,] : row index is out of range");
+            if (col < 0 || col >= width)
+                throw new IndexOutOfRangeException("Board.get[,] : column index is out of range");
+            var index = row * width + col;
+            return board[index];
+        }
+        set
+        {
+            if (row < 0 || row >= height)
+                throw new IndexOutOfRangeException("Board.get[,] : row index is out of range");
+            if (col < 0 || col >= width)
+                throw new IndexOutOfRangeException("Board.get[,] : column index is out of range");
+            var index = row * width + col;
+
+            board[index] = value;
+        }
+    }
+
+    public IEnumerator<Game.Roster> GetEnumerator() => new BoardEtor(board);
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 class BoardEtor : IEnumerator<Game.Roster>
 {
-   readonly Game.Roster[] list;
-   int head;
+    readonly Game.Roster[] list;
+    int head;
 
-   internal BoardEtor(Game.Roster[] _list)
-   {
-      list = _list;
-      head = -1;
-   }
+    internal BoardEtor(Game.Roster[] _list)
+    {
+        list = _list;
+        head = -1;
+    }
 
-   public Game.Roster Current => list[head];
+    public Game.Roster Current => list[head];
 
-   object IEnumerator.Current => Current;
+    object IEnumerator.Current => Current;
 
-   public void Dispose() { }
+    public void Dispose() { }
 
-   public bool MoveNext()
-   {
-      head++;
-      return head != list.Length;
-   }
+    public bool MoveNext()
+    {
+        head++;
+        return head != list.Length;
+    }
 
-   public void Reset() { head = -1; }
+    public void Reset() { head = -1; }
 }
 
 class Line : IEnumerable<Game.Roster>
 {
-   internal readonly int Length;
-   readonly Tile[] rc;
-   readonly Board board;
+    internal readonly int Length;
+    readonly Tile[] rc;
+    readonly Board board;
 
-   internal Line(Board _board, Tile[] _rc)
-   {
-      rc = _rc;
-      Length = _rc.Length;
-      board = _board;
-   }
+    internal Line(Board _board, Tile[] _rc)
+    {
+        rc = _rc;
+        Length = _rc.Length;
+        board = _board;
+    }
 
-   internal Game.Roster this[int index]
-   {
+    internal Tile GetTile(int index)
+    {
+        if (index < 0 || index >= Length)
+            throw new IndexOutOfRangeException("Line.GetTile : index is out of range");
+
+        return rc[index];
+    }
+
+    internal Game.Roster this[int index]
+    {
         get
         {
             if (index < 0 || index >= Length)
@@ -133,37 +154,37 @@ class Line : IEnumerable<Game.Roster>
 
             board[rc[index].row, rc[index].col] = value;
         }
-   }
+    }
 
-   public IEnumerator<Game.Roster> GetEnumerator() => new LineEtor(board, rc);
+    public IEnumerator<Game.Roster> GetEnumerator() => new LineEtor(board, rc);
 
-   IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 class LineEtor : IEnumerator<Game.Roster>
 {
-   readonly Board list;
-   readonly Tile[] rc;
-   int head;
+    readonly Board list;
+    readonly Tile[] rc;
+    int head;
 
-   internal LineEtor(Board _list, Tile[] _rc)
-   {
-      list = _list;
-      rc = _rc;
-      head = -1;
-   }
+    internal LineEtor(Board _list, Tile[] _rc)
+    {
+        list = _list;
+        rc = _rc;
+        head = -1;
+    }
 
-   public Game.Roster Current => list[rc[head].row, rc[head].col];
+    public Game.Roster Current => list[rc[head].row, rc[head].col];
 
-   object IEnumerator.Current => Current;
+    object IEnumerator.Current => Current;
 
-   public void Dispose() { }
+    public void Dispose() { }
 
-   public bool MoveNext()
-   {
-      head++;
-      return head != rc.Length;
-   }
+    public bool MoveNext()
+    {
+        head++;
+        return head != rc.Length;
+    }
 
-   public void Reset() { head = -1; }
+    public void Reset() { head = -1; }
 }

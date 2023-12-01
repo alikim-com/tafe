@@ -41,20 +41,21 @@ internal class TurnWheel
         if (sender is not IComponent iComp)
             throw new Exception($"TurnWheel.PlayerMovedHandler : '{sender}' is not IComponent");
 
+        if (CurPlayerIsHuman) DisableUICb();
+
         iComp.IsLocked = true;
-        iComp.Disable();
 
-
+        // talk to game & advance() if not the end
     };
 
     static void Advance()
     {
-        AdvancePlayer();
+        GoNextPlayer();
 
         AssertPlayer();
     }
 
-    static void AdvancePlayer() => head = head == Game.TurnList.Length - 1 ? 0 : head + 1;
+    static void GoNextPlayer() => head = head == Game.TurnList.Length - 1 ? 0 : head + 1;
 
     /// <summary>
     /// Ensure next click is scheduled and will be performed

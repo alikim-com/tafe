@@ -32,6 +32,8 @@ internal class CellWrapper : IComponent
         box = _box;
         rc = new Point(_row, _col);
 
+        AIMovedHandler = (object? _, Point pnt) => OnClick(_, new EventArgs());
+
         SyncBoardUIHandler = (object? _, Dictionary<Point, BgMode> e) =>
         {
             if (!e.TryGetValue(rc, out BgMode val)) return;
@@ -152,6 +154,6 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// AI mouse clicks
     /// </summary>
-    void SimulateOnClick() => OnClick(null, new EventArgs());
+    internal EventHandler<Point> AIMovedHandler;
 }
 

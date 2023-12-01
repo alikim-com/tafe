@@ -63,8 +63,6 @@ partial class AppForm : Form
 
     bool firstChosenIsLeft = false;
 
-    //readonly List<AI> AIAgents = new();
-
     void SetupFormPopup()
     {
         setupForm ??= new SetupForm();
@@ -117,6 +115,16 @@ partial class AppForm : Form
         //menuHelpAbout.Click += (object? sender, EventArgs e) => { BackgroundImage = Resource.GameBackImg; };
     }
 
+    void ResetUI()
+    {
+        foreach (var cw in cellWrap)
+            if (cw is IComponent iComp)
+            {
+                iComp.IsLocked = false;
+                iComp.Disable();
+            }
+    }
+
     void EnableUI()
     {
         foreach (var cw in cellWrap)
@@ -140,13 +148,12 @@ partial class AppForm : Form
         Reset();
 
         // create AIs, if needed
-        //AIAgents.Clear();
         foreach(var chItm in chosenArr)
             if(chItm.originType == "AI")
             {
                 var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
                 var aiAgent = new AI(logic, chItm.rosterId);
-                //AIAgents.Add(aiAgent);
+
                 EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.AIMakeMoveHandler());
             }
 
@@ -162,7 +169,10 @@ partial class AppForm : Form
         EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
 
         foreach (var cw in cellWrap)
+        {
+            EM.Subscribe(EM.Evt.AIMoved, cw.AIMovedHandler);
             EM.Subscribe(EM.Evt.SyncBoardUI, cw.SyncBoardUIHandler);
+        }
 
         EM.Subscribe(EM.Evt.PlayerMoved, TurnWheel.PlayerMovedHandler);
 
@@ -187,6 +197,8 @@ partial class AppForm : Form
         // Game.SetTurns("random");
 
         TurnWheel.Reset();
+
+        ResetUI();
     }
 
     void AssertPlayers()

@@ -29,12 +29,25 @@ class LabelManager : INotifyPropertyChanged
         Two,
         One
     }
+    /// <summary>
+    /// Messages from AI to append to the current info
+    /// </summary>
+    internal enum AIMsg
+    {
+        Attack,
+        Defend,
+        Random,
+    }
 
     // <----------------how to add extra messages from Ai
 
     static readonly Dictionary<Enum, string> stateToString = new()
     {
         { Info.None, "" },
+        //
+        { AIMsg.Attack, " (attacking)"},
+        { AIMsg.Defend, " (defending)"},
+        { AIMsg.Random, " (random choice)"},
         //
         { Countdown.Three, "Game starts in 3..." },
         { Countdown.Two, "Game starts in 2..." },
@@ -70,6 +83,10 @@ class LabelManager : INotifyPropertyChanged
         if (_this == null) return;
         switch (state)
         {
+            case AIMsg:
+                _this.InfoPanelBind += stateToString[state];
+                RaiseEvtPropertyChanged(nameof(InfoPanelBind));
+                break;
             case Info.Player1:
                 _this.LabelLeftBind = stateToString[state];
                 RaiseEvtPropertyChanged(nameof(LabelLeftBind));
