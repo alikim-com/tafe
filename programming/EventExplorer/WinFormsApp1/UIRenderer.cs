@@ -1,6 +1,12 @@
 ﻿
 namespace uiRenderer;
 
+public class UIFonts
+{ 
+    static public readonly Font menu = new("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font info = new("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
+}
+
 public class UIColors
 {
     static readonly public Color Black = Color.FromArgb(0, 0, 0);

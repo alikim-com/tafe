@@ -93,9 +93,29 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AI_One_Right_Head {
+            get {
+                object obj = ResourceManager.GetObject("AI_One_Right_Head", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AI_Two_Left {
             get {
                 object obj = ResourceManager.GetObject("AI_Two_Left", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AI_Two_Left_Head {
+            get {
+                object obj = ResourceManager.GetObject("AI_Two_Left_Head", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,19 +133,9 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FaceLeft {
+        internal static System.Drawing.Bitmap AI_Two_Right_Head {
             get {
-                object obj = ResourceManager.GetObject("FaceLeft", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FaceRight {
-            get {
-                object obj = ResourceManager.GetObject("FaceRight", resourceCulture);
+                object obj = ResourceManager.GetObject("AI_Two_Right_Head", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -153,6 +163,16 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Human_One_Left_Head {
+            get {
+                object obj = ResourceManager.GetObject("Human_One_Left_Head", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Human_One_Right {
             get {
                 object obj = ResourceManager.GetObject("Human_One_Right", resourceCulture);
@@ -163,9 +183,29 @@ namespace WinFormsApp1 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Human_One_Right_Head {
+            get {
+                object obj = ResourceManager.GetObject("Human_One_Right_Head", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Human_Two_Left {
             get {
                 object obj = ResourceManager.GetObject("Human_Two_Left", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Human_Two_Left_Head {
+            get {
+                object obj = ResourceManager.GetObject("Human_Two_Left_Head", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

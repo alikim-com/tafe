@@ -70,6 +70,8 @@ partial class UML_Events
         label1.Name = "label1";
         label1.Size = new Size(392, 15);
         label1.TabIndex = 1;
+        label1.Font = UIFonts.info;
+        label1.ForeColor = theme.Text;
         label1.Text = "Drag && drop boxes around, save and load their size && position as a layout";
         // 
         // menuStrip1
@@ -79,7 +81,8 @@ partial class UML_Events
         menuStrip1.Name = "menuStrip1";
         menuStrip1.Size = new Size(1500, 24);
         menuStrip1.TabIndex = 2;
-        menuStrip1.Text = "menuMain";
+        menuStrip1.Text = "";
+        menuStrip1.Font = UIFonts.menu;
         // 
         // menuLoad
         // 
@@ -147,6 +150,7 @@ partial class UML_Events
         menuLayout.Margin = new Padding(0, 0, 1, 0);
         menuLayout.Name = "menuLayout";
         menuLayout.Size = new Size(100, 20);
+        menuLayout.Font = UIFonts.menu;
         menuLayout.Text = "Default";
         // 
         // UML_Events
