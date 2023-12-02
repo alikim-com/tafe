@@ -22,7 +22,7 @@ public partial class UML_Events : Form
 
         theme = UIColors.Steel;
 
-        BackColor = theme.Pitch;
+        BackColor = UIColors.Black;
 
         InitializeComponent();
 

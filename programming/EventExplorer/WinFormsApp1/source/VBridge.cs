@@ -34,12 +34,6 @@ internal class VBridge
     /// </summary>
     static readonly Dictionary<Game.Roster, ChoiceItem.Side> rosterToSide = new();
 
-    static readonly Color infoBackNone = Color.FromArgb(80, 0, 0, 0);
-    static readonly Color infoBackLeft = ColorExtensions.BlendOver(
-        ColorExtensions.Scale(SetupForm.tintLeft, 0.8), infoBackNone);
-    static readonly Color infoBackRight = ColorExtensions.BlendOver(
-        ColorExtensions.Scale(SetupForm.tintRight, 0.8), infoBackNone);
-
     /// <summary>
     /// Fill in LabelManager.stateToString messages that depend on player names and their sides
     /// </summary>
@@ -48,7 +42,7 @@ internal class VBridge
         rosterToSide.Clear();
         rosterToSide.Add(Game.Roster.None, ChoiceItem.Side.None);
 
-        var enumInfo = new Dictionary<Enum, object>();
+        Dictionary<LabelManager.Info, string> playerInfo = new();
 
         foreach (var chItem in chosen)
         {
@@ -65,23 +59,16 @@ internal class VBridge
 
             var msgWon = $"Player {chItem.identityName} is the winner! Congratulations!";
 
-            enumInfo.Add(state, chItem.identityName);
-            enumInfo.Add(stateMove, msgMove);
-            enumInfo.Add(stateWon, msgWon);
-
-            var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>(state.ToString());
-            var infoBackColor = side == ChoiceItem.Side.Left ? infoBackLeft : infoBackRight;
-            enumInfo.Add(stateBg, infoBackColor);
+            playerInfo.Add(state, chItem.identityName);
+            playerInfo.Add(stateMove, msgMove);
+            playerInfo.Add(stateWon, msgWon);
         }
 
-        enumInfo.Add(LabelManager.Bg.None, infoBackNone);
-
-        LabelManager.Reset(enumInfo);
+        LabelManager.Reset(playerInfo);
 
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
             LabelManager.Info.Player1,
             LabelManager.Info.Player2,
-            LabelManager.Bg.None
         });
     }
 
@@ -113,9 +100,8 @@ internal class VBridge
         var side = Utils.SafeDictValue(rosterToSide, rostId);
         var state = Utils.SafeDictValue(sideToInfoLab, side);
         var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
-        var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>(state.ToString());
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove, stateBg });
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove });
     };
 
     static internal EventHandler<Game.Roster> GameOverHandler =
@@ -124,8 +110,7 @@ internal class VBridge
         var side = Utils.SafeDictValue(rosterToSide, winner);
         var state = Utils.SafeDictValue(sideToInfoLab, side);
         var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
-        var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>(state.ToString());
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateWon, stateBg });
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateWon });
     };
 }

@@ -11,7 +11,7 @@ internal class EM
     /// </summary>
     /// <param>List of cells to update,<br/>
     /// containing row(X) and column(Y) of a cell and the player occupying it</param>
-    static event EventHandler<Dictionary<Tile, Game.Roster>> EvtSyncBoard = delegate { };
+    static event EventHandler<Dictionary<Point, Game.Roster>> EvtSyncBoard = delegate { };
     /// <summary>
     /// Sync the board with EvtSyncBoard translation done by VBridge
     /// </summary>
@@ -19,27 +19,26 @@ internal class EM
     /// containing row(X) and column(Y) of a cell and a background associated with the player</param>
     static event EventHandler<Dictionary<Point, CellWrapper.BgMode>> EvtSyncBoardUI = delegate { };
     /// <summary>
-    /// Issued by TurnWheel to make AI take action
+    /// Resets UI, except the board
     /// </summary>
-    static event EventHandler<Game.Roster> EvtAIMakeMove = delegate { };
+    static event EventHandler EvtReset = delegate { };
     /// <summary>
-    /// Issued by TurnWheel for VBridge to update labels on player move
-    /// </summary>
-    static event EventHandler<Game.Roster> EvtSyncMoveLabels = delegate { };
-    /// <summary>
-    /// Raised by clicking or simulating a click on a cell
+    /// Raised when a player clicks on a cell
     /// </summary>
     /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
     static event EventHandler<Point> EvtPlayerMoved = delegate { };
     /// <summary>
-    /// Raised by AI for a cell to simulate a click on it
+    /// Confirms a player visual appearance (cell bg) on PanelWrapper click
     /// </summary>
-    /// <param>Point containing row(X) and column(Y) of the cell clicked</param>
-    static event EventHandler<Point> EvtAIMoved = delegate { };
+    static event EventHandler<CellWrapper.BgMode> EvtPlayerConfigured = delegate { };
     /// <summary>
-    /// Raised by Game when the current game is over
+    /// AI choice of a config panel for TurnWheel to simulate click on it
     /// </summary>
-    static event EventHandler<Game.Roster> EvtGameOver = delegate { };
+    static event EventHandler<int> EvtAIMoved = delegate { };
+    /// <summary>
+    /// Issued by TurnWheel when the game is ready to be played
+    /// </summary>
+    static event EventHandler EvtConfigFinished = delegate { };
     /// <summary>
     /// Updates labels in LabelManager
     /// </summary>
@@ -48,15 +47,15 @@ internal class EM
     /// <summary>
     /// Event associations
     /// </summary>
-    internal enum Evt
+    public enum Evt
     {
         SyncBoard,
         SyncBoardUI,
-        AIMakeMove,
-        SyncMoveLabels,
+        Reset,
         PlayerMoved,
+        PlayerConfigured,
         AIMoved,
-        GameOver,
+        ConfigFinished,
         UpdateLabels
     }
     /// <summary>
@@ -65,11 +64,11 @@ internal class EM
     static readonly Dictionary<Evt, Delegate> dict = new() {
         { Evt.SyncBoard, EvtSyncBoard },
         { Evt.SyncBoardUI, EvtSyncBoardUI },
-        { Evt.AIMakeMove, EvtAIMakeMove },
-        { Evt.SyncMoveLabels, EvtSyncMoveLabels },
+        { Evt.Reset, EvtReset },
         { Evt.PlayerMoved, EvtPlayerMoved },
+        { Evt.PlayerConfigured, EvtPlayerConfigured },
         { Evt.AIMoved, EvtAIMoved },
-        { Evt.GameOver, EvtGameOver },
+        { Evt.ConfigFinished, EvtConfigFinished },
         { Evt.UpdateLabels, EvtUpdateLabels },
     };
 
@@ -81,26 +80,21 @@ internal class EM
     /// <param name="evt">Event to be raised</param>
     /// <param name="sender">Event sender object</param>
     /// <param name="e">Event arguments</param>
-    static internal void Raise<E>(Evt enm, object sender, E e)
+    static public void Raise<E>(Evt enm, object sender, E e)
     {
-        if (!dict.TryGetValue(enm, out var _evt))
+        if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Raise : no event for Evt.{enm}");
 
-        bool nonGeneric = _evt.GetType() == typeof(EventHandler);
+        bool generic = dict[enm].GetType() == typeof(EventHandler);
 
-        if (nonGeneric)
-        {
-            var evtNG = (EventHandler)_evt;
-            evtNG?.Invoke(sender, new EventArgs());
+        if (generic)
+            ((EventHandler)dict[enm])?.Invoke(sender, new EventArgs());
 
-        } else
-        {
-            var evtG = (EventHandler<E>)_evt;
-            evtG?.Invoke(sender, e);
-        }
+        else
+            ((EventHandler<E>)dict[enm])?.Invoke(sender, e);
     }
 
-    static internal void Subscribe(Evt enm, Delegate handler)
+    static public void Subscribe(Evt enm, Delegate handler)
     {
         if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Subscribe : no event for Evt.{enm}");
@@ -108,7 +102,7 @@ internal class EM
             dict[enm] = Delegate.Combine(evt, handler);
     }
 
-    static internal void Unsubscribe(Evt enm, Delegate handler)
+    static public void Unsubscribe(Evt enm, Delegate handler)
     {
         if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Unsubscribe : no event for Evt.{enm}");
@@ -118,11 +112,11 @@ internal class EM
 
     // ----- cross-thread calls -----
 
-    static internal AppForm? uiThread;
+    public static AppForm? uiThread;
 
     /// <summary>
     /// Raise events from UI thread for safe UI access
     /// </summary>
     /// <param name="lambda"></param>
-    static internal void InvokeFromMainThread(Action lambda) => uiThread?.Invoke(lambda);
+    public static void InvokeFromMainThread(Action lambda) => uiThread?.Invoke(lambda);
 }

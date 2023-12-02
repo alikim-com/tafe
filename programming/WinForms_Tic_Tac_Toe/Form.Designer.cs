@@ -250,6 +250,16 @@ partial class AppForm
         PerformLayout();
     }
 
+    private void ToolStripButton_MouseLeave(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void ToolStripButton_MouseEnter(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 
     private TableLayoutPanel tLayout;

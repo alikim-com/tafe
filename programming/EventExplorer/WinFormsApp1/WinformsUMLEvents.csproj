@@ -11,10 +11,13 @@
   <ItemGroup>
     <Compile Remove="profiles\**" />
     <Compile Remove="source\**" />
+    <Compile Remove="source_old\**" />
     <EmbeddedResource Remove="profiles\**" />
     <EmbeddedResource Remove="source\**" />
+    <EmbeddedResource Remove="source_old\**" />
     <None Remove="profiles\**" />
     <None Remove="source\**" />
+    <None Remove="source_old\**" />
   </ItemGroup>
 
   <ItemGroup>

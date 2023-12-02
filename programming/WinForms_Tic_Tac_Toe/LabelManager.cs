@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel;
+using static WinFormsApp1.LabelManager;
 
 namespace WinFormsApp1;
 
@@ -41,8 +42,15 @@ class LabelManager : INotifyPropertyChanged
         Defend,
         Random,
     }
-
-    // <----------------how to add extra messages from Ai
+    /// <summary>
+    /// Manages info bg color
+    /// </summary>
+    internal enum Bg
+    {
+        None,
+        Player1,
+        Player2
+    }
 
     static readonly Dictionary<Enum, string> stateToString = new()
     {
@@ -59,6 +67,11 @@ class LabelManager : INotifyPropertyChanged
         { Countdown.One, "Game starts in 1..." },
     };
 
+    static readonly Dictionary<Enum, Color> stateToColor = new()
+    {
+        // filled by VBridge.Reset()
+    };
+
     /// <summary>
     /// Subscribed to EM.EvtUpdateLabels event
     /// </summary>
@@ -72,14 +85,24 @@ class LabelManager : INotifyPropertyChanged
     /// Called from VBridge.Reset
     /// defines Info labels when the game starts
     /// </summary>
-    static internal void Reset(Dictionary<Info, string> playerInfo)
+    static internal void Reset(Dictionary<Enum, object> enumInfo)
     {
-        foreach (var (enm, msg) in playerInfo)
+        foreach (var (enm, obj) in enumInfo)
         {
-            if (!stateToString.ContainsKey(enm))
-                stateToString.Add(enm, msg);
-            else
-                stateToString[enm] = msg;
+            if (obj is string msg)
+            {
+                if (!stateToString.ContainsKey(enm))
+                    stateToString.Add(enm, msg);
+                else
+                    stateToString[enm] = msg;
+            }
+            else if(obj is Color backInfoColor)
+            {
+                if (!stateToColor.ContainsKey(enm))
+                    stateToColor.Add(enm, backInfoColor);
+                else
+                    stateToColor[enm] = backInfoColor;
+            }
         }
     }
 
@@ -104,6 +127,10 @@ class LabelManager : INotifyPropertyChanged
             case Countdown:
                 _this.InfoPanelBind = stateToString[state];
                 RaiseEvtPropertyChanged(nameof(InfoPanelBind));
+                break;
+            case Bg:
+                _this.InfoBackBind = stateToColor[state];
+                RaiseEvtPropertyChanged(nameof(InfoBackBind));
                 break;
             default:
                 throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
@@ -131,6 +158,7 @@ class LabelManager : INotifyPropertyChanged
     public string LabelLeftBind { get; set; } = "";
     public string LabelRightBind { get; set; } = "";
     public string InfoPanelBind { get; set; } = "";
+    public Color InfoBackBind { get; set; } = UIColors.Transparent;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

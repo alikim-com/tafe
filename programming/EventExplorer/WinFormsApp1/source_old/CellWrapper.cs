@@ -6,12 +6,24 @@ namespace WinFormsApp1;
 /// </summary>
 internal class CellWrapper : IComponent
 {
+    public string Name { get => box.Name; } // interface
+
     readonly Panel box;
     readonly Point rc;
     readonly Dictionary<BgMode, Image> backgr = new();
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
-    internal enum BgMode
+    /// <summary>
+    /// Event driven readable state
+    /// </summary>
+    BgMode _curBgMode;
+    public BgMode CurBgMode
+    {
+        get => _curBgMode;
+        private set => _curBgMode = value;
+    }
+
+    public enum BgMode
     {
         // star
         Default,
@@ -25,18 +37,10 @@ internal class CellWrapper : IComponent
         Lost2
     }
 
-    public bool IsLocked { get; set; } = false;
-
-    internal CellWrapper(Panel _box, int _row, int _col)
+    public CellWrapper(Panel _box, int _row, int _col)
     {
         box = _box;
         rc = new Point(_row, _col);
-
-        AIMovedHandler = (object? _, Point pnt) =>
-        {
-            if (pnt != rc) return;
-            OnClick(_, new EventArgs());
-        };
 
         SyncBoardUIHandler = (object? _, Dictionary<Point, BgMode> e) =>
         {
@@ -51,7 +55,7 @@ internal class CellWrapper : IComponent
     /// <summary>
     /// Subscribed EM.EvtSyncBoardUI event
     /// </summary>
-    internal EventHandler<Dictionary<Point, BgMode>> SyncBoardUIHandler;
+    public EventHandler<Dictionary<Point, BgMode>> SyncBoardUIHandler;
 
     void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());
 
@@ -71,7 +75,7 @@ internal class CellWrapper : IComponent
         backgr.Add(BgMode.MouseEnter, bgHover);
         backgr.Add(BgMode.MouseLeave, bgDef);
 
-        Image token1 = Resource.TokenLeft.GetOverlayOnBackground(
+        Image tokenLeft = Resource.TokenLeft.GetOverlayOnBackground(
             new Size(
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
@@ -80,7 +84,7 @@ internal class CellWrapper : IComponent
             "center"
         );
 
-        Image token2= Resource.TokenRight.GetOverlayOnBackground(
+        Image tokenRight = Resource.TokenRight.GetOverlayOnBackground(
             new Size(
                 (int)(box.Size.Width * 1.5),
                 (int)(box.Size.Height * 1.5)),
@@ -89,11 +93,11 @@ internal class CellWrapper : IComponent
             "center"
         );
 
-        backgr.Add(BgMode.Player1, token1);
-        backgr.Add(BgMode.Player2, token2);
+        backgr.Add(BgMode.Player1, tokenLeft);
+        backgr.Add(BgMode.Player2, tokenRight);
 
-        backgr.Add(BgMode.Lost1, token1.Desaturate("PS"));
-        backgr.Add(BgMode.Lost2, token2.Desaturate("PS"));
+        backgr.Add(BgMode.Lost1, tokenLeft.Desaturate("PS"));
+        backgr.Add(BgMode.Lost2, tokenRight.Desaturate("PS"));
 
     }
 
@@ -105,6 +109,7 @@ internal class CellWrapper : IComponent
             if (box.BackgroundImage != image)
             {
                 box.BackgroundImage = image;
+                CurBgMode = evtName;
             }
         };
     }
@@ -129,8 +134,7 @@ internal class CellWrapper : IComponent
 
     public void Enable()
     {
-        if (IsLocked) return;
-
+        Disable(); // to prevent double enabling
         AddHoverEventHandlers();
         box.Click += OnClick;
         box.Cursor = Cursors.Hand;
@@ -138,26 +142,28 @@ internal class CellWrapper : IComponent
 
     public void Disable()
     {
-        if (IsLocked) return;
-
         box.Click -= OnClick;
         RemoveHoverEventHandlers();
         box.Cursor = Cursors.Default;
     }
 
     /// <summary>
+    /// Called from TurnWheel.OnClickHandler
+    /// Empty here, cells are controlled by EM.EvtSyncBoardUI
+    /// </summary>
+    public void Highlight() { }
+
+    /// <summary>
     /// Raises EM.EvtPlayerMoved event
     /// </summary>
     void OnClick(object? _, EventArgs __)
     {
-        if (IsLocked) return;
-
         EM.Raise(EM.Evt.PlayerMoved, this, rc);
     }
 
     /// <summary>
     /// AI mouse clicks
     /// </summary>
-    internal EventHandler<Point> AIMovedHandler;
+    public void SimulateOnClick() => OnClick(null, new EventArgs());
 }
 

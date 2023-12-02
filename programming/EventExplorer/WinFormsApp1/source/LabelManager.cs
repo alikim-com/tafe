@@ -6,51 +6,54 @@ namespace WinFormsApp1;
 /// <summary>
 /// Updates UI labels based on subscribed events
 /// </summary>
-internal class LabelManager : INotifyPropertyChanged
+class LabelManager : INotifyPropertyChanged
 {
     /// <summary>
-    /// Bottom config panel states
+    /// Middle & bottom info panel states
     /// </summary>
-    public enum Choice
+    internal enum Info
     {
         None,
-        HumanLeft,
-        HumanRight,
-        // for TurnWheel.AvH case
-        HumanFirst,
-        AIFirst,
-    }
-    /// <summary>
-    /// Middle info panel states
-    /// </summary>
-    public enum Info
-    {
-        None,
-        HumanTurn,
-        AITurn,
+        Tie,
+        //
+        Player1,
+        Player2,
+        Player1Move,
+        Player2Move,
+        Player1Won,
+        Player2Won,
     }
     /// <summary>
     /// Pre-game countdown info panel states
     /// </summary>
-    public enum Countdown
+    internal enum Countdown
     {
         Three,
         Two,
         One
     }
-
-    static public readonly Dictionary<Enum, string> labels = new()
+    /// <summary>
+    /// Messages from AI to append to the current info
+    /// </summary>
+    internal enum AIMsg
     {
-        { Choice.None, "" },
-        { Choice.HumanLeft, "YOU  -vs-  AI   " },
-        { Choice.HumanRight, "   AI  -vs-  YOU" },
-        { Choice.HumanFirst, "CHOOSE\nYOUR\nSIDE" },
-        { Choice.AIFirst, "TAKE\nYOUR\nSIDE" },
-        //
+        Attack,
+        Defend,
+        Random,
+    }
+
+    // <----------------how to add extra messages from Ai
+
+    static readonly Dictionary<Enum, string> stateToString = new()
+    {
         { Info.None, "" },
-        { Info.HumanTurn, "Your turn..." },
-        { Info.AITurn, "AI is thinking..." },
-        //
+        { Info.Tie, "It's a tie! No winner this time."},
+        // the rest is filled by VBridge.Reset()
+
+        { AIMsg.Attack, " (attacking)"},
+        { AIMsg.Defend, " (defending)"},
+        { AIMsg.Random, " (random choice)"},
+        
         { Countdown.Three, "Game starts in 3..." },
         { Countdown.Two, "Game starts in 2..." },
         { Countdown.One, "Game starts in 1..." },
@@ -60,36 +63,47 @@ internal class LabelManager : INotifyPropertyChanged
     /// Subscribed to EM.EvtUpdateLabels event
     /// </summary>
     /// <param name="e">An array of states to set for each panel</param>
-    static public EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
+    static internal readonly EventHandler<Enum[]> UpdateLabelsHandler = (object? _, Enum[] e) =>
     {
         foreach (Enum state in e) SetLabel(state);
     };
 
     /// <summary>
-    /// Subscribed to EM.EvtReset event
+    /// Called from VBridge.Reset
+    /// defines Info labels when the game starts
     /// </summary>
-    static public EventHandler ResetHandler = (object? _, EventArgs __) =>
+    static internal void Reset(Dictionary<Info, string> playerInfo)
     {
-        SetLabel(Choice.None);
-        SetLabel(Info.None);
-    };
+        foreach (var (enm, msg) in playerInfo)
+        {
+            if (!stateToString.ContainsKey(enm))
+                stateToString.Add(enm, msg);
+            else
+                stateToString[enm] = msg;
+        }
+    }
 
     static void SetLabel(Enum state)
     {
         if (_this == null) return;
         switch (state)
         {
-            case Choice:
-                _this.ChoicePanel = labels[state];
-                RaiseEvtPropertyChanged(nameof(ChoicePanel));
+            case AIMsg:
+                _this.InfoPanelBind += stateToString[state];
+                RaiseEvtPropertyChanged(nameof(InfoPanelBind));
+                break;
+            case Info.Player1:
+                _this.LabelLeftBind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelLeftBind));
+                break;
+            case Info.Player2:
+                _this.LabelRightBind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelRightBind));
                 break;
             case Info:
-                _this.InfoPanel = labels[state];
-                RaiseEvtPropertyChanged(nameof(InfoPanel));
-                break;
             case Countdown:
-                _this.InfoPanel = labels[state];
-                RaiseEvtPropertyChanged(nameof(InfoPanel));
+                _this.InfoPanelBind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(InfoPanelBind));
                 break;
             default:
                 throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
@@ -114,11 +128,13 @@ internal class LabelManager : INotifyPropertyChanged
     /// <summary>
     /// Data bindings
     /// </summary>
-    public string ChoicePanel { get; private set; } = "";
-    public string InfoPanel { get; private set; } = "";
+    public string LabelLeftBind { get; set; } = "";
+    public string LabelRightBind { get; set; } = "";
+    public string InfoPanelBind { get; set; } = "";
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    public LabelManager()
+
+    internal LabelManager()
     {
         _this = this;
     }

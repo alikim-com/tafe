@@ -135,6 +135,9 @@ partial class AppForm : Form
             labelVS.Location.X + (labelVS.Width - toolStripButton.Width) / 2,
             labelVS.Location.Y + menuStrip1.Height + (labelVS.Height - toolStripButton.Height) / 2
             );
+
+        toolStripButton.MouseEnter += (object? s, EventArgs e) => buttonRenderer.SetOverState(toolStripButton, true);
+        toolStripButton.MouseLeave += (object? s, EventArgs e) => buttonRenderer.SetOverState(toolStripButton, false);
     }
 
     void ResetUI()
@@ -203,6 +206,7 @@ partial class AppForm : Form
 
     void SetupBinds()
     {
+        info.DataBindings.Add(new Binding("BackColor", labMgr, "InfoBackBind"));
         info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanelBind"));
         labelLeft.DataBindings.Add(new Binding("Text", labMgr, "LabelLeftBind"));
         labelRight.DataBindings.Add(new Binding("Text", labMgr, "LabelRightBind"));
@@ -310,7 +314,6 @@ partial class AppForm : Form
 
         info.Font = UIFonts.info;
         info.ForeColor = theme.Text;
-        info.BackColor = Color.FromArgb(64, 0, 0, 0);
     }
 
     void FormAspect_ClientSizeChanged(object? sender, EventArgs e)

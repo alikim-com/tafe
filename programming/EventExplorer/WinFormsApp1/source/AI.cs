@@ -1,148 +1,116 @@
 ﻿
 namespace WinFormsApp1;
 
-internal class AI
+class AI
 {
-    public enum Logic
+    internal enum Logic
     {
-        ConfigRNG,
-        BoardRNG,
-        BoardEasy
+        None,
+        RNG,
+        Easy
     }
 
-    static readonly Dictionary<Logic, Action<int, Logic>> action = new()
+    readonly Logic logic;
+    readonly Game.Roster selfId;
+
+    internal AI(Logic _logic, Game.Roster _selfId)
     {
-        { Logic.ConfigRNG, MakeConfigMove },
-        { Logic.BoardRNG, MakeBoardMove },
-        { Logic.BoardEasy, MakeBoardMove },
-    };
-
-    /// <summary>
-    /// Called from TurnWheel to choose a UI element
-    /// </summary>
-    public static void MakeMove(int count, Logic L) => action[L](count, L);
-
-    /// <summary>
-    /// Choose a config panel
-    /// </summary>
-    /// <param name="count">The number of remaining UI elements to click</param>
-    public static void MakeConfigMove(int count, Logic L)
-    {
-        Thread thread = new(() =>
-        {
-            Thread.Sleep(750);
-
-            switch (L)
-            {
-                case Logic.ConfigRNG:
-                    {
-                        Random random = new();
-                        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
-                        break;
-                    }
-
-                default:
-                    throw new NotImplementedException($"AI.MakeConfigMove : logic '{L}'");
-            }
-
-        });
-
-        thread.Start();
+        logic = _logic;
+        selfId = _selfId;
     }
 
     /// <summary>
     /// Choose a board cell
     /// </summary>
     /// <param name="count">The number of remaining UI elements to click</param>
-    public static void MakeBoardMove(int count, Logic L)
+    internal EventHandler<Game.Roster> AIMakeMoveHandler()
     {
-        Thread thread = new(() =>
+        return logic switch
         {
-            Thread.Sleep(750);
-
-            switch (L)
+            Logic.RNG =>
+            (object? _, Game.Roster curPlayer) =>
             {
-                case Logic.BoardRNG:
-                    {
-                        Random random = new();
-                        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, random.Next(count)));
-                        break;
-                    }
+                if (curPlayer != selfId) return;
 
-                case Logic.BoardEasy:
-                    {
-                        int move = LogicEasy();
-                        
-                        Thread.Sleep(250); // to see the reason for the decision in case AI vs AI
+                Thread thread = new(() =>
+                {
+                    Thread.Sleep(500);
 
-                        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, move));
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException($"AI.MakeConfigMove : logic '{L}'");
+                    var tile = LogicRNG();
+
+                    Thread.Sleep(2000);
+
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
+                });
+
+                thread.Start();
             }
+            ,
+            Logic.Easy =>
+            (object? _, Game.Roster curPlayer) =>
+            {
+                if (curPlayer != selfId) return;
 
-        });
+                Thread thread = new(() =>
+                {
+                    Thread.Sleep(500);
 
-        thread.Start();
+                    var tile = LogicEasy();
+
+                    Thread.Sleep(2000);
+
+                    EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
+                });
+
+                thread.Start();
+            }
+            ,
+            _ => throw new NotImplementedException($"AI.AIMakeMoveHandler : logic '{logic}' not supported"),
+        };
+
+    }
+
+    static Tile LogicRNG()
+    {
+        var canTake = new List<int>();
+
+        for (int i = 0; i < Game.board.Length; i++)
+            if (Game.CanTakeBoardTile(i, out Game.Roster _)) canTake.Add(i);
+
+        if (canTake.Count == 0)
+            throw new Exception("AI.LogicRNG : run on full board");
+
+        var rng = new Random();
+        var choice = rng.Next(canTake.Count);
+
+        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { LabelManager.AIMsg.Random }));
+
+        var tile = Game.board.GetTile(canTake[choice]);
+
+        return tile;
     }
 
     /// <summary>
-    /// Simple AI logic (esay mode) for playing the game
+    /// Simple AI logic (easy mode) for playing the game<br/>
+    /// Each line is examined to determine the highest presence (cells taken) by a player<br/>
+    /// AI participates in the first available (has cells that can be taken) line with the highest presence,<br/>
+    /// whether it's its own (to win the game) or a foe's (to stop them from winning)
     /// </summary>
-    static int LogicEasy()
+    Tile LogicEasy()
     {
-        static bool CanTake(Point pnt) => Game.Board[pnt.X, pnt.Y] == Game.Roster.None;
+        var linesInfo = Game.ExamineLines();
+        
+        var playableLines = linesInfo.Where(rec => rec.canTake.Count > 0).ToArray();
 
-        static int LinearOffset(Point pnt) => pnt.X * Game.boardSize.Width + pnt.Y; // <------------ array removed
+        var playLine = playableLines.MaxBy(rec => rec.dominant.Value) ??
+            throw new Exception($"AI.LogicEasy : run on full board");
 
-        // examine lines
-        foreach (var line in Game.Lines)
-        {
-            // gather stats for the line
-            Dictionary<Game.Roster, int> stat = new();
-            // memo free cells
-            List<Point> free = new();
-            foreach (var pnt in line)
-            {
-                var player = Game.Board[pnt.X, pnt.Y];
-                if (!stat.ContainsKey(player)) stat.Add(player, 0);
-                stat[player]++;
-                if (player == Game.Roster.None) free.Add(pnt);
-            }
-            // search the line for 2 cells taken by same player
-            foreach(var rec in stat)
-            {
-                if (rec.Value == 2 && rec.Key != Game.Roster.None && free.Count > 0)
-                    // block player (rec.Key != self) or
-                    // win the game (rec.Key == self)
+        var tile = playLine.line.GetTile(playLine.canTake.First());
 
-                    // TODO send labels update
-                    
-                    return LinearOffset(free[0]);
-            }
+        var msg = playLine.dominant.Key == selfId ? LabelManager.AIMsg.Attack : LabelManager.AIMsg.Defend;
 
-        }
+        EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { msg }));
 
-        // try to take best spots
-        List<Point> bestSpots = new()
-        { 
-            // middle
-            new Point(1,1),
-            // corners
-            new Point(0,0),
-            new Point(0,2),
-            new Point(2,0),
-            new Point(2,2),
-        };
-        foreach (var spot in bestSpots)
-            if (CanTake(spot))
-            {
-                // TODO send labels
-                return LinearOffset(spot);
-            }
-
-
-        return 0;
+        return tile;
     }
 }
