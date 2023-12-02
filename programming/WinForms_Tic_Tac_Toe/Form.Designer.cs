@@ -1,4 +1,7 @@
 ﻿
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 namespace WinFormsApp1;
 
 partial class AppForm
@@ -45,8 +48,11 @@ partial class AppForm
         menuLabel = new ToolStripLabel();
         menuDummy = new ToolStripTextBox();
         menuLayout = new ToolStripTextBox();
+        toolStripButton = new ToolStrip();
+        toolStripButtonLabel = new ToolStripLabel();
         tLayout.SuspendLayout();
         menuStrip1.SuspendLayout();
+        toolStripButton.SuspendLayout();
         SuspendLayout();
         // 
         // tLayout
@@ -75,20 +81,18 @@ partial class AppForm
         // 
         tLayout.SetColumnSpan(info, 3);
         info.Dock = DockStyle.Fill;
-        info.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
         info.ForeColor = Color.FromArgb(0, 255, 255, 255);
         info.Location = new Point(0, 477);
         info.Margin = new Padding(0);
         info.Name = "info";
         info.Size = new Size(500, 43);
         info.TabIndex = 3;
-        info.TextAlign = ContentAlignment.TopCenter;
+        info.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // labelVS
         // 
         labelVS.AutoSize = true;
         labelVS.Dock = DockStyle.Fill;
-        labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
         labelVS.ForeColor = Color.FromArgb(200, 200, 200);
         labelVS.Location = new Point(166, 520);
         labelVS.Margin = new Padding(0);
@@ -196,6 +200,27 @@ partial class AppForm
         menuLayout.Size = new Size(100, 23);
         menuLayout.Text = "Default";
         // 
+        // toolStripButton
+        // 
+        toolStripButton.Anchor = AnchorStyles.None;
+        toolStripButton.Dock = DockStyle.None;
+        toolStripButton.GripMargin = new Padding(0);
+        toolStripButton.GripStyle = ToolStripGripStyle.Hidden;
+        toolStripButton.Items.AddRange(new ToolStripItem[] { toolStripButtonLabel });
+        toolStripButton.Location = new Point(190, 500);
+        toolStripButton.Name = "toolStripButton";
+        toolStripButton.Padding = new Padding(10);
+        toolStripButton.Size = new Size(117, 39);
+        toolStripButton.TabIndex = 3;
+        // 
+        // toolStripButtonLabel
+        // 
+        toolStripButtonLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        toolStripButtonLabel.Margin = new Padding(0);
+        toolStripButtonLabel.Name = "toolStripButtonLabel";
+        toolStripButtonLabel.Size = new Size(64, 19);
+        toolStripButtonLabel.Text = "New game";
+        // 
         // AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -203,6 +228,7 @@ partial class AppForm
         BackColor = Color.FromArgb(64, 0, 64);
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(500, 750);
+        Controls.Add(toolStripButton);
         Controls.Add(labelLeft);
         Controls.Add(labelRight);
         Controls.Add(tLayout);
@@ -218,6 +244,8 @@ partial class AppForm
         tLayout.PerformLayout();
         menuStrip1.ResumeLayout(false);
         menuStrip1.PerformLayout();
+        toolStripButton.ResumeLayout(false);
+        toolStripButton.PerformLayout();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -241,4 +269,6 @@ partial class AppForm
     private Label labelLeft;
     private Label labelRight;
     private Label labelVS;
+    private ToolStrip toolStripButton;
+    private ToolStripLabel toolStripButtonLabel;
 }

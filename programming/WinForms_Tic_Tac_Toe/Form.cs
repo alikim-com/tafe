@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WinFormsApp1;
 
@@ -11,7 +13,6 @@ partial class AppForm : Form
     readonly int lChoiceWidth;
     readonly float lChoiceFontSize;
 
-    // board cell bg manager
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
     readonly LabelManager labMgr;
@@ -29,32 +30,6 @@ partial class AppForm : Form
 
     UIColors.ColorTheme theme;
 
-    void InitializeMenu()
-    {
-        // menu appearance
-        menuStrip1.BackColor = theme.Prime;
-        menuStrip1.ForeColor = theme.Text;
-        menuStrip1.Renderer = UIRenderer.TSRenderer(theme, "ColorTableMain");
-
-        ToolStripMenuItem[] expandableItems = new[] { menuLoad, menuLoadCollection, menuSave, menuHelp };
-
-        foreach (var item in expandableItems)
-        {
-            if (item.DropDown is ToolStripDropDownMenu dropDownMenu)
-                dropDownMenu.ShowImageMargin = false;
-
-            foreach (ToolStripItem subItem in item.DropDownItems) subItem.ForeColor = theme.Text;
-        }
-
-        menuLayout.BackColor = theme.Dark;
-        menuLayout.ForeColor = theme.Text;
-        menuLayout.BorderStyle = BorderStyle.None;
-
-        menuDummy.BackColor = theme.Dark;
-        menuDummy.ForeColor = theme.Text;
-        menuDummy.BorderStyle = BorderStyle.None;
-    }
-
     SetupForm? setupForm;
 
     IEnumerable<ChoiceItem> chosen = Enumerable.Empty<ChoiceItem>();
@@ -70,11 +45,14 @@ partial class AppForm : Form
         if (setupForm.ShowDialog(this) == DialogResult.OK) return;
     }
 
+    readonly ButtonToolStripRenderer buttonRenderer;
+
     internal AppForm()
     {
-        theme = UIColors.Steel;
-
         EM.uiThread = this;
+
+        theme = UIColors.Steel;
+        ForeColor = theme.Text;
 
         // init label manager
         labMgr = new();
@@ -103,6 +81,10 @@ partial class AppForm : Form
         // adjust labels & setup percentage positioning
         SetupLabels();
 
+        // restart game button
+        buttonRenderer = UIRenderer.ButtonTSRenderer(toolStripButton, ButtonColors.Sunrise);
+        SetupRestart();
+
         // LabelManager properties -> Labels
         SetupBinds();
 
@@ -112,7 +94,47 @@ partial class AppForm : Form
         // MULTI-USE: reset everything and start the game
         StartGame();
 
-        //menuHelpAbout.Click += (object? sender, EventArgs e) => { BackgroundImage = Resource.GameBackImg; };
+        // menuHelpAbout.Click += (object? sender, EventArgs e) => {  };
+    }
+
+    void InitializeMenu()
+    {
+        // menu appearance
+        menuStrip1.BackColor = theme.Prime;
+        menuStrip1.ForeColor = theme.Text;
+        menuStrip1.Renderer = UIRenderer.MenuTSRenderer(theme, "MenuColorTable");
+        menuStrip1.Font = UIFonts.menu;
+
+        ToolStripMenuItem[] expandableItems = new[] { menuLoad, menuLoadCollection, menuSave, menuHelp };
+
+        foreach (var item in expandableItems)
+        {
+            if (item.DropDown is ToolStripDropDownMenu dropDownMenu)
+                dropDownMenu.ShowImageMargin = false;
+
+            foreach (ToolStripItem subItem in item.DropDownItems) subItem.ForeColor = theme.Text;
+        }
+
+        menuLayout.BackColor = theme.Dark;
+        menuLayout.ForeColor = theme.Text;
+        menuLayout.BorderStyle = BorderStyle.None;
+
+        menuDummy.BackColor = theme.Dark;
+        menuDummy.ForeColor = theme.Text;
+        menuDummy.BorderStyle = BorderStyle.None;
+    }
+
+    void SetupRestart()
+    {
+        toolStripButton.Renderer = buttonRenderer;
+        toolStripButton.BackColor = toolStripButtonLabel.BackColor = UIColors.Transparent;
+        buttonRenderer.SetOverState(toolStripButton, false);
+
+        // center over VS
+        toolStripButton.Location = new Point(
+            labelVS.Location.X + (labelVS.Width - toolStripButton.Width) / 2,
+            labelVS.Location.Y + menuStrip1.Height + (labelVS.Height - toolStripButton.Height) / 2
+            );
     }
 
     void ResetUI()
@@ -124,7 +146,6 @@ partial class AppForm : Form
                 iComp.Disable();
             }
     }
-
     void EnableUI()
     {
         foreach (var cw in cellWrap)
@@ -148,8 +169,8 @@ partial class AppForm : Form
         Reset();
 
         // create AIs, if needed
-        foreach(var chItm in chosenArr)
-            if(chItm.originType == "AI")
+        foreach (var chItm in chosenArr)
+            if (chItm.originType == "AI")
             {
                 var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
                 var aiAgent = new AI(logic, chItm.rosterId);
@@ -275,6 +296,7 @@ partial class AppForm : Form
         labelRight.ForeColor = foreRight;
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
+        labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
 
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
 
@@ -285,6 +307,10 @@ partial class AppForm : Form
 
         RatioPosition.Add(labelLeft, this, RatioPosControl.Anchor.Left, RatioPosControl.Anchor.Top);
         RatioPosition.Add(labelRight, this, RatioPosControl.Anchor.Right, RatioPosControl.Anchor.Bottom);
+
+        info.Font = UIFonts.info;
+        info.ForeColor = theme.Text;
+        info.BackColor = Color.FromArgb(64, 0, 0, 0);
     }
 
     void FormAspect_ClientSizeChanged(object? sender, EventArgs e)

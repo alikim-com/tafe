@@ -34,11 +34,11 @@ class AI
 
                 Thread thread = new(() =>
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(400);
 
                     var tile = LogicRNG();
 
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1200);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });
@@ -53,11 +53,11 @@ class AI
 
                 Thread thread = new(() =>
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(400);
 
                     var tile = LogicEasy();
 
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1200);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });

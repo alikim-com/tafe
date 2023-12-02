@@ -1,6 +1,5 @@
 ﻿
 using System.ComponentModel;
-using System.Windows.Forms;
 
 namespace WinFormsApp1;
 partial class SetupForm
@@ -88,7 +87,7 @@ partial class SetupForm
         toolStrip.GripStyle = ToolStripGripStyle.Hidden;
         toolStrip.Items.AddRange(new ToolStripItem[] { toolStripLabel });
         toolStrip.Location = new Point(140, 420);
-        toolStrip.Name = "toolStrip";
+        toolStrip.Name = "toolStripButton";
         toolStrip.Padding = new Padding(10);
         toolStrip.Size = new Size(163, 39);
         toolStrip.TabIndex = 3;
@@ -101,7 +100,7 @@ partial class SetupForm
         // 
         toolStripLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
         toolStripLabel.Margin = new Padding(0);
-        toolStripLabel.Name = "toolStripButton";
+        toolStripLabel.Name = "toolStripButtonLabel";
         toolStripLabel.Size = new Size(110, 19);
         toolStripLabel.Text = "...";
         // 

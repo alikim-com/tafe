@@ -14,7 +14,7 @@ partial class SetupForm : Form
 
     static internal readonly List<ChoiceItem> roster = new();
 
-    readonly ToolStripRendererOverride buttonRenderer;
+    readonly ButtonToolStripRenderer buttonRenderer;
 
     enum BtnMessage
     {
@@ -65,7 +65,7 @@ partial class SetupForm : Form
 
         CreateChoiceLists();
 
-        buttonRenderer = new ToolStripRendererOverride(toolStrip);
+        buttonRenderer = UIRenderer.ButtonTSRenderer(toolStrip, ButtonColors.Sunrise);
         toolStrip.Renderer = buttonRenderer;
 
         toolStrip.BackColor = toolStripLabel.BackColor = UIColors.Transparent;
@@ -320,73 +320,5 @@ class ChoiceItem
     }
 
     public override string ToString() => $"{identity.Text} | {side} | chosen: {chosen}";
-}
-
-class ToolStripRendererOverride : ToolStripProfessionalRenderer
-{
-    Color gTop, gBot;
-    static readonly Color gradTop = Color.FromArgb(52, 26, 79).ScaleRGB(1.25);
-    static readonly Color gradBot = Color.FromArgb(110, 18, 0).ScaleRGB(1.25);
-    static readonly Color gradBotOver = Color.FromArgb(52, 26, 79).ScaleRGB(1.4);
-    static readonly Color gradTopOver = Color.FromArgb(110, 18, 0).ScaleRGB(1.4);
-    static readonly Color gradTopDisabled = Color.FromArgb(200, 104, 34).ScaleRGB(0.10);
-    static readonly Color gradBotDisabled = Color.FromArgb(185, 36, 199).ScaleRGB(0.10);
-
-    bool _disabled = false;
-    internal bool Disabled
-    {
-        get => _disabled;
-        set
-        {
-            if (value != _disabled)
-            {
-                _disabled = value;
-
-                UpdateColors(false);
-                parent.Invalidate();
-            }
-        }
-    }
-
-    readonly Control parent;
-
-    internal ToolStripRendererOverride(Control _parent)
-    {
-        parent = _parent;
-        this.RoundedEdges = false;
-    }
-
-    void UpdateColors(bool state)
-    {
-        gTop = Disabled ? gradTopDisabled : (state ? gradTopOver : gradTop);
-        gBot = Disabled ? gradBotDisabled : (state ? gradBotOver : gradBot);
-    }
-
-    internal void SetOverState(object sender, bool state)
-    {
-        UpdateColors(state);
-
-        if (sender is Control ctrl)
-        {
-            ctrl.Cursor = (!Disabled && state) ? Cursors.Hand : Cursors.Default;
-            ctrl.Invalidate();
-        }
-    }
-
-    protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e) { }
-
-    protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
-    {
-        base.OnRenderToolStripBackground(e);
-
-        using var brush = new LinearGradientBrush(
-            e.AffectedBounds,
-            gTop,
-            gBot,
-            LinearGradientMode.Vertical
-        );
-
-        e.Graphics.FillRectangle(brush, e.AffectedBounds);
-    }
 }
 
