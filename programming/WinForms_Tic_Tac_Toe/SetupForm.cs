@@ -7,9 +7,6 @@ partial class SetupForm : Form
 {
     static readonly UIColors.ColorTheme theme = UIColors.Steel;
 
-    static internal readonly Color tintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
-    static internal readonly Color tintRight = Color.FromArgb(20 * 4, 185, 36, 199);
-
     readonly Color foreLeft, foreRight, foreLeftDim, foreRightDim;
 
     static internal readonly List<ChoiceItem> roster = new();
@@ -38,8 +35,8 @@ partial class SetupForm : Form
         ForeColor = theme.Text;
         BackColor = theme.Prime;
 
-        foreLeft = ColorExtensions.BlendOver(tintLeft, ForeColor);
-        foreRight = ColorExtensions.BlendOver(tintRight, ForeColor);
+        foreLeft = UIColors.ForeLeft; 
+        foreRight = UIColors.ForeRight;
         foreLeftDim = ColorExtensions.BlendOver(Color.FromArgb(96, 0, 0, 0), foreLeft);
         foreRightDim = ColorExtensions.BlendOver(Color.FromArgb(96, 0, 0, 0), foreRight);
 

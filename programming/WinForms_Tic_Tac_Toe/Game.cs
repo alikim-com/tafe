@@ -175,6 +175,6 @@ class Game
             TurnWheel.Advance();
 
         else
-            EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { LabelManager.Info.Tie, LabelManager.Bg.None });
+            EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());
     }
 }

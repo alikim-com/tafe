@@ -140,8 +140,16 @@ partial class AppForm : Form
         toolStripButton.MouseLeave += (object? s, EventArgs e) => buttonRenderer.SetOverState(toolStripButton, false);
     }
 
+    void ShowEndGameButton(bool state)
+    {
+        toolStripButton.Enabled = state;
+        toolStripButton.Visible = state;
+    }
+
     void ResetUI()
     {
+        ShowEndGameButton(false);
+
         foreach (var cw in cellWrap)
             if (cw is IComponent iComp)
             {
@@ -185,13 +193,20 @@ partial class AppForm : Form
         TurnWheel.GameCountdown();
     }
 
+    EventHandler<Game.Roster> GameOverHandler() => (object? _, Game.Roster __) => ShowEndGameButton(true);
+    EventHandler GameTieHandler() => (object? _, EventArgs e) => ShowEndGameButton(true);
+
     void SetupSubsAndCb()
     {
+        EM.Subscribe(EM.Evt.GameOver, GameOverHandler());
+        EM.Subscribe(EM.Evt.GameTie, GameTieHandler());
+
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
         EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
         EM.Subscribe(EM.Evt.GameOver, VBridge.GameOverHandler);
+        EM.Subscribe(EM.Evt.GameTie, VBridge.GameTieHandler);
 
         foreach (var cw in cellWrap)
         {
@@ -208,8 +223,10 @@ partial class AppForm : Form
     {
         info.DataBindings.Add(new Binding("BackColor", labMgr, "InfoBackBind"));
         info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanelBind"));
-        labelLeft.DataBindings.Add(new Binding("Text", labMgr, "LabelLeftBind"));
-        labelRight.DataBindings.Add(new Binding("Text", labMgr, "LabelRightBind"));
+        labelLeft.DataBindings.Add(new Binding("Text", labMgr, "LabelPlayer1Bind"));
+        labelLeft.DataBindings.Add(new Binding("ForeColor", labMgr, "Player1ForeBind"));
+        labelRight.DataBindings.Add(new Binding("Text", labMgr, "LabelPlayer2Bind"));
+        labelRight.DataBindings.Add(new Binding("ForeColor", labMgr, "Player2ForeBind"));
     }
 
     void Reset()
@@ -293,11 +310,6 @@ partial class AppForm : Form
 
     void SetupLabels()
     {
-        Color foreLeft = ColorExtensions.BlendOver(SetupForm.tintLeft, theme.Text);
-        Color foreRight = ColorExtensions.BlendOver(SetupForm.tintRight, theme.Text);
-
-        labelLeft.ForeColor = foreLeft;
-        labelRight.ForeColor = foreRight;
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
         labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);

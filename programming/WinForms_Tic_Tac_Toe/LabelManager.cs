@@ -48,8 +48,12 @@ class LabelManager : INotifyPropertyChanged
     internal enum Bg
     {
         None,
-        Player1,
-        Player2
+        Player1InfoBack,
+        Player2InfoBack,
+        Player1Fore,
+        Player2Fore,
+        Player1ForeDim,
+        Player2ForeDim,
     }
 
     static readonly Dictionary<Enum, string> stateToString = new()
@@ -69,7 +73,7 @@ class LabelManager : INotifyPropertyChanged
 
     static readonly Dictionary<Enum, Color> stateToColor = new()
     {
-        // filled by VBridge.Reset()
+        // enum Bg, filled by VBridge.Reset()
     };
 
     /// <summary>
@@ -116,12 +120,12 @@ class LabelManager : INotifyPropertyChanged
                 RaiseEvtPropertyChanged(nameof(InfoPanelBind));
                 break;
             case Info.Player1:
-                _this.LabelLeftBind = stateToString[state];
-                RaiseEvtPropertyChanged(nameof(LabelLeftBind));
+                _this.LabelPlayer1Bind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelPlayer1Bind));
                 break;
             case Info.Player2:
-                _this.LabelRightBind = stateToString[state];
-                RaiseEvtPropertyChanged(nameof(LabelRightBind));
+                _this.LabelPlayer2Bind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelPlayer2Bind));
                 break;
             case Info:
             case Countdown:
@@ -129,8 +133,20 @@ class LabelManager : INotifyPropertyChanged
                 RaiseEvtPropertyChanged(nameof(InfoPanelBind));
                 break;
             case Bg:
-                _this.InfoBackBind = stateToColor[state];
-                RaiseEvtPropertyChanged(nameof(InfoBackBind));
+                if (state.ToString().Contains("Player1Fore"))
+                {
+                    _this.Player1ForeBind = stateToColor[state];
+                    RaiseEvtPropertyChanged(nameof(Player1ForeBind));
+
+                } else if (state.ToString().Contains("Player2Fore"))
+                {
+                    _this.Player2ForeBind = stateToColor[state];
+                    RaiseEvtPropertyChanged(nameof(Player2ForeBind));
+                } else
+                {
+                    _this.InfoBackBind = stateToColor[state];
+                    RaiseEvtPropertyChanged(nameof(InfoBackBind));
+                }
                 break;
             default:
                 throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
@@ -155,10 +171,12 @@ class LabelManager : INotifyPropertyChanged
     /// <summary>
     /// Data bindings
     /// </summary>
-    public string LabelLeftBind { get; set; } = "";
-    public string LabelRightBind { get; set; } = "";
+    public string LabelPlayer1Bind { get; set; } = "";
+    public string LabelPlayer2Bind { get; set; } = "";
     public string InfoPanelBind { get; set; } = "";
     public Color InfoBackBind { get; set; } = UIColors.Transparent;
+    public Color Player1ForeBind { get; set; } = UIColors.Transparent;
+    public Color Player2ForeBind { get; set; } = UIColors.Transparent;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

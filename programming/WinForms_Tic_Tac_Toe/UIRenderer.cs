@@ -22,6 +22,12 @@ public class UIColors
     static public readonly Color Black = Color.FromArgb(0, 0, 0);
     static public readonly Color Transparent = Color.FromArgb(0, 0, 0, 0);
 
+    static internal readonly Color TintLeft = Color.FromArgb(15 * 4, 200, 104, 34);
+    static internal readonly Color TintRight = Color.FromArgb(20 * 4, 185, 36, 199);
+
+    static internal readonly Color ForeLeft = ColorExtensions.BlendOver(TintLeft, Color.FromArgb(200, 200, 200));
+    static internal readonly Color ForeRight = ColorExtensions.BlendOver(TintRight, Color.FromArgb(200, 200, 200));
+
     public struct ColorTheme
     {
         public Color Pitch;

@@ -23,7 +23,7 @@ internal class VBridge
     /// <summary>
     /// Auxiliary map
     /// </summary>
-    static readonly Dictionary<ChoiceItem.Side, LabelManager.Info> sideToInfoLab = new()
+    static readonly Dictionary<ChoiceItem.Side, LabelManager.Info> sideToPlayer = new()
     {
         { ChoiceItem.Side.Left, LabelManager.Info.Player1 },
         { ChoiceItem.Side.Right, LabelManager.Info.Player2 }
@@ -34,11 +34,18 @@ internal class VBridge
     /// </summary>
     static readonly Dictionary<Game.Roster, ChoiceItem.Side> rosterToSide = new();
 
+    // labels colors
     static readonly Color infoBackNone = Color.FromArgb(80, 0, 0, 0);
+    
     static readonly Color infoBackLeft = ColorExtensions.BlendOver(
-        ColorExtensions.Scale(SetupForm.tintLeft, 0.8), infoBackNone);
+        ColorExtensions.Scale(UIColors.TintLeft, 0.8), infoBackNone);
+
     static readonly Color infoBackRight = ColorExtensions.BlendOver(
-        ColorExtensions.Scale(SetupForm.tintRight, 0.8), infoBackNone);
+        ColorExtensions.Scale(UIColors.TintRight, 0.8), infoBackNone);
+
+    static readonly Color dim = Color.FromArgb(96, 0, 0, 0);
+    static readonly Color foreLeftDim = ColorExtensions.BlendOver(dim, UIColors.ForeLeft);
+    static readonly Color foreRightDim = ColorExtensions.BlendOver(dim, UIColors.ForeRight);
 
     /// <summary>
     /// Fill in LabelManager.stateToString messages that depend on player names and their sides
@@ -48,7 +55,10 @@ internal class VBridge
         rosterToSide.Clear();
         rosterToSide.Add(Game.Roster.None, ChoiceItem.Side.None);
 
-        var enumInfo = new Dictionary<Enum, object>();
+        var enumInfo = new Dictionary<Enum, object>
+        {
+            { LabelManager.Bg.None, infoBackNone }
+        };
 
         foreach (var chItem in chosen)
         {
@@ -56,7 +66,7 @@ internal class VBridge
 
             rosterToSide.Add(chItem.rosterId, side);
 
-            var state = Utils.SafeDictValue(sideToInfoLab, side);
+            var state = Utils.SafeDictValue(sideToPlayer, side);
             var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
             var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
 
@@ -68,20 +78,30 @@ internal class VBridge
             enumInfo.Add(state, chItem.identityName);
             enumInfo.Add(stateMove, msgMove);
             enumInfo.Add(stateWon, msgWon);
+            
+            // enum Bg colors
+            var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
+            var stateFore = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}Fore");
+            var stateForeDim = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}ForeDim");
 
-            var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>(state.ToString());
-            var infoBackColor = side == ChoiceItem.Side.Left ? infoBackLeft : infoBackRight;
+            var sideIsLeft = side == ChoiceItem.Side.Left;
+            var infoBackColor = sideIsLeft ? infoBackLeft : infoBackRight;
+            var foreColor = sideIsLeft ? UIColors.ForeLeft : UIColors.ForeRight;
+            var foreColorDim = sideIsLeft ? foreLeftDim : foreRightDim;
+
             enumInfo.Add(stateBg, infoBackColor);
+            enumInfo.Add(stateFore, foreColor);
+            enumInfo.Add(stateForeDim, foreColorDim);
         }
-
-        enumInfo.Add(LabelManager.Bg.None, infoBackNone);
 
         LabelManager.Reset(enumInfo);
 
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
             LabelManager.Info.Player1,
             LabelManager.Info.Player2,
-            LabelManager.Bg.None
+            LabelManager.Bg.None,
+            LabelManager.Bg.Player1Fore, 
+            LabelManager.Bg.Player2Fore,
         });
     }
 
@@ -111,9 +131,9 @@ internal class VBridge
     (object? _, Game.Roster rostId) =>
     {
         var side = Utils.SafeDictValue(rosterToSide, rostId);
-        var state = Utils.SafeDictValue(sideToInfoLab, side);
+        var state = Utils.SafeDictValue(sideToPlayer, side);
         var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
-        var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>(state.ToString());
+        var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
 
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateMove, stateBg });
     };
@@ -122,10 +142,26 @@ internal class VBridge
     (object? _, Game.Roster winner) =>
     {
         var side = Utils.SafeDictValue(rosterToSide, winner);
-        var state = Utils.SafeDictValue(sideToInfoLab, side);
+        var state = Utils.SafeDictValue(sideToPlayer, side);
         var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
-        var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>(state.ToString());
+        var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { stateWon, stateBg });
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { 
+            stateWon, 
+            stateBg, 
+            LabelManager.Bg.Player1ForeDim, 
+            LabelManager.Bg.Player2ForeDim, 
+        });
+    };
+
+    static internal EventHandler GameTieHandler =
+    (object? _, EventArgs __) =>
+    {
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
+            LabelManager.Info.Tie,
+            LabelManager.Bg.None,
+            LabelManager.Bg.Player1ForeDim,
+            LabelManager.Bg.Player2ForeDim,
+        });
     };
 }
