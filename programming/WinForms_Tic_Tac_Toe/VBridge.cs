@@ -97,6 +97,7 @@ internal class VBridge
         LabelManager.Reset(enumInfo);
 
         EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
+            LabelManager.Info.None,
             LabelManager.Info.Player1,
             LabelManager.Info.Player2,
             LabelManager.Bg.None,

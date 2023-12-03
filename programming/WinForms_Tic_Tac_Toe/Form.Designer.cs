@@ -202,8 +202,9 @@ partial class AppForm
         toolStripButton.Items.AddRange(new ToolStripItem[] { toolStripButtonLabel });
         toolStripButton.Location = new Point(190, 500);
         toolStripButton.Name = "toolStripButton";
-        toolStripButton.Padding = new Padding(10);
-        toolStripButton.Size = new Size(117, 39);
+        toolStripButton.Padding = new Padding(0);
+        //toolStripButton.AutoSize = false;
+        //toolStripButton.Size = new Size(117, 39);
         toolStripButton.TabIndex = 3;
         // 
         // toolStripButtonLabel
@@ -211,7 +212,7 @@ partial class AppForm
         toolStripButtonLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
         toolStripButtonLabel.Margin = new Padding(0);
         toolStripButtonLabel.Name = "toolStripButtonLabel";
-        toolStripButtonLabel.Size = new Size(64, 19);
+        //toolStripButtonLabel.Size = new Size(64, 19);
         toolStripButtonLabel.Text = "New game";
         // 
         // AppForm

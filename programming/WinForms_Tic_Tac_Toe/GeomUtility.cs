@@ -29,7 +29,7 @@ public class RatioPosControl
 {
     public enum Anchor
     {
-        Left, Top, Right, Bottom
+        Left, Top, Right, Bottom, Middle
     }
 
     internal readonly Anchor hor, ver;
@@ -68,7 +68,7 @@ public class RatioPosition
 
     static public void Remove(Control control) => rpControls.RemoveAll(rpCtrl => rpCtrl.control == control);
 
-    static public void Update(Control control)
+    static public void Update(Control control, bool scale = false)
     {
         var rpCtrl = rpControls.Find(rpCtrl => rpCtrl.control == control);
         if (rpCtrl == null) return;
@@ -78,23 +78,20 @@ public class RatioPosition
         var clSize = rpCtrl.parent.ClientSize;
         var hor = rpCtrl.hor;
         var ver = rpCtrl.ver;
-
-        int x;
-        if (hor == RatioPosControl.Anchor.Left)
-            x = (int)(rect.Left * clSize.Width);
-        else if (hor == RatioPosControl.Anchor.Right)
-            x = (int)(rect.Right * clSize.Width) - ctrl.Width;
-        else
-            throw new Exception($"RatioPosition.Update : wrong hor Anchor type '{hor}'");
-
-        int y;
-        if (ver == RatioPosControl.Anchor.Top)
-            y = (int)(rect.Top * clSize.Height);
-        else if (ver == RatioPosControl.Anchor.Bottom)
-            y = (int)(rect.Bottom * clSize.Height) - ctrl.Height;
-        else
-            throw new Exception($"RatioPosition.Update : wrong ver Anchor type '{ver}'");
-
+        var x = hor switch
+        {
+            RatioPosControl.Anchor.Left => (int)(rect.Left * clSize.Width),
+            RatioPosControl.Anchor.Right => (int)(rect.Right * clSize.Width) - ctrl.Width,
+            RatioPosControl.Anchor.Middle => (int)((rect.Left + 0.5 * rect.Width) * clSize.Width) - ctrl.Width / 2,
+            _ => throw new Exception($"RatioPosition.Update : wrong hor Anchor type '{hor}'"),
+        };
+        var y = ver switch
+        {
+            RatioPosControl.Anchor.Top => (int)(rect.Top * clSize.Height),
+            RatioPosControl.Anchor.Bottom => (int)(rect.Bottom * clSize.Height) - ctrl.Height,
+            RatioPosControl.Anchor.Middle => (int)((rect.Top + 0.5 * rect.Height) * clSize.Height) - ctrl.Height / 2,
+            _ => throw new Exception($"RatioPosition.Update : wrong ver Anchor type '{ver}'"),
+        };
         rpCtrl.control.Location = new Point(x, y);
     }
 }

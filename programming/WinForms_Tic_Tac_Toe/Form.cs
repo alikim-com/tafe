@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -5,11 +6,12 @@ namespace WinFormsApp1;
 
 partial class AppForm : Form
 {
-    double cRatio; // main window
+    double rcpClHeight; // for scaling fonts
+    double clRatio; // main window
     Size ncSize; // non-client area
-
-    readonly int lChoiceWidth;
-    readonly float lChoiceFontSize;
+    Dictionary<Label, Font> scaledLabels = new();
+    Dictionary<ToolStripLabel, Font> scaledTSLabels = new();
+    Dictionary<Control, Size> scaledControls = new();
 
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
@@ -17,13 +19,13 @@ partial class AppForm : Form
 
     static readonly Dictionary<KeyValuePair<Game.Roster, Game.Roster>, Image> mainBg = new();
 
-    static internal void ApplyDoubleBuffer(Control control)
+    static internal void ApplyDoubleBuffer(object control)
     {
-        control.GetType().InvokeMember(
-            "DoubleBuffered",
-            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-            null, control, new object[] { true }
-        );
+        var propName = "DoubleBuffered";
+        var bindFlags = BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic;
+        var type = control.GetType();
+        var prop = type.GetProperty(propName, bindFlags);
+        prop?.SetValue(control, true);
     }
 
     UIColors.ColorTheme theme;
@@ -67,23 +69,19 @@ partial class AppForm : Form
 
         InitializeMenu();
 
-        // for scaling font
-        //lChoiceWidth = choice.Width;
-        //lChoiceFontSize = choice.Font.Size;
-
-        // prevent backgound flickering components
-        var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight, labelVS };
+        // prevent background flickering
+        var doubleBuffed = new object[] { tLayout, labelLeft, labelRight, labelVS, toolStripButton, toolStripButtonLabel };
         foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
 
         // BLOCKS: player setup pop-up 
         SetupFormPopup();
 
-        // adjust labels & setup percentage positioning
-        SetupLabels();
-
         // restart game button
         buttonRenderer = UIRenderer.ButtonTSRenderer(toolStripButton, ButtonColors.Sunrise);
         SetupRestart();
+
+        // adjust labels & setup percentage positioning
+        SetupLabels();
 
         // LabelManager properties -> Labels
         SetupBinds();
@@ -94,7 +92,12 @@ partial class AppForm : Form
         // MULTI-USE: resets everything and start the game
         StartGame();
 
-        // menuHelpAbout.Click += (object? sender, EventArgs e) => {  };
+        menuHelpAbout.Click += (object? sender, EventArgs e) =>
+        {
+            var fact = 0.5;
+            var size = toolStripButton.Size;
+            toolStripButton.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
+        };
     }
 
     void InitializeMenu()
@@ -148,7 +151,7 @@ partial class AppForm : Form
 
     void ResetUI()
     {
-        ShowEndGameButton(false);
+        ShowEndGameButton(true);
 
         foreach (var cw in cellWrap)
             if (cw is IComponent iComp)
@@ -336,6 +339,7 @@ partial class AppForm : Form
 
         RatioPosition.Add(labelLeft, this, RatioPosControl.Anchor.Left, RatioPosControl.Anchor.Top);
         RatioPosition.Add(labelRight, this, RatioPosControl.Anchor.Right, RatioPosControl.Anchor.Bottom);
+        RatioPosition.Add(toolStripButton, this, RatioPosControl.Anchor.Middle, RatioPosControl.Anchor.Middle);
 
         info.Font = UIFonts.info;
         info.ForeColor = theme.Text;
@@ -346,6 +350,7 @@ partial class AppForm : Form
         // adjust components
         RatioPosition.Update(labelLeft);
         RatioPosition.Update(labelRight);
+        RatioPosition.Update(toolStripButton);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -378,8 +383,17 @@ partial class AppForm : Form
 
     void FormAspect_Load(object sender, EventArgs e)
     {
-        ncSize = Size - ClientSize;
-        cRatio = (double)ClientSize.Width / ClientSize.Height;
+        var clHeight = ClientSize.Height - menuStrip1.Height;
+        var clSize = new Size(ClientSize.Width, clHeight);
+        clRatio = (double)clSize.Width / clSize.Height;
+        ncSize = Size - clSize;
+
+        Label[] labs = new[] { info, labelLeft, labelRight, labelVS };
+        foreach (var lab in labs) 
+            scaledLabels.Add(lab, lab.Font);
+        scaledTSLabels.Add(toolStripButtonLabel, toolStripButtonLabel.Font);
+        scaledControls.Add(toolStripButton, toolStripButton.Size);
+        rcpClHeight = 1.0 / clHeight;
     }
 
     // ---------------   constant client aspect ratio   ---------------
@@ -410,15 +424,17 @@ partial class AppForm : Form
         if (m.Msg == WM_SIZING)
         {
             var rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT))!;
-            int newWidth, newHeight;
+            int clWidth, clHeight, newWidth, newHeight;
+            clHeight = default;
 
             switch ((WMSZ)m.WParam.ToInt32())
             {
                 case WMSZ.LEFT:
                 case WMSZ.RIGHT:
                     // width has changed, adjust height
-                    newWidth = rc.Right - rc.Left - ncSize.Width;
-                    newHeight = (int)(newWidth / cRatio) + ncSize.Height;
+                    clWidth = rc.Right - rc.Left - ncSize.Width;
+                    clHeight = (int)(clWidth / clRatio);
+                    newHeight = clHeight + ncSize.Height;
                     rc.Bottom = rc.Top + newHeight;
                     break;
                 case WMSZ.TOP:
@@ -428,17 +444,21 @@ partial class AppForm : Form
                 case WMSZ.BOTTOMLEFT:
                 case WMSZ.BOTTOMRIGHT:
                     // height has changed, adjust width
-                    newHeight = rc.Bottom - rc.Top - ncSize.Height;
-                    newWidth = (int)(newHeight * cRatio) + ncSize.Width;
+                    clHeight = rc.Bottom - rc.Top - ncSize.Height;
+                    newWidth = (int)(clHeight * clRatio) + ncSize.Width;
                     rc.Right = rc.Left + newWidth;
                     break;
             }
             Marshal.StructureToPtr(rc, m.LParam, true);
 
-            //float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
-            //choice.Font = new Font(choice.Font.FontFamily, newFontSize);
-            //info.Font = new Font(info.Font.FontFamily, newFontSize);
+            var fact = (float)(clHeight * rcpClHeight);
 
+            foreach (var (lab, font) in scaledLabels) 
+                lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
+             //foreach (var (lab, font) in scaledTSLabels)
+               //lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
+            //foreach (var (ctrl, size) in scaledControls)
+              // ctrl.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
         }
 
         base.WndProc(ref m);
