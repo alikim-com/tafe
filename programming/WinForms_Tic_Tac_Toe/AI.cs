@@ -12,18 +12,20 @@ class AI
 
     readonly Logic logic;
     readonly Game.Roster selfId;
+    internal EventHandler<Game.Roster> MoveHandler;
 
     internal AI(Logic _logic, Game.Roster _selfId)
     {
         logic = _logic;
         selfId = _selfId;
+        MoveHandler = AIMakeMoveHandler();
     }
 
     /// <summary>
     /// Choose a board cell
     /// </summary>
     /// <param name="count">The number of remaining UI elements to click</param>
-    internal EventHandler<Game.Roster> AIMakeMoveHandler()
+    EventHandler<Game.Roster> AIMakeMoveHandler()
     {
         return logic switch
         {

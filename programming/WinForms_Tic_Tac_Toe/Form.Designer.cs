@@ -1,7 +1,4 @@
 ﻿
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
 namespace WinFormsApp1;
 
 partial class AppForm
@@ -81,7 +78,6 @@ partial class AppForm
         // 
         tLayout.SetColumnSpan(info, 3);
         info.Dock = DockStyle.Fill;
-        info.ForeColor = Color.FromArgb(0, 255, 255, 255);
         info.Location = new Point(0, 477);
         info.Margin = new Padding(0);
         info.Name = "info";
@@ -93,7 +89,6 @@ partial class AppForm
         // 
         labelVS.AutoSize = true;
         labelVS.Dock = DockStyle.Fill;
-        labelVS.ForeColor = Color.FromArgb(200, 200, 200);
         labelVS.Location = new Point(166, 520);
         labelVS.Margin = new Padding(0);
         labelVS.Name = "labelVS";
@@ -105,7 +100,6 @@ partial class AppForm
         // labelLeft
         // 
         labelLeft.AutoSize = true;
-        labelLeft.BackColor = Color.Thistle;
         labelLeft.Location = new Point(0, 520);
         labelLeft.Margin = new Padding(0);
         labelLeft.Name = "labelLeft";
@@ -117,7 +111,6 @@ partial class AppForm
         // 
         labelRight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         labelRight.AutoSize = true;
-        labelRight.BackColor = Color.Thistle;
         labelRight.Location = new Point(440, 708);
         labelRight.Margin = new Padding(0);
         labelRight.Name = "labelRight";

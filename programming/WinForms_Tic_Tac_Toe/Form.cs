@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WinFormsApp1;
 
@@ -37,6 +35,8 @@ partial class AppForm : Form
     ChoiceItem[] chosenArr = Array.Empty<ChoiceItem>();
 
     bool firstChosenIsLeft = false;
+
+    readonly List<AI> AIs = new();
 
     void SetupFormPopup()
     {
@@ -91,7 +91,7 @@ partial class AppForm : Form
         // Event subscriptions & callbacks
         SetupSubsAndCb();
 
-        // MULTI-USE: reset everything and start the game
+        // MULTI-USE: resets everything and start the game
         StartGame();
 
         // menuHelpAbout.Click += (object? sender, EventArgs e) => {  };
@@ -179,14 +179,20 @@ partial class AppForm : Form
         // ready new game
         Reset();
 
-        // create AIs, if needed
+        // (re)create AIs, if needed
+
+        foreach(var aiAgent in AIs)
+            EM.Unsubscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
+        AIs.Clear();
+
         foreach (var chItm in chosenArr)
             if (chItm.originType == "AI")
             {
                 var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
                 var aiAgent = new AI(logic, chItm.rosterId);
+                AIs.Add(aiAgent);
 
-                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.AIMakeMoveHandler());
+                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
             }
 
         // start game
@@ -217,6 +223,12 @@ partial class AppForm : Form
         EM.Subscribe(EM.Evt.PlayerMoved, TurnWheel.PlayerMovedHandler);
 
         TurnWheel.SetCallbacks(EnableUI, DisableUI);
+
+        toolStripButton.Click += (object? _, EventArgs __) =>
+        {
+            SetupFormPopup();
+            StartGame();
+        };
     }
 
     void SetupBinds()
@@ -313,6 +325,7 @@ partial class AppForm : Form
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
         labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
+        toolStripButton.Font = new("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
 
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
 
