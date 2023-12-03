@@ -9,9 +9,25 @@ partial class AppForm : Form
     double rcpClHeight; // for scaling fonts
     double clRatio; // main window
     Size ncSize; // non-client area
-    Dictionary<Label, Font> scaledLabels = new();
-    Dictionary<ToolStripLabel, Font> scaledTSLabels = new();
-    Dictionary<Control, Size> scaledControls = new();
+    readonly int minWndWidth = 200;
+    int minWndHeight = 0;
+    Dictionary<Label, Font> scalableLabels = new();
+    Dictionary<ToolStripLabel, Font> scalableTSLabels = new();
+
+    struct ScalableTSButton
+    {
+        internal Control control;
+        internal Size size;
+        internal Padding padding;
+
+        internal ScalableTSButton(Control _control, Size _size, Padding _padding)
+        {
+            control = _control;
+            size = _size;
+            padding = _padding;
+        }
+    }
+    readonly List<ScalableTSButton> scalableTSButtons = new();
 
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
@@ -151,7 +167,7 @@ partial class AppForm : Form
 
     void ResetUI()
     {
-        ShowEndGameButton(true);
+        ShowEndGameButton(false);
 
         foreach (var cw in cellWrap)
             if (cw is IComponent iComp)
@@ -184,7 +200,7 @@ partial class AppForm : Form
 
         // (re)create AIs, if needed
 
-        foreach(var aiAgent in AIs)
+        foreach (var aiAgent in AIs)
             EM.Unsubscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
         AIs.Clear();
 
@@ -388,11 +404,17 @@ partial class AppForm : Form
         clRatio = (double)clSize.Width / clSize.Height;
         ncSize = Size - clSize;
 
+        minWndHeight = (int)(minWndWidth / clRatio);
+
         Label[] labs = new[] { info, labelLeft, labelRight, labelVS };
-        foreach (var lab in labs) 
-            scaledLabels.Add(lab, lab.Font);
-        scaledTSLabels.Add(toolStripButtonLabel, toolStripButtonLabel.Font);
-        scaledControls.Add(toolStripButton, toolStripButton.Size);
+        foreach (var lab in labs)
+            scalableLabels.Add(lab, lab.Font);
+        scalableTSLabels.Add(toolStripButtonLabel, toolStripButtonLabel.Font);
+        scalableTSButtons.Add(new ScalableTSButton(
+            toolStripButton,
+            toolStripButton.Size,
+            toolStripButtonLabel.Margin
+        ));
         rcpClHeight = 1.0 / clHeight;
     }
 
@@ -424,18 +446,24 @@ partial class AppForm : Form
         if (m.Msg == WM_SIZING)
         {
             var rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT))!;
+
+            if (rc.Right - rc.Left < minWndWidth) rc.Right = rc.Left + minWndWidth;
+            if (rc.Bottom - rc.Top < minWndHeight) rc.Bottom = rc.Top + minWndHeight;
+
             int clWidth, clHeight, newWidth, newHeight;
             clHeight = default;
+            bool scale = false;
 
             switch ((WMSZ)m.WParam.ToInt32())
             {
                 case WMSZ.LEFT:
-                case WMSZ.RIGHT:
+                case WMSZ.RIGHT:                  
                     // width has changed, adjust height
                     clWidth = rc.Right - rc.Left - ncSize.Width;
                     clHeight = (int)(clWidth / clRatio);
                     newHeight = clHeight + ncSize.Height;
                     rc.Bottom = rc.Top + newHeight;
+                    scale = true;
                     break;
                 case WMSZ.TOP:
                 case WMSZ.BOTTOM:
@@ -447,18 +475,32 @@ partial class AppForm : Form
                     clHeight = rc.Bottom - rc.Top - ncSize.Height;
                     newWidth = (int)(clHeight * clRatio) + ncSize.Width;
                     rc.Right = rc.Left + newWidth;
+                    scale = true;
                     break;
             }
             Marshal.StructureToPtr(rc, m.LParam, true);
 
-            var fact = (float)(clHeight * rcpClHeight);
+            if (scale)
+            {
+                var fact = (float)(clHeight * rcpClHeight);
 
-            foreach (var (lab, font) in scaledLabels) 
-                lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
-             //foreach (var (lab, font) in scaledTSLabels)
-               //lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
-            //foreach (var (ctrl, size) in scaledControls)
-              // ctrl.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
+                foreach (var (lab, font) in scalableLabels)
+                    lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
+                foreach (var (lab, font) in scalableTSLabels)
+                    lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
+                foreach (var rec in scalableTSButtons)
+                {
+                    var size = rec.size;
+                    rec.control.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
+                    var pad = rec.padding;
+                    toolStripButtonLabel.Margin = new Padding(
+                        (int)(pad.Left * fact),
+                        (int)(pad.Top * fact),
+                        (int)(pad.Right * fact),
+                        (int)(pad.Bottom * fact)
+                    );
+                }
+            }
         }
 
         base.WndProc(ref m);

@@ -137,13 +137,13 @@ partial class AppForm
         // menuLoadOpen
         // 
         menuLoadOpen.Name = "menuLoadOpen";
-        menuLoadOpen.Size = new Size(165, 22);
+        menuLoadOpen.Size = new Size(180, 22);
         menuLoadOpen.Text = "Open layout...";
         // 
         // menuLoadCollection
         // 
         menuLoadCollection.Name = "menuLoadCollection";
-        menuLoadCollection.Size = new Size(165, 22);
+        menuLoadCollection.Size = new Size(180, 22);
         menuLoadCollection.Text = "Layout collection";
         // 
         // menuSave
@@ -156,7 +156,7 @@ partial class AppForm
         // menuSaveAs
         // 
         menuSaveAs.Name = "menuSaveAs";
-        menuSaveAs.Size = new Size(157, 22);
+        menuSaveAs.Size = new Size(180, 22);
         menuSaveAs.Text = "Save layout as...";
         // 
         // menuHelp
@@ -169,7 +169,7 @@ partial class AppForm
         // menuHelpAbout
         // 
         menuHelpAbout.Name = "menuHelpAbout";
-        menuHelpAbout.Size = new Size(107, 22);
+        menuHelpAbout.Size = new Size(180, 22);
         menuHelpAbout.Text = "About";
         // 
         // menuLabel
@@ -196,6 +196,7 @@ partial class AppForm
         // toolStripButton
         // 
         toolStripButton.Anchor = AnchorStyles.None;
+        toolStripButton.AutoSize = false;
         toolStripButton.Dock = DockStyle.None;
         toolStripButton.GripMargin = new Padding(0);
         toolStripButton.GripStyle = ToolStripGripStyle.Hidden;
@@ -203,16 +204,17 @@ partial class AppForm
         toolStripButton.Location = new Point(190, 500);
         toolStripButton.Name = "toolStripButton";
         toolStripButton.Padding = new Padding(0);
-        //toolStripButton.AutoSize = false;
-        //toolStripButton.Size = new Size(117, 39);
+        toolStripButton.CanOverflow = false;
+        toolStripButton.Size = new Size(100, 39);
         toolStripButton.TabIndex = 3;
         // 
         // toolStripButtonLabel
         // 
+        toolStripButtonLabel.TextAlign = ContentAlignment.MiddleLeft;
         toolStripButtonLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
-        toolStripButtonLabel.Margin = new Padding(0);
+        toolStripButtonLabel.Margin = new Padding(12,7,0,7);
         toolStripButtonLabel.Name = "toolStripButtonLabel";
-        //toolStripButtonLabel.Size = new Size(64, 19);
+        //toolStripButtonLabel.Size = new Size(64, 39);
         toolStripButtonLabel.Text = "New game";
         // 
         // AppForm
