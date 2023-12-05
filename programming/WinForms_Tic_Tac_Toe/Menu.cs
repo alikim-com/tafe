@@ -3,9 +3,12 @@ namespace WinFormsApp1;
 
 partial class AppForm
 {
+    static readonly string curDir = Directory.GetCurrentDirectory();
+    static readonly string profPath = Path.GetFullPath(Path.Combine(curDir, "../../../savegame/"));
+
     AboutForm? aboutForm;
 
-    readonly List<Profile> profiles = new();
+    readonly List<SaveGame> profiles = new();
 
     private void MenuHelpAbout_Click(object sender, EventArgs e)
     {
@@ -14,12 +17,18 @@ partial class AppForm
         if (aboutForm.ShowDialog(this) == DialogResult.OK) return;
     }
 
-    private void MenuSaveAs_Click(object sender, EventArgs e)
+    private void MenuSaveAs_Click(object? sender, EventArgs e)
     {
         string layoutName = menuLayout.Text.Trim();
-        //layoutName = string.IsNullOrEmpty(layoutName) ? "Default" : layoutName;
-        //var prof = new Profile();// layoutName, boxes);
-       // Utils.SaveProfile(profPath, layoutName, prof);
+        layoutName = string.IsNullOrEmpty(layoutName) ? "Default" : layoutName;
+        var prof = new SaveGame(
+            layoutName,
+            Game.board.ToArray(),
+            Game.TurnList,
+            Game.state,
+            TurnWheel.Head
+        );
+        Utils.SaveProfile(profPath, layoutName, prof);
        // AddProfile(prof);
     }
 
@@ -34,21 +43,21 @@ partial class AppForm
 
         // update boxes from profile
         menuLayout.Text = prof.Name;
-        foreach (var pbox in prof.Boxes)
-        {
+        //foreach (var pbox in prof.Boxes)
+       // {
            // var box = boxes.Find(b => b.name == pbox.Name);
             //if (box == null) continue;
 
             //box.pos = pbox.Pos;
             //box.size = pbox.Size;
-        }
+        //}
 
         // force repaint, no grid positioning
      //   PaintCheckAfter(1);
      //   UpdatePaintCheck(true, false);
     }
 
-    void AddProfile(Profile prof)
+    void AddProfile(SaveGame prof)
     {
         foreach (var obj in menuLoadCollection.DropDownItems)
         {
@@ -98,44 +107,38 @@ partial class AppForm
     }
 }
 
-class BoxInfo
+class SaveGame
 {
-    internal string Name { get; set; } = "";
-    internal Point Pos { get; set; } = new();
-    internal Size Size { get; set; } = new();
+    public string Name { get; set; } = "";
+    public Game.Roster[] Board { get; set; } = Array.Empty<Game.Roster>();
+    public Game.Roster[] TurnList { get; set; } = Array.Empty<Game.Roster>();
+    public Game.State State { get; set; }
+    public int TurnWheelHead { get; set; }
 
-    internal BoxInfo() { }
-
-    internal BoxInfo(string _name, Point _pos, Size _size)
-    {
+    internal SaveGame(
+        string _name,
+        Game.Roster[] _board, 
+        Game.Roster[] _turnList, 
+        Game.State _state,
+        int _turnWheelHead
+    ){
         Name = _name;
-        Pos = _pos;
-        Size = _size;
-    }
-}
 
-class Profile
-{
-    internal string Name { get; set; } = "";
-    internal List<BoxInfo> Boxes { get; set; } = new();
+        var len = _board.Length;
+        Board = new Game.Roster[len];
+        Array.Copy(_board, Board, len);
 
-    //Profile(string _name, List<ClassBox> _boxes)
-    //{
-    //    Name = _name;
-    //    foreach (var _box in _boxes)
-    //        Boxes.Add(new BoxInfo(_box.name, _box.pos, _box.size));
-    //}
+        len = _turnList.Length;
+        TurnList = new Game.Roster[len];
+        Array.Copy(_turnList, TurnList, len);
 
-    internal Profile()
-    {
-
+        State = _state;
+        TurnWheelHead = _turnWheelHead;
     }
 
-    public override string ToString()
+    internal SaveGame()
     {
-        string outp = $"name: {Name}\n";
-        foreach (var box in Boxes) outp += $"box: {box.Name}, pos: {box.Pos}, size: {box.Size}\n";
-        return outp;
+        
     }
 }
 

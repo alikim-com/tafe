@@ -12,6 +12,8 @@ internal class TurnWheel
     static int head;
     static bool isBusy;
 
+    static internal int Head { get => head; }
+
     static internal Game.Roster CurPlayer => Game.TurnList[head];
 
     static bool CheckPlayerType(Game.Roster player, string type) => player.ToString().StartsWith(type);

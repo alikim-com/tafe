@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -108,11 +106,6 @@ partial class AppForm : Form
 
         // MULTI-USE: resets everything and start the game
         StartGame();
-
-        menuHelpAbout.Click += (object? sender, EventArgs e) =>
-        {
-            Debug.WriteLine("click");
-        };
     }
 
     void InitializeMenu()

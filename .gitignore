@@ -1,5 +1,6 @@
 **/.vs/
 **/obj/
+**/assets_design/
 programming/**/bin/*/*/*
 !programming/**/*.dll
 !programming/**/*.exe

@@ -157,7 +157,8 @@ partial class AppForm
         // 
         menuSaveAs.Name = "menuSaveAs";
         menuSaveAs.Size = new Size(180, 22);
-        menuSaveAs.Text = "Save layout as...";
+        menuSaveAs.Text = "Save game as...";
+        menuSaveAs.Click += MenuSaveAs_Click;
         // 
         // menuHelp
         // 
@@ -171,13 +172,14 @@ partial class AppForm
         menuHelpAbout.Name = "menuHelpAbout";
         menuHelpAbout.Size = new Size(180, 22);
         menuHelpAbout.Text = "About";
+        menuHelpAbout.Click += MenuHelpAbout_Click;
         // 
         // menuLabel
         // 
         menuLabel.Margin = new Padding(50, 1, 5, 2);
         menuLabel.Name = "menuLabel";
         menuLabel.Size = new Size(46, 20);
-        menuLabel.Text = "Layout:";
+        menuLabel.Text = "Game name:";
         // 
         // menuDummy
         // 
