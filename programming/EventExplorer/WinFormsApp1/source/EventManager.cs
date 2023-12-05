@@ -41,6 +41,10 @@ internal class EM
     /// </summary>
     static event EventHandler<Game.Roster> EvtGameOver = delegate { };
     /// <summary>
+    /// Raised by Game when the current game is a tie
+    /// </summary>
+    static event EventHandler EvtGameTie = delegate { };
+    /// <summary>
     /// Updates labels in LabelManager
     /// </summary>
     static event EventHandler<Enum[]> EvtUpdateLabels = delegate { };
@@ -57,6 +61,7 @@ internal class EM
         PlayerMoved,
         AIMoved,
         GameOver,
+        GameTie,
         UpdateLabels
     }
     /// <summary>
@@ -70,6 +75,7 @@ internal class EM
         { Evt.PlayerMoved, EvtPlayerMoved },
         { Evt.AIMoved, EvtAIMoved },
         { Evt.GameOver, EvtGameOver },
+        { Evt.GameTie, EvtGameTie },
         { Evt.UpdateLabels, EvtUpdateLabels },
     };
 

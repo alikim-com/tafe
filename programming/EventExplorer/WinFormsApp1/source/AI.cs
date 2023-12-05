@@ -12,18 +12,20 @@ class AI
 
     readonly Logic logic;
     readonly Game.Roster selfId;
+    internal EventHandler<Game.Roster> MoveHandler;
 
     internal AI(Logic _logic, Game.Roster _selfId)
     {
         logic = _logic;
         selfId = _selfId;
+        MoveHandler = AIMakeMoveHandler();
     }
 
     /// <summary>
     /// Choose a board cell
     /// </summary>
     /// <param name="count">The number of remaining UI elements to click</param>
-    internal EventHandler<Game.Roster> AIMakeMoveHandler()
+    EventHandler<Game.Roster> AIMakeMoveHandler()
     {
         return logic switch
         {
@@ -34,11 +36,11 @@ class AI
 
                 Thread thread = new(() =>
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(400);
 
                     var tile = LogicRNG();
 
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1200);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });
@@ -53,11 +55,11 @@ class AI
 
                 Thread thread = new(() =>
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(400);
 
                     var tile = LogicEasy();
 
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1200);
 
                     EM.InvokeFromMainThread(() => EM.Raise(EM.Evt.AIMoved, new { }, new Point(tile.row, tile.col)));
                 });

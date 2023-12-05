@@ -144,6 +144,16 @@ class Game
         for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
     }
 
+    internal enum State
+    {
+        None,
+        Started,
+        Won,
+        Tie
+    }
+
+    static internal State state = State.None;
+
     /// <summary>
     /// Called by TurnWheel.PlayerMovedHandler.<br/>
     /// Assert the game state, execute game over or<br/>
@@ -165,16 +175,22 @@ class Game
 
         if(gameOver)
         {
+            state = State.Won;
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
             return;
         }
 
         var maxCanTake = linesInfo.MaxBy(rec => rec.canTake.Count)?.canTake.Count;
 
-        if(maxCanTake > 0) 
+        if (maxCanTake > 0)
+        {
+            state = State.Started;
             TurnWheel.Advance();
 
-        else
+        } else
+        {
+            state = State.Tie;
             EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());
+        }
     }
 }

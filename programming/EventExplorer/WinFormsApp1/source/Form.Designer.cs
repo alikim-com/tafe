@@ -45,8 +45,11 @@ partial class AppForm
         menuLabel = new ToolStripLabel();
         menuDummy = new ToolStripTextBox();
         menuLayout = new ToolStripTextBox();
+        toolStripButton = new ToolStrip();
+        toolStripButtonLabel = new ToolStripLabel();
         tLayout.SuspendLayout();
         menuStrip1.SuspendLayout();
+        toolStripButton.SuspendLayout();
         SuspendLayout();
         // 
         // tLayout
@@ -75,21 +78,17 @@ partial class AppForm
         // 
         tLayout.SetColumnSpan(info, 3);
         info.Dock = DockStyle.Fill;
-        info.Font = new Font("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
-        info.ForeColor = Color.FromArgb(0, 255, 255, 255);
         info.Location = new Point(0, 477);
         info.Margin = new Padding(0);
         info.Name = "info";
         info.Size = new Size(500, 43);
         info.TabIndex = 3;
-        info.TextAlign = ContentAlignment.TopCenter;
+        info.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // labelVS
         // 
         labelVS.AutoSize = true;
         labelVS.Dock = DockStyle.Fill;
-        labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
-        labelVS.ForeColor = Color.FromArgb(200, 200, 200);
         labelVS.Location = new Point(166, 520);
         labelVS.Margin = new Padding(0);
         labelVS.Name = "labelVS";
@@ -101,7 +100,6 @@ partial class AppForm
         // labelLeft
         // 
         labelLeft.AutoSize = true;
-        labelLeft.BackColor = Color.Thistle;
         labelLeft.Location = new Point(0, 520);
         labelLeft.Margin = new Padding(0);
         labelLeft.Name = "labelLeft";
@@ -113,7 +111,6 @@ partial class AppForm
         // 
         labelRight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         labelRight.AutoSize = true;
-        labelRight.BackColor = Color.Thistle;
         labelRight.Location = new Point(440, 708);
         labelRight.Margin = new Padding(0);
         labelRight.Name = "labelRight";
@@ -140,13 +137,13 @@ partial class AppForm
         // menuLoadOpen
         // 
         menuLoadOpen.Name = "menuLoadOpen";
-        menuLoadOpen.Size = new Size(165, 22);
+        menuLoadOpen.Size = new Size(180, 22);
         menuLoadOpen.Text = "Open layout...";
         // 
         // menuLoadCollection
         // 
         menuLoadCollection.Name = "menuLoadCollection";
-        menuLoadCollection.Size = new Size(165, 22);
+        menuLoadCollection.Size = new Size(180, 22);
         menuLoadCollection.Text = "Layout collection";
         // 
         // menuSave
@@ -159,7 +156,7 @@ partial class AppForm
         // menuSaveAs
         // 
         menuSaveAs.Name = "menuSaveAs";
-        menuSaveAs.Size = new Size(157, 22);
+        menuSaveAs.Size = new Size(180, 22);
         menuSaveAs.Text = "Save layout as...";
         // 
         // menuHelp
@@ -172,7 +169,7 @@ partial class AppForm
         // menuHelpAbout
         // 
         menuHelpAbout.Name = "menuHelpAbout";
-        menuHelpAbout.Size = new Size(107, 22);
+        menuHelpAbout.Size = new Size(180, 22);
         menuHelpAbout.Text = "About";
         // 
         // menuLabel
@@ -196,6 +193,30 @@ partial class AppForm
         menuLayout.Size = new Size(100, 23);
         menuLayout.Text = "Default";
         // 
+        // toolStripButton
+        // 
+        toolStripButton.Anchor = AnchorStyles.None;
+        toolStripButton.AutoSize = false;
+        toolStripButton.Dock = DockStyle.None;
+        toolStripButton.GripMargin = new Padding(0);
+        toolStripButton.GripStyle = ToolStripGripStyle.Hidden;
+        toolStripButton.Items.AddRange(new ToolStripItem[] { toolStripButtonLabel });
+        toolStripButton.Location = new Point(190, 500);
+        toolStripButton.Name = "toolStripButton";
+        toolStripButton.Padding = new Padding(0);
+        toolStripButton.CanOverflow = false;
+        toolStripButton.Size = new Size(100, 39);
+        toolStripButton.TabIndex = 3;
+        // 
+        // toolStripButtonLabel
+        // 
+        toolStripButtonLabel.TextAlign = ContentAlignment.MiddleLeft;
+        toolStripButtonLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        toolStripButtonLabel.Margin = new Padding(12,7,0,7);
+        toolStripButtonLabel.Name = "toolStripButtonLabel";
+        //toolStripButtonLabel.Size = new Size(64, 39);
+        toolStripButtonLabel.Text = "New game";
+        // 
         // AppForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -203,6 +224,7 @@ partial class AppForm
         BackColor = Color.FromArgb(64, 0, 64);
         BackgroundImageLayout = ImageLayout.Stretch;
         ClientSize = new Size(500, 750);
+        Controls.Add(toolStripButton);
         Controls.Add(labelLeft);
         Controls.Add(labelRight);
         Controls.Add(tLayout);
@@ -218,8 +240,20 @@ partial class AppForm
         tLayout.PerformLayout();
         menuStrip1.ResumeLayout(false);
         menuStrip1.PerformLayout();
+        toolStripButton.ResumeLayout(false);
+        toolStripButton.PerformLayout();
         ResumeLayout(false);
         PerformLayout();
+    }
+
+    private void ToolStripButton_MouseLeave(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void ToolStripButton_MouseEnter(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
     }
 
     #endregion
@@ -241,4 +275,6 @@ partial class AppForm
     private Label labelLeft;
     private Label labelRight;
     private Label labelVS;
+    private ToolStrip toolStripButton;
+    private ToolStripLabel toolStripButtonLabel;
 }

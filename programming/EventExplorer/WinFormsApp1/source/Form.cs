@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -5,36 +6,123 @@ namespace WinFormsApp1;
 
 partial class AppForm : Form
 {
-    double cRatio; // main window
+    double rcpClHeight; // for scaling fonts
+    double clRatio; // main window
     Size ncSize; // non-client area
+    readonly int minWndWidth = 200;
+    int minWndHeight = 0;
+    Dictionary<Label, Font> scalableLabels = new();
+    Dictionary<ToolStripLabel, Font> scalableTSLabels = new();
 
-    readonly int lChoiceWidth;
-    readonly float lChoiceFontSize;
+    struct ScalableTSButton
+    {
+        internal Control control;
+        internal Size size;
+        internal Padding padding;
 
-    // board cell bg manager
+        internal ScalableTSButton(Control _control, Size _size, Padding _padding)
+        {
+            control = _control;
+            size = _size;
+            padding = _padding;
+        }
+    }
+    readonly List<ScalableTSButton> scalableTSButtons = new();
+
     readonly CellWrapper[,] cellWrap = new CellWrapper[3, 3];
 
     readonly LabelManager labMgr;
 
     static readonly Dictionary<KeyValuePair<Game.Roster, Game.Roster>, Image> mainBg = new();
 
-    static internal void ApplyDoubleBuffer(Control control)
+    static internal void ApplyDoubleBuffer(object control)
     {
-        control.GetType().InvokeMember(
-            "DoubleBuffered",
-            BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-            null, control, new object[] { true }
-        );
+        var propName = "DoubleBuffered";
+        var bindFlags = BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic;
+        var type = control.GetType();
+        var prop = type.GetProperty(propName, bindFlags);
+        prop?.SetValue(control, true);
     }
 
     UIColors.ColorTheme theme;
+
+    SetupForm? setupForm;
+
+    IEnumerable<ChoiceItem> chosen = Enumerable.Empty<ChoiceItem>();
+
+    ChoiceItem[] chosenArr = Array.Empty<ChoiceItem>();
+
+    bool firstChosenIsLeft = false;
+
+    readonly List<AI> AIs = new();
+
+    void SetupFormPopup()
+    {
+        setupForm ??= new SetupForm();
+
+        if (setupForm.ShowDialog(this) == DialogResult.OK) return;
+    }
+
+    readonly ButtonToolStripRenderer buttonRenderer;
+
+    internal AppForm()
+    {
+        EM.uiThread = this;
+
+        theme = UIColors.Steel;
+        ForeColor = theme.Text;
+
+        // init label manager
+        labMgr = new();
+
+        // to extend the behaviour of sub components
+        ControlAdded += FormAspect_ControlAdded;
+
+        // prevent main window flickering
+        DoubleBuffered = true;
+
+        InitializeComponent();
+
+        InitializeMenu();
+
+        // prevent background flickering
+        var doubleBuffed = new object[] { tLayout, labelLeft, labelRight, labelVS, toolStripButton, toolStripButtonLabel };
+        foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
+
+        // BLOCKS: player setup pop-up 
+        SetupFormPopup();
+
+        // restart game button
+        buttonRenderer = UIRenderer.ButtonTSRenderer(toolStripButton, ButtonColors.Sunrise);
+        SetupRestart();
+
+        // adjust labels & setup percentage positioning
+        SetupLabels();
+
+        // LabelManager properties -> Labels
+        SetupBinds();
+
+        // Event subscriptions & callbacks
+        SetupSubsAndCb();
+
+        // MULTI-USE: resets everything and start the game
+        StartGame();
+
+        menuHelpAbout.Click += (object? sender, EventArgs e) =>
+        {
+            var fact = 0.5;
+            var size = toolStripButton.Size;
+            toolStripButton.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
+        };
+    }
 
     void InitializeMenu()
     {
         // menu appearance
         menuStrip1.BackColor = theme.Prime;
         menuStrip1.ForeColor = theme.Text;
-        menuStrip1.Renderer = UIRenderer.TSRenderer(theme, "ColorTableMain");
+        menuStrip1.Renderer = UIRenderer.MenuTSRenderer(theme, "MenuColorTable");
+        menuStrip1.Font = UIFonts.menu;
 
         ToolStripMenuItem[] expandableItems = new[] { menuLoad, menuLoadCollection, menuSave, menuHelp };
 
@@ -55,68 +143,32 @@ partial class AppForm : Form
         menuDummy.BorderStyle = BorderStyle.None;
     }
 
-    SetupForm? setupForm;
-
-    IEnumerable<ChoiceItem> chosen = Enumerable.Empty<ChoiceItem>();
-
-    ChoiceItem[] chosenArr = Array.Empty<ChoiceItem>();
-
-    bool firstChosenIsLeft = false;
-
-    void SetupFormPopup()
+    void SetupRestart()
     {
-        setupForm ??= new SetupForm();
+        toolStripButton.Renderer = buttonRenderer;
+        toolStripButton.BackColor = toolStripButtonLabel.BackColor = UIColors.Transparent;
+        buttonRenderer.SetOverState(toolStripButton, false);
 
-        if (setupForm.ShowDialog(this) == DialogResult.OK) return;
+        // center over VS
+        toolStripButton.Location = new Point(
+            labelVS.Location.X + (labelVS.Width - toolStripButton.Width) / 2,
+            labelVS.Location.Y + menuStrip1.Height + (labelVS.Height - toolStripButton.Height) / 2
+            );
+
+        toolStripButton.MouseEnter += (object? s, EventArgs e) => buttonRenderer.SetOverState(toolStripButton, true);
+        toolStripButton.MouseLeave += (object? s, EventArgs e) => buttonRenderer.SetOverState(toolStripButton, false);
     }
 
-    internal AppForm()
+    void ShowEndGameButton(bool state)
     {
-        theme = UIColors.Steel;
-
-        EM.uiThread = this;
-
-        // init label manager
-        labMgr = new();
-
-        // to extend the behaviour of sub components
-        ControlAdded += FormAspect_ControlAdded;
-
-        // prevent main window flickering
-        DoubleBuffered = true;
-
-        InitializeComponent();
-
-        InitializeMenu();
-
-        // for scaling font
-        //lChoiceWidth = choice.Width;
-        //lChoiceFontSize = choice.Font.Size;
-
-        // prevent backgound flickering components
-        var doubleBuffed = new Control[] { tLayout, labelLeft, labelRight, labelVS };
-        foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
-
-        // BLOCKS: player setup pop-up 
-        SetupFormPopup();
-
-        // adjust labels & setup percentage positioning
-        SetupLabels();
-
-        // LabelManager properties -> Labels
-        SetupBinds();
-
-        // Event subscriptions & callbacks
-        SetupSubsAndCb();
-
-        // MULTI-USE: reset everything and start the game
-        StartGame();
-
-        //menuHelpAbout.Click += (object? sender, EventArgs e) => { BackgroundImage = Resource.GameBackImg; };
+        toolStripButton.Enabled = state;
+        toolStripButton.Visible = state;
     }
 
     void ResetUI()
     {
+        ShowEndGameButton(false);
+
         foreach (var cw in cellWrap)
             if (cw is IComponent iComp)
             {
@@ -124,7 +176,6 @@ partial class AppForm : Form
                 iComp.Disable();
             }
     }
-
     void EnableUI()
     {
         foreach (var cw in cellWrap)
@@ -147,27 +198,40 @@ partial class AppForm : Form
         // ready new game
         Reset();
 
-        // create AIs, if needed
-        foreach(var chItm in chosenArr)
-            if(chItm.originType == "AI")
+        // (re)create AIs, if needed
+
+        foreach (var aiAgent in AIs)
+            EM.Unsubscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
+        AIs.Clear();
+
+        foreach (var chItm in chosenArr)
+            if (chItm.originType == "AI")
             {
                 var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
                 var aiAgent = new AI(logic, chItm.rosterId);
+                AIs.Add(aiAgent);
 
-                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.AIMakeMoveHandler());
+                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
             }
 
         // start game
         TurnWheel.GameCountdown();
     }
 
+    EventHandler<Game.Roster> GameOverHandler() => (object? _, Game.Roster __) => ShowEndGameButton(true);
+    EventHandler GameTieHandler() => (object? _, EventArgs e) => ShowEndGameButton(true);
+
     void SetupSubsAndCb()
     {
+        EM.Subscribe(EM.Evt.GameOver, GameOverHandler());
+        EM.Subscribe(EM.Evt.GameTie, GameTieHandler());
+
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
         EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
         EM.Subscribe(EM.Evt.GameOver, VBridge.GameOverHandler);
+        EM.Subscribe(EM.Evt.GameTie, VBridge.GameTieHandler);
 
         foreach (var cw in cellWrap)
         {
@@ -178,13 +242,22 @@ partial class AppForm : Form
         EM.Subscribe(EM.Evt.PlayerMoved, TurnWheel.PlayerMovedHandler);
 
         TurnWheel.SetCallbacks(EnableUI, DisableUI);
+
+        toolStripButton.Click += (object? _, EventArgs __) =>
+        {
+            SetupFormPopup();
+            StartGame();
+        };
     }
 
     void SetupBinds()
     {
+        info.DataBindings.Add(new Binding("BackColor", labMgr, "InfoBackBind"));
         info.DataBindings.Add(new Binding("Text", labMgr, "InfoPanelBind"));
-        labelLeft.DataBindings.Add(new Binding("Text", labMgr, "LabelLeftBind"));
-        labelRight.DataBindings.Add(new Binding("Text", labMgr, "LabelRightBind"));
+        labelLeft.DataBindings.Add(new Binding("Text", labMgr, "LabelPlayer1Bind"));
+        labelLeft.DataBindings.Add(new Binding("ForeColor", labMgr, "Player1ForeBind"));
+        labelRight.DataBindings.Add(new Binding("Text", labMgr, "LabelPlayer2Bind"));
+        labelRight.DataBindings.Add(new Binding("ForeColor", labMgr, "Player2ForeBind"));
     }
 
     void Reset()
@@ -268,13 +341,10 @@ partial class AppForm : Form
 
     void SetupLabels()
     {
-        Color foreLeft = ColorExtensions.BlendOver(SetupForm.tintLeft, theme.Text);
-        Color foreRight = ColorExtensions.BlendOver(SetupForm.tintRight, theme.Text);
-
-        labelLeft.ForeColor = foreLeft;
-        labelRight.ForeColor = foreRight;
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
+        labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
+        toolStripButton.Font = new("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
 
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
 
@@ -285,6 +355,10 @@ partial class AppForm : Form
 
         RatioPosition.Add(labelLeft, this, RatioPosControl.Anchor.Left, RatioPosControl.Anchor.Top);
         RatioPosition.Add(labelRight, this, RatioPosControl.Anchor.Right, RatioPosControl.Anchor.Bottom);
+        RatioPosition.Add(toolStripButton, this, RatioPosControl.Anchor.Middle, RatioPosControl.Anchor.Middle);
+
+        info.Font = UIFonts.info;
+        info.ForeColor = theme.Text;
     }
 
     void FormAspect_ClientSizeChanged(object? sender, EventArgs e)
@@ -292,6 +366,7 @@ partial class AppForm : Form
         // adjust components
         RatioPosition.Update(labelLeft);
         RatioPosition.Update(labelRight);
+        RatioPosition.Update(toolStripButton);
     }
 
     void FormAspect_ControlAdded(object? sender, ControlEventArgs e)
@@ -324,8 +399,23 @@ partial class AppForm : Form
 
     void FormAspect_Load(object sender, EventArgs e)
     {
-        ncSize = Size - ClientSize;
-        cRatio = (double)ClientSize.Width / ClientSize.Height;
+        var clHeight = ClientSize.Height - menuStrip1.Height;
+        var clSize = new Size(ClientSize.Width, clHeight);
+        clRatio = (double)clSize.Width / clSize.Height;
+        ncSize = Size - clSize;
+
+        minWndHeight = (int)(minWndWidth / clRatio);
+
+        Label[] labs = new[] { info, labelLeft, labelRight, labelVS };
+        foreach (var lab in labs)
+            scalableLabels.Add(lab, lab.Font);
+        scalableTSLabels.Add(toolStripButtonLabel, toolStripButtonLabel.Font);
+        scalableTSButtons.Add(new ScalableTSButton(
+            toolStripButton,
+            toolStripButton.Size,
+            toolStripButtonLabel.Margin
+        ));
+        rcpClHeight = 1.0 / clHeight;
     }
 
     // ---------------   constant client aspect ratio   ---------------
@@ -356,16 +446,24 @@ partial class AppForm : Form
         if (m.Msg == WM_SIZING)
         {
             var rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT))!;
-            int newWidth, newHeight;
+
+            if (rc.Right - rc.Left < minWndWidth) rc.Right = rc.Left + minWndWidth;
+            if (rc.Bottom - rc.Top < minWndHeight) rc.Bottom = rc.Top + minWndHeight;
+
+            int clWidth, clHeight, newWidth, newHeight;
+            clHeight = default;
+            bool scale = false;
 
             switch ((WMSZ)m.WParam.ToInt32())
             {
                 case WMSZ.LEFT:
-                case WMSZ.RIGHT:
+                case WMSZ.RIGHT:                  
                     // width has changed, adjust height
-                    newWidth = rc.Right - rc.Left - ncSize.Width;
-                    newHeight = (int)(newWidth / cRatio) + ncSize.Height;
+                    clWidth = rc.Right - rc.Left - ncSize.Width;
+                    clHeight = (int)(clWidth / clRatio);
+                    newHeight = clHeight + ncSize.Height;
                     rc.Bottom = rc.Top + newHeight;
+                    scale = true;
                     break;
                 case WMSZ.TOP:
                 case WMSZ.BOTTOM:
@@ -374,17 +472,35 @@ partial class AppForm : Form
                 case WMSZ.BOTTOMLEFT:
                 case WMSZ.BOTTOMRIGHT:
                     // height has changed, adjust width
-                    newHeight = rc.Bottom - rc.Top - ncSize.Height;
-                    newWidth = (int)(newHeight * cRatio) + ncSize.Width;
+                    clHeight = rc.Bottom - rc.Top - ncSize.Height;
+                    newWidth = (int)(clHeight * clRatio) + ncSize.Width;
                     rc.Right = rc.Left + newWidth;
+                    scale = true;
                     break;
             }
             Marshal.StructureToPtr(rc, m.LParam, true);
 
-            //float newFontSize = lChoiceFontSize * choice.Width / lChoiceWidth;
-            //choice.Font = new Font(choice.Font.FontFamily, newFontSize);
-            //info.Font = new Font(info.Font.FontFamily, newFontSize);
+            if (scale)
+            {
+                var fact = (float)(clHeight * rcpClHeight);
 
+                foreach (var (lab, font) in scalableLabels)
+                    lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
+                foreach (var (lab, font) in scalableTSLabels)
+                    lab.Font = new Font(font.FontFamily, font.Size * fact, font.Style);
+                foreach (var rec in scalableTSButtons)
+                {
+                    var size = rec.size;
+                    rec.control.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
+                    var pad = rec.padding;
+                    toolStripButtonLabel.Margin = new Padding(
+                        (int)(pad.Left * fact),
+                        (int)(pad.Top * fact),
+                        (int)(pad.Right * fact),
+                        (int)(pad.Bottom * fact)
+                    );
+                }
+            }
         }
 
         base.WndProc(ref m);

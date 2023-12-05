@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel;
+using static WinFormsApp1.LabelManager;
 
 namespace WinFormsApp1;
 
@@ -41,8 +42,19 @@ class LabelManager : INotifyPropertyChanged
         Defend,
         Random,
     }
-
-    // <----------------how to add extra messages from Ai
+    /// <summary>
+    /// Manages info bg color
+    /// </summary>
+    internal enum Bg
+    {
+        None,
+        Player1InfoBack,
+        Player2InfoBack,
+        Player1Fore,
+        Player2Fore,
+        Player1ForeDim,
+        Player2ForeDim,
+    }
 
     static readonly Dictionary<Enum, string> stateToString = new()
     {
@@ -59,6 +71,11 @@ class LabelManager : INotifyPropertyChanged
         { Countdown.One, "Game starts in 1..." },
     };
 
+    static readonly Dictionary<Enum, Color> stateToColor = new()
+    {
+        // enum Bg, filled by VBridge.Reset()
+    };
+
     /// <summary>
     /// Subscribed to EM.EvtUpdateLabels event
     /// </summary>
@@ -72,14 +89,24 @@ class LabelManager : INotifyPropertyChanged
     /// Called from VBridge.Reset
     /// defines Info labels when the game starts
     /// </summary>
-    static internal void Reset(Dictionary<Info, string> playerInfo)
+    static internal void Reset(Dictionary<Enum, object> enumInfo)
     {
-        foreach (var (enm, msg) in playerInfo)
+        foreach (var (enm, obj) in enumInfo)
         {
-            if (!stateToString.ContainsKey(enm))
-                stateToString.Add(enm, msg);
-            else
-                stateToString[enm] = msg;
+            if (obj is string msg)
+            {
+                if (!stateToString.ContainsKey(enm))
+                    stateToString.Add(enm, msg);
+                else
+                    stateToString[enm] = msg;
+            }
+            else if(obj is Color backInfoColor)
+            {
+                if (!stateToColor.ContainsKey(enm))
+                    stateToColor.Add(enm, backInfoColor);
+                else
+                    stateToColor[enm] = backInfoColor;
+            }
         }
     }
 
@@ -93,17 +120,33 @@ class LabelManager : INotifyPropertyChanged
                 RaiseEvtPropertyChanged(nameof(InfoPanelBind));
                 break;
             case Info.Player1:
-                _this.LabelLeftBind = stateToString[state];
-                RaiseEvtPropertyChanged(nameof(LabelLeftBind));
+                _this.LabelPlayer1Bind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelPlayer1Bind));
                 break;
             case Info.Player2:
-                _this.LabelRightBind = stateToString[state];
-                RaiseEvtPropertyChanged(nameof(LabelRightBind));
+                _this.LabelPlayer2Bind = stateToString[state];
+                RaiseEvtPropertyChanged(nameof(LabelPlayer2Bind));
                 break;
             case Info:
             case Countdown:
                 _this.InfoPanelBind = stateToString[state];
                 RaiseEvtPropertyChanged(nameof(InfoPanelBind));
+                break;
+            case Bg:
+                if (state.ToString().Contains("Player1Fore"))
+                {
+                    _this.Player1ForeBind = stateToColor[state];
+                    RaiseEvtPropertyChanged(nameof(Player1ForeBind));
+
+                } else if (state.ToString().Contains("Player2Fore"))
+                {
+                    _this.Player2ForeBind = stateToColor[state];
+                    RaiseEvtPropertyChanged(nameof(Player2ForeBind));
+                } else
+                {
+                    _this.InfoBackBind = stateToColor[state];
+                    RaiseEvtPropertyChanged(nameof(InfoBackBind));
+                }
                 break;
             default:
                 throw new NotImplementedException($"LabelManager.SetLabels : state '{state}'");
@@ -128,9 +171,12 @@ class LabelManager : INotifyPropertyChanged
     /// <summary>
     /// Data bindings
     /// </summary>
-    public string LabelLeftBind { get; set; } = "";
-    public string LabelRightBind { get; set; } = "";
+    public string LabelPlayer1Bind { get; set; } = "";
+    public string LabelPlayer2Bind { get; set; } = "";
     public string InfoPanelBind { get; set; } = "";
+    public Color InfoBackBind { get; set; } = UIColors.Transparent;
+    public Color Player1ForeBind { get; set; } = UIColors.Transparent;
+    public Color Player2ForeBind { get; set; } = UIColors.Transparent;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

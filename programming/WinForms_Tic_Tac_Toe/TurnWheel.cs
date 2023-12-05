@@ -10,7 +10,7 @@ namespace WinFormsApp1;
 internal class TurnWheel
 {
     static int head;
-    static bool busy;
+    static bool isBusy;
 
     static internal Game.Roster CurPlayer => Game.TurnList[head];
 
@@ -30,17 +30,18 @@ internal class TurnWheel
     static internal void Reset()
     {
         head = -1;
-        busy = false;
+        isBusy = false;
     }
 
     /// <summary>
     /// For Human players Comes from CellWrapper -> OnClick;<br/>
-    /// For AI players from CellWrapper -> AIMovedHandler -> OnClick
+    /// For AI players from CellWrapper -> AIMovedHandler -> OnClick<br/>
+    /// Lock and Monitor prevent click spamming (from the same thread)
     /// </summary>
     static internal readonly EventHandler<Point> PlayerMovedHandler = (object? sender, Point e) =>
     {
-        if (busy) return;
-        busy = true;
+        if (isBusy) return;
+        isBusy = true;
 
         if (sender is not IComponent iComp)
             throw new Exception($"TurnWheel.PlayerMovedHandler : '{sender}' is not IComponent");
@@ -54,7 +55,7 @@ internal class TurnWheel
 
     static internal void Advance()
     {
-        busy = false;
+        isBusy = false;
 
         GoNextPlayer();
 
@@ -74,8 +75,8 @@ internal class TurnWheel
 
             EM.Raise(EM.Evt.AIMakeMove, new { }, CurPlayer);
 
-        } else if(CurPlayerIsHuman)
-        { 
+        } else if (CurPlayerIsHuman)
+        {
             EnableUICb();
         }
 
@@ -99,7 +100,7 @@ internal class TurnWheel
         }
 
         // UI safety
-        EM.InvokeFromMainThread(Advance);
+        EM.InvokeFromMainThread(() => Advance());
     }
 
 }

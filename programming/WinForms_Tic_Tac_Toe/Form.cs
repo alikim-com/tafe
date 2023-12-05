@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -110,9 +111,7 @@ partial class AppForm : Form
 
         menuHelpAbout.Click += (object? sender, EventArgs e) =>
         {
-            var fact = 0.5;
-            var size = toolStripButton.Size;
-            toolStripButton.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
+            Debug.WriteLine("click");
         };
     }
 

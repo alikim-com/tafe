@@ -691,6 +691,7 @@ public class ClassBox
 
     void FirstDraw(Graphics g)
     {
+        var itemGap = new Size(20, 12);
         Size maxSize = size;
 
         void UpdateSize(Size sz, Point pos)
@@ -703,10 +704,10 @@ public class ClassBox
 
         // events
         Size sz = new(0, 0);
-        Point curPos = pos.Add(20, 30);
+        Point curPos = pos.Add(20, 20);
         foreach (var evt in events)
         {
-            curPos.Y += sz.Height + 5;
+            curPos.Y += itemGap.Height;
             evt.offName = curPos.Sub(pos);
 
             sz = UML_Events.MeasureText(fntEvt, evt.name);
@@ -717,11 +718,12 @@ public class ClassBox
 
             sz = UML_Events.MeasureText(fntEType, evt.subName);
             UpdateSize(sz, evt.offSubname);
+            curPos.Y += sz.Height;
         }
 
         // subscriptions
         sz = new(0, 0);
-        if (events.Count > 0) curPos.Y += 15;
+        curPos.Y += itemGap.Height * (events.Count > 0 ? 2 : 0);
 
         foreach (var sub in subs)
         {
@@ -733,26 +735,27 @@ public class ClassBox
                 if (evt == null) continue;
 
                 sub.Key.color = evt.color;
-                curPos.Y += sz.Height;
+                curPos.Y += itemGap.Height;
                 sub.Key.offName = curPos.Sub(pos);
 
                 sz = UML_Events.MeasureText(fntEvt, $"SUB {sub.Key.name}.{sub.Key.subName}");
                 UpdateSize(sz, sub.Key.offName);
 
                 curPos.X += 5;
-                curPos.Y += sz.Height;
-
+               
                 foreach (var s in sub.Value)
                 {
+                    curPos.Y += sz.Height;
+
                     s.color = evt.color;
                     s.offName = curPos.Sub(pos);
 
                     sz = UML_Events.MeasureText(fntEType, $"{s.name}.{s.subName}");
                     UpdateSize(sz, s.offName);
-
-                    curPos.Y += sz.Height;
                 }
                 curPos.X -= 5;
+                curPos.Y += sz.Height;
+
 
                 break;
             }
@@ -764,7 +767,7 @@ public class ClassBox
 
         // triggers
         sz = new(0, 0);
-        if (subs.Count > 0) curPos.Y += 15;
+        curPos.Y += itemGap.Height * (subs.Count > 0 ? 2 : 0);
 
         foreach (var trig in triggers)
         {
@@ -779,7 +782,7 @@ public class ClassBox
                 if (evt == null) continue;
 
                 ce.color = evt.color;
-                curPos.Y += sz.Height;
+                curPos.Y += itemGap.Height;
                 ce.offName = curPos.Sub(pos);
 
                 sz = UML_Events.MeasureText(fntEvt, $"TRG {ce.name}.{ce.subName}");
@@ -811,12 +814,12 @@ public class ClassBox
         {
             if (maxSize.Width > size.Width)
             {
-                size.Width = maxSize.Width + 10;
+                size.Width = maxSize.Width + itemGap.Width;
                 updatePaintCheck = true;
             }
             if (maxSize.Height > size.Height)
             {
-                size.Height = maxSize.Height + 10;
+                size.Height = maxSize.Height + itemGap.Height;
                 updatePaintCheck = true;
             }
         }
