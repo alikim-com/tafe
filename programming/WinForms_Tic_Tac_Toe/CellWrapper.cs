@@ -8,6 +8,7 @@ internal class CellWrapper : IComponent
 {
     readonly Panel box;
     readonly Point rc;
+    internal Point RC { get => rc; }
     readonly Dictionary<BgMode, Image> backgr = new();
     readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 

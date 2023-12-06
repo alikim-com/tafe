@@ -28,7 +28,7 @@ partial class AppForm
             chosenArr
         );
         Utils.SaveProfile(profPath, layoutName, prof);
-        AddProfileToMenu(prof);
+        AddProfileToMenu(prof.Name);
     }
 
     void MenuLoadCollection_Click(string pname)
@@ -40,17 +40,15 @@ partial class AppForm
             return;
         }
 
-        if(LoadGame(prof))
-            menuLayout.Text = pname;
-        else
-            Utils.Msg($"Menu.LoadProfile : profile '{pname}' appears to be empty");
+        LoadGame(prof);
 
+        menuLayout.Text = pname;
     }
 
-    void AddProfileToMenu(SaveGame prof)
+    void AddProfileToMenu(string pname)
     {
         foreach (var obj in menuLoadCollection.DropDownItems)
-            if (obj is ToolStripMenuItem item && item.Text == prof.Name) return;
+            if (obj is ToolStripMenuItem item && item.Text == pname) return;
 
         // add to menu
         int ind = menuLoadCollection.DropDownItems.Count;
@@ -59,27 +57,18 @@ partial class AppForm
             ForeColor = theme.Text,
             BackColor = theme.Light,
             Name = $"menuLoadCollection{ind}",
-            Text = prof.Name,
+            Text = pname
         };
-        menuItem.Click += (object? sender, EventArgs e) => { MenuLoadCollection_Click(prof.Name); };
+        menuItem.Click += (object? sender, EventArgs e) => { MenuLoadCollection_Click(pname); };
 
         menuLoadCollection.DropDownItems.Add(menuItem);
     }
 
-    void RebuildProfileListAndMenu()
+    void BuildProfileListMenu()
     {
-        //profiles.Clear();
-        //menuLoadCollection.DropDownItems.Clear();
+        List<string> pnames = Utils.GetProfileNames<SaveGame>(profPath);
 
-        //var pfiles = Utils.ReadFolder(profPath);
-
-        //foreach (var file in pfiles)
-        //{
-        //    var prof = Utils.LoadProfile<Profile>(file, profPath);
-        //    if (prof == null) continue;
-
-        //    AddProfile(prof);
-        //}
+        foreach (var pname in pnames) AddProfileToMenu(pname);
     }
 }
 
@@ -118,7 +107,7 @@ class SaveGame : Utils.INamedProfile
         chosen = _chosen;
     }
 
-    internal SaveGame()
+    public SaveGame()
     {
 
     }

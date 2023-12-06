@@ -149,13 +149,13 @@ class Game
 
     internal enum State
     {
-        None,
+        Countdown,
         Started,
         Won,
         Tie
     }
 
-    static internal State state = State.None;
+    static internal State state = State.Countdown;
 
     /// <summary>
     /// Called by TurnWheel.PlayerMovedHandler.<br/>
@@ -174,9 +174,9 @@ class Game
 
         var dominant = linesInfo.MaxBy(rec => rec.dominant.Value)?.dominant;
 
-        var gameOver = dominant?.Value == 3;
+        var gameWon = dominant?.Value == 3;
 
-        if(gameOver)
+        if(gameWon)
         {
             state = State.Won;
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
@@ -187,7 +187,6 @@ class Game
 
         if (maxCanTake > 0)
         {
-            state = State.Started;
             TurnWheel.Advance();
 
         } else

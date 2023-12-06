@@ -162,6 +162,26 @@ public class Utils
         }
     }
 
+    static public List<string> GetProfileNames<P>(string profPath) where P : INamedProfile
+    {
+        List<string> names = new();
+
+        string[] files = ReadFolder(profPath);
+
+        foreach (string fname in files)
+        {
+            var input = ReadFile(profPath, fname);
+            var obj = JsonSerializer.Deserialize<P>(input);
+            if (obj == null) continue;
+
+            var name = obj.Name;
+            if(string.IsNullOrEmpty(name)) continue;
+            names.Add(name);
+        }
+
+        return names;
+    }
+
     static public P? LoadProfileByFileName<P>(string fname, string profPath)
     {
         var input = ReadFile(profPath, fname);

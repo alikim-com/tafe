@@ -84,6 +84,8 @@ partial class AppForm : Form
 
         InitializeMenu();
 
+        BuildProfileListMenu();
+
         // prevent background flickering
         var doubleBuffed = new object[] { tLayout, labelLeft, labelRight, labelVS, toolStripButton, toolStripButtonLabel };
         foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
@@ -210,7 +212,7 @@ partial class AppForm : Form
         TurnWheel.GameCountdown();
     }
 
-    bool LoadGame(SaveGame prof)
+    void LoadGame(SaveGame prof)
     {
         // retrieve players list
         AssertPlayers(prof.chosen);
@@ -218,7 +220,7 @@ partial class AppForm : Form
         // create player defined bg
         CreateBackground();
 
-        // ---- Reset() ----
+        // ---- Reset() ---->
 
         // rebuild visual bridge for translation between
         // Game <-> (CellWrapper, LabelManager)
@@ -231,12 +233,25 @@ partial class AppForm : Form
         );
         // Game.SetTurns("random");
 
-        TurnWheel.Reset();
+        TurnWheel.Reset(prof.TurnWheelHead);
 
-        ResetUI();
+        // ---- ResetUI() ---->
 
-        // ----------------
+        var gameOver = prof.State == Game.State.Won || prof.State == Game.State.Tie;
 
+        ShowEndGameButton(gameOver);
+
+        foreach (var cw in cellWrap)
+            if (cw is IComponent iComp)
+            {
+                var rc = cw.RC;
+                iComp.IsLocked = Game.board[rc.X, rc.Y] != Game.Roster.None;
+                iComp.Disable();
+            }
+
+        // <---- ResetUI() ----
+
+        // <---- Reset() ----
 
         // (re)create AIs, if needed
 
@@ -254,10 +269,22 @@ partial class AppForm : Form
                 EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
             }
 
-        // start game
-        //TurnWheel.GameCountdown();
-
-        return true;
+        // start game, if necessary
+        switch (prof.State)
+        {
+            case Game.State.Won:
+                EM.Raise(EM.Evt.GameOver, new { }, TurnWheel.CurPlayer);
+                break;
+            case Game.State.Tie:
+                EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());
+                break;
+            case Game.State.Countdown:
+                TurnWheel.Advance();
+                break;
+            case Game.State.Started:
+                TurnWheel.AssertPlayer();
+                break;
+        }
     }
 
     EventHandler<Game.Roster> GameOverHandler() => (object? _, Game.Roster __) => ShowEndGameButton(true);

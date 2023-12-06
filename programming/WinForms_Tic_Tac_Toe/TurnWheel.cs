@@ -29,16 +29,15 @@ internal class TurnWheel
         DisableUICb = _DisableUICb;
     }
 
-    static internal void Reset()
+    static internal void Reset(int _head = -1)
     {
-        head = -1;
+        head = _head;
         isBusy = false;
     }
 
     /// <summary>
     /// For Human players Comes from CellWrapper -> OnClick;<br/>
     /// For AI players from CellWrapper -> AIMovedHandler -> OnClick<br/>
-    /// Lock and Monitor prevent click spamming (from the same thread)
     /// </summary>
     static internal readonly EventHandler<Point> PlayerMovedHandler = (object? sender, Point e) =>
     {
@@ -62,6 +61,8 @@ internal class TurnWheel
         GoNextPlayer();
 
         AssertPlayer();
+
+        Game.state = Game.State.Started;
     }
 
     static void GoNextPlayer() => head = head == Game.TurnList.Length - 1 ? 0 : head + 1;
@@ -69,7 +70,7 @@ internal class TurnWheel
     /// <summary>
     /// Ensure next click is scheduled and will be performed
     /// </summary>
-    static void AssertPlayer()
+    static internal void AssertPlayer()
     {
         if (CurPlayerIsAI)
         {
