@@ -1,6 +1,7 @@
 ﻿
 namespace utils;
 
+using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -161,21 +162,37 @@ public class Utils
         }
     }
 
-    static public P? LoadProfile<P>(string pfile, string profPath)
+    static public P? LoadProfileByFileName<P>(string fname, string profPath)
     {
-        try
-        {
-            var input = ReadFile(profPath, pfile);
-
-            var obj = JsonSerializer.Deserialize<P>(input);
-
-            return obj;
-        }
-        catch (Exception ex)
-        {
-            Msg($"Utils.LoadProfile : There was an error <{ex.Message}> reading '{pfile}'");
+        var input = ReadFile(profPath, fname);
+        var obj = JsonSerializer.Deserialize<P>(input);
+        if (obj == null) {
+            Msg($"Utils.LoadProfileByFileName : profile (path: '{profPath}', file name: '{fname}') appears to be empty");
             return default;
         }
+        return obj;
+    }
+
+    static public P? LoadProfileByName<P>(string pname, string profPath) where P : INamedProfile
+    {
+        string[] files = ReadFolder(profPath);
+
+        foreach (string pfile in files)
+        {
+            var input = ReadFile(profPath, pfile);
+            var obj = JsonSerializer.Deserialize<P>(input);
+            if (obj == null) continue;
+
+            if (obj.Name == pname) return obj;
+        }
+
+        Msg($"Utils.LoadProfileByName : No profile with the name '{pname}' found in '{profPath}'");
+        return default;
+    }
+
+    public interface INamedProfile
+    {
+        string Name { get; set; }
     }
 }
 

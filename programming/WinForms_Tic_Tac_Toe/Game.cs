@@ -106,11 +106,11 @@ class Game
         return linesInfo;
     }
 
-    static internal void Reset(Roster[] turnlist)
+    static internal void Reset(Roster[] turnlist, Roster[]? _board = null)
     {
         TurnList = turnlist;
 
-        ResetBoard();
+        ResetBoard(_board);
 
         // add all the board cells to the update
         var update = new Dictionary<Tile, Roster>();
@@ -139,9 +139,12 @@ class Game
         }
     }
 
-    static void ResetBoard()
+    static void ResetBoard(Roster[]? _board)
     {
-        for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
+        if (_board != null)
+            for (int i = 0; i < board.Length; i++) board[i] = _board[i];
+        else
+            for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
     }
 
     internal enum State

@@ -104,7 +104,7 @@ partial class AppForm : Form
         // Event subscriptions & callbacks
         SetupSubsAndCb();
 
-        // MULTI-USE: resets everything and start the game
+        // MULTI-USE: resets everything and starts the game
         StartGame();
     }
 
@@ -210,6 +210,56 @@ partial class AppForm : Form
         TurnWheel.GameCountdown();
     }
 
+    bool LoadGame(SaveGame prof)
+    {
+        // retrieve players list
+        AssertPlayers(prof.chosen);
+
+        // create player defined bg
+        CreateBackground();
+
+        // ---- Reset() ----
+
+        // rebuild visual bridge for translation between
+        // Game <-> (CellWrapper, LabelManager)
+        VBridge.Reset(chosen);
+
+        // reset the game and the board
+        Game.Reset(
+            chosen.Select(chItm => chItm.rosterId).ToArray(),
+            prof.Board
+        );
+        // Game.SetTurns("random");
+
+        TurnWheel.Reset();
+
+        ResetUI();
+
+        // ----------------
+
+
+        // (re)create AIs, if needed
+
+        foreach (var aiAgent in AIs)
+            EM.Unsubscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
+        AIs.Clear();
+
+        foreach (var chItm in chosenArr)
+            if (chItm.originType == "AI")
+            {
+                var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
+                var aiAgent = new AI(logic, chItm.rosterId);
+                AIs.Add(aiAgent);
+
+                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
+            }
+
+        // start game
+        //TurnWheel.GameCountdown();
+
+        return true;
+    }
+
     EventHandler<Game.Roster> GameOverHandler() => (object? _, Game.Roster __) => ShowEndGameButton(true);
     EventHandler GameTieHandler() => (object? _, EventArgs e) => ShowEndGameButton(true);
 
@@ -267,9 +317,9 @@ partial class AppForm : Form
         ResetUI();
     }
 
-    void AssertPlayers()
+    void AssertPlayers(IEnumerable<ChoiceItem>? _chosen = null)
     {
-        chosen = SetupForm.roster.Where(itm => itm.chosen);
+        chosen = _chosen ?? SetupForm.roster.Where(itm => itm.chosen);
         chosenArr = chosen.ToArray();
         if (chosenArr.Length != 2)
             throw new Exception($"Form.CreateBackground : wrong number of players '{chosenArr.Length}'");

@@ -8,8 +8,6 @@ partial class AppForm
 
     AboutForm? aboutForm;
 
-    readonly List<SaveGame> profiles = new();
-
     private void MenuHelpAbout_Click(object sender, EventArgs e)
     {
         aboutForm ??= new AboutForm();
@@ -26,52 +24,33 @@ partial class AppForm
             Game.board.ToArray(),
             Game.TurnList,
             Game.state,
-            TurnWheel.Head
+            TurnWheel.Head,
+            chosenArr
         );
         Utils.SaveProfile(profPath, layoutName, prof);
-       // AddProfile(prof);
+        AddProfileToMenu(prof);
     }
 
-    void ApplyProfile(string pname)
+    void MenuLoadCollection_Click(string pname)
     {
-        var prof = profiles.Find(p => p.Name == pname);
-        if (prof == null)
+        var prof = Utils.LoadProfileByName<SaveGame>(pname, profPath);
+        if (prof == default(SaveGame))
         {
-            Utils.Msg($"UML_events.ApplyProfile : profile '{pname}' not found");
+            Utils.Msg($"Menu.LoadProfile : profile '{pname}' appears to be empty");
             return;
         }
 
-        // update boxes from profile
-        menuLayout.Text = prof.Name;
-        //foreach (var pbox in prof.Boxes)
-       // {
-           // var box = boxes.Find(b => b.name == pbox.Name);
-            //if (box == null) continue;
+        if(LoadGame(prof))
+            menuLayout.Text = pname;
+        else
+            Utils.Msg($"Menu.LoadProfile : profile '{pname}' appears to be empty");
 
-            //box.pos = pbox.Pos;
-            //box.size = pbox.Size;
-        //}
-
-        // force repaint, no grid positioning
-     //   PaintCheckAfter(1);
-     //   UpdatePaintCheck(true, false);
     }
 
-    void AddProfile(SaveGame prof)
+    void AddProfileToMenu(SaveGame prof)
     {
         foreach (var obj in menuLoadCollection.DropDownItems)
-        {
-            if (obj is ToolStripMenuItem item && item.Text == prof.Name)
-            {
-
-                menuLoadCollection.DropDownItems.Remove(item);
-
-                var existingProfile = profiles.Find(p => p.Name == prof.Name);
-                if (existingProfile != null) profiles.Remove(existingProfile);
-
-                break;
-            }
-        }
+            if (obj is ToolStripMenuItem item && item.Text == prof.Name) return;
 
         // add to menu
         int ind = menuLoadCollection.DropDownItems.Count;
@@ -82,18 +61,15 @@ partial class AppForm
             Name = $"menuLoadCollection{ind}",
             Text = prof.Name,
         };
-        menuItem.Click += (object? sender, EventArgs e) => { ApplyProfile(prof.Name); };
+        menuItem.Click += (object? sender, EventArgs e) => { MenuLoadCollection_Click(prof.Name); };
 
         menuLoadCollection.DropDownItems.Add(menuItem);
-
-        // add to profiles
-        profiles.Add(prof);
     }
 
     void RebuildProfileListAndMenu()
     {
-        profiles.Clear();
-        menuLoadCollection.DropDownItems.Clear();
+        //profiles.Clear();
+        //menuLoadCollection.DropDownItems.Clear();
 
         //var pfiles = Utils.ReadFolder(profPath);
 
@@ -107,7 +83,7 @@ partial class AppForm
     }
 }
 
-class SaveGame
+class SaveGame : Utils.INamedProfile
 {
     public string Name { get; set; } = "";
     public Game.Roster[] Board { get; set; } = Array.Empty<Game.Roster>();
@@ -115,13 +91,17 @@ class SaveGame
     public Game.State State { get; set; }
     public int TurnWheelHead { get; set; }
 
+    public IEnumerable<ChoiceItem> chosen = Enumerable.Empty<ChoiceItem>();
+
     internal SaveGame(
         string _name,
-        Game.Roster[] _board, 
-        Game.Roster[] _turnList, 
+        Game.Roster[] _board,
+        Game.Roster[] _turnList,
         Game.State _state,
-        int _turnWheelHead
-    ){
+        int _turnWheelHead,
+        IEnumerable<ChoiceItem> _chosen
+    )
+    {
         Name = _name;
 
         var len = _board.Length;
@@ -134,11 +114,13 @@ class SaveGame
 
         State = _state;
         TurnWheelHead = _turnWheelHead;
+
+        chosen = _chosen;
     }
 
     internal SaveGame()
     {
-        
+
     }
 }
 

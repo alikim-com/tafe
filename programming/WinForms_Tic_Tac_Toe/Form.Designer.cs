@@ -138,13 +138,13 @@ partial class AppForm
         // 
         menuLoadOpen.Name = "menuLoadOpen";
         menuLoadOpen.Size = new Size(180, 22);
-        menuLoadOpen.Text = "Open layout...";
+        menuLoadOpen.Text = "Open saved game...";
         // 
         // menuLoadCollection
         // 
         menuLoadCollection.Name = "menuLoadCollection";
         menuLoadCollection.Size = new Size(180, 22);
-        menuLoadCollection.Text = "Layout collection";
+        menuLoadCollection.Text = "Saved games";
         // 
         // menuSave
         // 
