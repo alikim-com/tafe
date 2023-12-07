@@ -1,6 +1,4 @@
 ﻿
-using System.Text.Json;
-
 namespace WinFormsApp1;
 
 partial class AppForm
@@ -31,6 +29,22 @@ partial class AppForm
         );
         Utils.SaveProfile(profPath, layoutName, prof);
         AddProfileToMenu(prof.Name);
+    }
+
+    void MenuLoadOpen_Click(object? sender, EventArgs e)
+    {
+        var input = Utils.OpenLoadFileDialog(profPath);
+        if (string.IsNullOrEmpty(input)) return;
+        
+        var prof = Utils.LoadProfileFromString<SaveGame>(input);
+        if (prof == default(SaveGame))
+        {
+            Utils.Msg($"Menu.MenuLoadOpen_Click : profile from string '{input}' produces empty game");
+            return;
+        }
+        LoadGame(prof);
+
+        menuLayout.Text = prof.Name;
     }
 
     void MenuLoadCollection_Click(string pname)
@@ -113,6 +127,4 @@ class SaveGame : Utils.INamedProfile
         // for JsonSerializer.Deserialize<P>(input);
     }
 }
-
-
 

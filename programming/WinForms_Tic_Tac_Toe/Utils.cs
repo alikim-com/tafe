@@ -175,19 +175,38 @@ public class Utils
             if (obj == null) continue;
 
             var name = obj.Name;
-            if(string.IsNullOrEmpty(name)) continue;
+            if (string.IsNullOrEmpty(name)) continue;
             names.Add(name);
         }
 
         return names;
     }
 
-    static public P? LoadProfileByFileName<P>(string fname, string profPath)
+    static public string OpenLoadFileDialog(string profPath)
     {
-        var input = ReadFile(profPath, fname);
+        using OpenFileDialog openFileDialog = new();
+
+        openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+        openFileDialog.Title = "Load game";
+        openFileDialog.InitialDirectory = profPath;
+
+        DialogResult result = openFileDialog.ShowDialog();
+
+        if (result == DialogResult.OK)
+        {
+            string selectedFilePath = openFileDialog.FileName;
+            string outp = ReadFile(profPath, selectedFilePath);
+            return outp;
+        }
+
+        return "";
+    }
+
+    static public P? LoadProfileFromString<P>(string input)
+    {
         var obj = JsonSerializer.Deserialize<P>(input);
         if (obj == null) {
-            Msg($"Utils.LoadProfileByFileName : profile (path: '{profPath}', file name: '{fname}') appears to be empty");
+            Msg($"Utils.LoadProfileFromString : input string '{input}' produces null object");
             return default;
         }
         return obj;

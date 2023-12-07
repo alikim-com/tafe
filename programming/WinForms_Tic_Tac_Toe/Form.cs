@@ -245,8 +245,9 @@ partial class AppForm : Form
             if (cw is IComponent iComp)
             {
                 var rc = cw.RC;
-                iComp.IsLocked = Game.board[rc.X, rc.Y] != Game.Roster.None;
-                iComp.Disable();
+                var owned = Game.board[rc.X, rc.Y] != Game.Roster.None;
+                if (owned) iComp.Disable(); else iComp.Enable();
+                iComp.IsLocked = owned;
             }
 
         // <---- ResetUI() ----
@@ -526,7 +527,7 @@ partial class AppForm : Form
             switch ((WMSZ)m.WParam.ToInt32())
             {
                 case WMSZ.LEFT:
-                case WMSZ.RIGHT:                  
+                case WMSZ.RIGHT:
                     // width has changed, adjust height
                     clWidth = rc.Right - rc.Left - ncSize.Width;
                     clHeight = (int)(clWidth / clRatio);

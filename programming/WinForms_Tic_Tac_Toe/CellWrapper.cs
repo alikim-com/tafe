@@ -27,6 +27,7 @@ internal class CellWrapper : IComponent
     }
 
     public bool IsLocked { get; set; } = false;
+    bool isEnabled = false;
 
     internal CellWrapper(Panel _box, int _row, int _col)
     {
@@ -130,8 +131,9 @@ internal class CellWrapper : IComponent
 
     public void Enable()
     {
-        if (IsLocked) return;
+        if (IsLocked || isEnabled) return;
 
+        isEnabled = true;
         AddHoverEventHandlers();
         box.Click += OnClick;
         box.Cursor = Cursors.Hand;
@@ -139,8 +141,9 @@ internal class CellWrapper : IComponent
 
     public void Disable()
     {
-        if (IsLocked) return;
+        if (IsLocked || !isEnabled) return;
 
+        isEnabled = false;
         box.Click -= OnClick;
         RemoveHoverEventHandlers();
         box.Cursor = Cursors.Default;

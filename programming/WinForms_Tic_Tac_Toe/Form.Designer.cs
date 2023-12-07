@@ -139,6 +139,7 @@ partial class AppForm
         menuLoadOpen.Name = "menuLoadOpen";
         menuLoadOpen.Size = new Size(180, 22);
         menuLoadOpen.Text = "Open saved game...";
+        menuLoadOpen.Click += MenuLoadOpen_Click;
         // 
         // menuLoadCollection
         // 
