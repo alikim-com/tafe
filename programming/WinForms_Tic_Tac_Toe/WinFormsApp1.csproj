@@ -11,8 +11,11 @@
 
   <ItemGroup>
     <Compile Remove="assets_design\**" />
+    <Compile Remove="savegame\**" />
     <EmbeddedResource Remove="assets_design\**" />
+    <EmbeddedResource Remove="savegame\**" />
     <None Remove="assets_design\**" />
+    <None Remove="savegame\**" />
   </ItemGroup>
 
   <ItemGroup>

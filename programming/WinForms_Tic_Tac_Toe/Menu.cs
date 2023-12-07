@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json;
+
 namespace WinFormsApp1;
 
 partial class AppForm
@@ -79,8 +81,7 @@ class SaveGame : Utils.INamedProfile
     public Game.Roster[] TurnList { get; set; } = Array.Empty<Game.Roster>();
     public Game.State State { get; set; }
     public int TurnWheelHead { get; set; }
-
-    public IEnumerable<ChoiceItem> chosen = Enumerable.Empty<ChoiceItem>();
+    public IEnumerable<ChoiceItem> Chosen { get; set; } = Enumerable.Empty<ChoiceItem>();
 
     internal SaveGame(
         string _name,
@@ -104,12 +105,12 @@ class SaveGame : Utils.INamedProfile
         State = _state;
         TurnWheelHead = _turnWheelHead;
 
-        chosen = _chosen;
+        Chosen = _chosen;
     }
 
     public SaveGame()
     {
-
+        // for JsonSerializer.Deserialize<P>(input);
     }
 }
 

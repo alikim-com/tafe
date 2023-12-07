@@ -64,18 +64,18 @@ internal class VBridge
         {
             var side = chItem.side;
 
-            rosterToSide.Add(chItem.rosterId, side);
+            rosterToSide.Add(chItem.RosterId, side);
 
             var state = Utils.SafeDictValue(sideToPlayer, side);
             var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
             var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
 
-            var msgMove = chItem.originType == "AI" ?
-                $"{chItem.identityName} is moving..." : $"Your move, {chItem.identityName}...";
+            var msgMove = chItem.OriginType == "AI" ?
+                $"{chItem.IdentityName} is moving..." : $"Your move, {chItem.IdentityName}...";
 
-            var msgWon = $"Player {chItem.identityName} is the winner! Congratulations!";
+            var msgWon = $"Player {chItem.IdentityName} is the winner! Congratulations!";
 
-            enumInfo.Add(state, chItem.identityName);
+            enumInfo.Add(state, chItem.IdentityName);
             enumInfo.Add(stateMove, msgMove);
             enumInfo.Add(stateWon, msgWon);
             

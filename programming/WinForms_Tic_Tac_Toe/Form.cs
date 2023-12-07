@@ -10,8 +10,8 @@ partial class AppForm : Form
     Size ncSize; // non-client area
     readonly int minWndWidth = 200;
     int minWndHeight = 0;
-    Dictionary<Label, Font> scalableLabels = new();
-    Dictionary<ToolStripLabel, Font> scalableTSLabels = new();
+    readonly Dictionary<Label, Font> scalableLabels = new();
+    readonly Dictionary<ToolStripLabel, Font> scalableTSLabels = new();
 
     struct ScalableTSButton
     {
@@ -199,10 +199,10 @@ partial class AppForm : Form
         AIs.Clear();
 
         foreach (var chItm in chosenArr)
-            if (chItm.originType == "AI")
+            if (chItm.OriginType == "AI")
             {
-                var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
-                var aiAgent = new AI(logic, chItm.rosterId);
+                var logic = chItm.RosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
+                var aiAgent = new AI(logic, chItm.RosterId);
                 AIs.Add(aiAgent);
 
                 EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
@@ -215,7 +215,7 @@ partial class AppForm : Form
     void LoadGame(SaveGame prof)
     {
         // retrieve players list
-        AssertPlayers(prof.chosen);
+        AssertPlayers(prof.Chosen);
 
         // create player defined bg
         CreateBackground();
@@ -228,7 +228,7 @@ partial class AppForm : Form
 
         // reset the game and the board
         Game.Reset(
-            chosen.Select(chItm => chItm.rosterId).ToArray(),
+            chosen.Select(chItm => chItm.RosterId).ToArray(),
             prof.Board
         );
         // Game.SetTurns("random");
@@ -260,10 +260,10 @@ partial class AppForm : Form
         AIs.Clear();
 
         foreach (var chItm in chosenArr)
-            if (chItm.originType == "AI")
+            if (chItm.OriginType == "AI")
             {
-                var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
-                var aiAgent = new AI(logic, chItm.rosterId);
+                var logic = chItm.RosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
+                var aiAgent = new AI(logic, chItm.RosterId);
                 AIs.Add(aiAgent);
 
                 EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
@@ -336,7 +336,7 @@ partial class AppForm : Form
         VBridge.Reset(chosen);
 
         // reset the game and the board
-        Game.Reset(chosen.Select(chItm => chItm.rosterId).ToArray());
+        Game.Reset(chosen.Select(chItm => chItm.RosterId).ToArray());
         // Game.SetTurns("random");
 
         TurnWheel.Reset();
@@ -349,7 +349,7 @@ partial class AppForm : Form
         chosen = _chosen ?? SetupForm.roster.Where(itm => itm.chosen);
         chosenArr = chosen.ToArray();
         if (chosenArr.Length != 2)
-            throw new Exception($"Form.CreateBackground : wrong number of players '{chosenArr.Length}'");
+            throw new Exception($"Form.AssertPlayers : wrong number of players '{chosenArr.Length}'");
 
         firstChosenIsLeft = chosenArr[0].side == ChoiceItem.Side.Left;
     }
@@ -357,8 +357,8 @@ partial class AppForm : Form
     void CreateBackground()
     {
         KeyValuePair<Game.Roster, Game.Roster> leftRightBg = firstChosenIsLeft ?
-            new(chosenArr[0].rosterId, chosenArr[1].rosterId) :
-            new(chosenArr[1].rosterId, chosenArr[0].rosterId);
+            new(chosenArr[0].RosterId, chosenArr[1].RosterId) :
+            new(chosenArr[1].RosterId, chosenArr[0].RosterId);
 
         foreach (var (_leftRightBg, bgImage) in mainBg)
             if (_leftRightBg.Equals(leftRightBg)) // cache exists
@@ -382,7 +382,7 @@ partial class AppForm : Form
         g.FillRectangle(brush, rect);
 
         Image?[] headImage = chosen.Select(itm =>
-            (Image?)Resource.ResourceManager.GetObject($"{itm.rosterId}_{itm.side}_Head")).ToArray();
+            (Image?)Resource.ResourceManager.GetObject($"{itm.RosterId}_{itm.side}_Head")).ToArray();
 
         KeyValuePair<Image?, Image?> leftRightImage = firstChosenIsLeft ?
             new(headImage[0], headImage[1]) : new(headImage[1], headImage[0]);

@@ -1,6 +1,4 @@
 ﻿
-using System.Drawing.Drawing2D;
-
 namespace WinFormsApp1;
 
 partial class SetupForm : Form
@@ -155,7 +153,7 @@ partial class SetupForm : Form
             var _origLab = AddMirrorLabel(panelRight, origLab, "Right" + origLab.Name, tab++, origLab.Text);
             var _identLab = AddMirrorLabel(panelRight, identLab, identLab.Name.Replace("Left", "Right"), tab++, identLab.Text);
 
-            roster.Add(new(choiceItem.rosterId, ChoiceItem.Side.Right, _origLab, _identLab, foreRight, foreRightDim));
+            roster.Add(new(choiceItem.RosterId, ChoiceItem.Side.Right, _origLab, _identLab, foreRight, foreRightDim));
         }
 
         foreach (var rec in roster)
@@ -172,7 +170,7 @@ partial class SetupForm : Form
 
             var (panelThisSide, panelOtherSide) = side == ChoiceItem.Side.Left ? (panelLeft, panelRight) : (panelRight, panelLeft);
 
-            panelThisSide.BackgroundImage = GetBackgroundImage(choiceItem.rosterId, side);
+            panelThisSide.BackgroundImage = GetBackgroundImage(choiceItem.RosterId, side);
 
             choiceItem.chosen = true;
             choiceItem.Activate();
@@ -183,9 +181,9 @@ partial class SetupForm : Form
                 rec.Deactivate();
             }
 
-            var rosterId = choiceItem.rosterId;
+            var rosterId = choiceItem.RosterId;
 
-            var mirrorItem = rosterOtherSide.FirstOrDefault(itm => itm.chosen && itm.rosterId == rosterId);
+            var mirrorItem = rosterOtherSide.FirstOrDefault(itm => itm.chosen && itm.RosterId == rosterId);
 
             if (mirrorItem != null)
             {
@@ -202,11 +200,11 @@ partial class SetupForm : Form
 
             if (thisChosen != null && otherChosen != null)
             {
-                if (thisChosen.originType != otherChosen.originType)
+                if (thisChosen.OriginType != otherChosen.OriginType)
                 {
                     UpdateButton(BtnMessage.Ready_Mix);
 
-                } else if (Enum.TryParse($"Ready_{thisChosen.originType}", out BtnMessage msg))
+                } else if (Enum.TryParse($"Ready_{thisChosen.OriginType}", out BtnMessage msg))
                 {
                     UpdateButton(msg);
                 }
@@ -261,37 +259,42 @@ class ChoiceItem
 {
     internal bool chosen;
 
-    internal readonly Game.Roster rosterId;
+    public Game.Roster RosterId { get; set; } = Game.Roster.None;
 
-    readonly Label origin;
-    readonly Label identity;
-    internal readonly string identityName;
+    internal Label origin = new();
+    internal Label identity = new();
+    public string IdentityName { get; set; } = "";
 
-    internal enum Side
+    public enum Side
     {
         None,
         Left,
         Right
     }
 
-    internal readonly Side side;
+    public Side side { get; set; } = Side.None;
     readonly Color foreOn;
     readonly Color foreOff;
 
-    internal readonly string originType;
+    public string OriginType { get; set; } = "";
 
     internal ChoiceItem(Game.Roster _rosterId, Side _side, Label _origin, Label _identity, Color _foreOn, Color _foreOff)
     {
         chosen = false;
-        rosterId = _rosterId;
+        RosterId = _rosterId;
         side = _side;
         origin = _origin;
         identity = _identity;
         foreOn = _foreOn;
         foreOff = _foreOff;
 
-        originType = _rosterId.ToString().Split('_')[0];
-        identityName = identity.Text;
+        OriginType = _rosterId.ToString().Split('_')[0];
+        IdentityName = identity.Text;
+    }
+
+    public ChoiceItem()
+    {
+        // for JsonSerializer.Deserialize<P>(input);
     }
 
     internal void Activate()
