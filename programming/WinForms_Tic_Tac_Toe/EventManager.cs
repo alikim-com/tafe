@@ -13,6 +13,12 @@ internal class EM
     /// containing row(X) and column(Y) of a cell and the player occupying it</param>
     static event EventHandler<Dictionary<Tile, Game.Roster>> EvtSyncBoard = delegate { };
     /// <summary>
+    /// Translates game states into UI states in VBridge
+    /// </summary>
+    /// <param>List of cells to grey out upon winning,<br/>
+    /// containing row(X) and column(Y) of a cell and the player occupying it</param>
+    static event EventHandler<KeyValuePair<Game.Roster,List<Tile>>> EvtSyncBoardWin = delegate { };
+    /// <summary>
     /// Sync the board with EvtSyncBoard translation done by VBridge
     /// </summary>
     /// <param>List of cells to update,<br/>
@@ -55,6 +61,7 @@ internal class EM
     internal enum Evt
     {
         SyncBoard,
+        SyncBoardWin,
         SyncBoardUI,
         AIMakeMove,
         SyncMoveLabels,
@@ -69,6 +76,7 @@ internal class EM
     /// </summary>
     static readonly Dictionary<Evt, Delegate> dict = new() {
         { Evt.SyncBoard, EvtSyncBoard },
+        { Evt.SyncBoardWin, EvtSyncBoardWin },
         { Evt.SyncBoardUI, EvtSyncBoardUI },
         { Evt.AIMakeMove, EvtAIMakeMove },
         { Evt.SyncMoveLabels, EvtSyncMoveLabels },

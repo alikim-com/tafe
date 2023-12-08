@@ -69,16 +69,28 @@ static public class ColorExtensions
 
 static public class ImageExtensions
 {
+
     /// <summary>
     /// Best fit the current image into dstSize box while preserving its aspect ratio.<br/>
     /// Paint the image over dst background at the specified offDst.
     /// </summary>
+    /// <param name="src">top image</param>
+    /// <param name="dst">bottom image</param>
+    /// <param name="dstOff">left-top offset on dst where to start painting fitted src</param>
+    /// <param name="dstSize">a box into which to fit src while preserving its aspect ratio</param>
+    /// <param name="hAlign">horizontal alignment after fitting scr into dstSize:</br/>
+    /// "left" - left margin is zero, "right" - right margin is zero, "center" - left and right margins are equal</param>
+    /// <param name="vAlign">vertical alignment after fitting scr into dstSize:</br/>
+    /// "top" - top margin is zero, "bottom" - bottom margin is zero, "center" - top and bottom margins are equal</param>
+    /// <param name="extraAlpha">extra opacity [0,1] applied to fitted src while blending</param>
+    /// <param name="blendMode">"add" - simple RGBA color addition, "over" - A over B pixel blending</param>
     static public Image GetOverlayOnBackground(this Image src,
         Image dst,
         Point dstOff,
         Size dstSize,
         string hAlign,
         string vAlign,
+        double extraAlpha = 1,
         string blendMode = "add")
     {
         Size scaledSrc = GeomUtility.FitRect(dstSize, src.Size);
@@ -99,9 +111,10 @@ static public class ImageExtensions
 
         using Graphics g = Graphics.FromImage(dst);
 
-        // a1 = 1
-        // a = a2 + (1 - a2) = 1
-        // R = R2 * a2 + R1 * (1 - a2) -> (srcAlpha, 1 - srcAlpha)
+        // --- no pre ---
+        // a = a2 + a1 * (1 - a2)
+        // aR = R2 * a2 + R1 * a1 * (1 - a2)
+        // R = aR / a
         if (blendMode == "over")
         {
             var dstBitmap = (Bitmap)dst;
@@ -122,12 +135,17 @@ static public class ImageExtensions
                     int dstX = dstLeft + x;
                     Color srcARGB = scaledSrcImg.GetPixel(x, y);
                     Color dstARGB = dstBitmap.GetPixel(dstX, dstY);
-                    double srcAlpha = srcARGB.A * norm;
-                    double oneMinusSrcAlpha = 1 - srcAlpha;
-                    Color blendOver = Color.FromArgb(
-                        (int)(srcARGB.R * srcAlpha + dstARGB.R * oneMinusSrcAlpha),
-                        (int)(srcARGB.G * srcAlpha + dstARGB.G * oneMinusSrcAlpha),
-                        (int)(srcARGB.B * srcAlpha + dstARGB.B * oneMinusSrcAlpha)
+                    double a1 = dstARGB.A * norm;
+                    double a2 = srcARGB.A * norm * extraAlpha;
+                    double aFact = a1 * (1 - a2);
+                    double a = a2 + aFact;
+                    double ra = 1 / a;
+                    Color blendOver = a == 0 ? Color.FromArgb(0,0,0,0) : 
+                    Color.FromArgb(
+                        (int)(255 * a),
+                        (int)((srcARGB.R * a2 + dstARGB.R * aFact) * ra),
+                        (int)((srcARGB.G * a2 + dstARGB.G * aFact) * ra),
+                        (int)((srcARGB.B * a2 + dstARGB.B * aFact) * ra)
                     );
                     dstBitmap.SetPixel(dstX, dstY, blendOver);
                 }

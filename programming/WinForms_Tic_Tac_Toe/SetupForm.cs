@@ -63,6 +63,7 @@ partial class SetupForm : Form
         buttonRenderer = UIRenderer.ButtonTSRenderer(toolStrip, ButtonColors.Sunrise);
         toolStrip.Renderer = buttonRenderer;
 
+        toolStrip.Font = UIFonts.button;
         toolStrip.BackColor = toolStripLabel.BackColor = UIColors.Transparent;
 
         UpdateButton(BtnMessage.Both_Missing);

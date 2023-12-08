@@ -22,8 +22,8 @@ internal class CellWrapper : IComponent
         Player1,
         Player2,
         // grey tokens
-        Lost1,
-        Lost2
+        Player1Lost,
+        Player2Lost,
     }
 
     public bool IsLocked { get; set; } = false;
@@ -91,11 +91,33 @@ internal class CellWrapper : IComponent
             "center"
         );
 
+        // partial desaturate as % of distance towards avr
+        // cells color should be dict of <roster, tile>, not winner and exclude None
+
+
         backgr.Add(BgMode.Player1, token1);
         backgr.Add(BgMode.Player2, token2);
 
-        backgr.Add(BgMode.Lost1, token1.Desaturate("PS"));
-        backgr.Add(BgMode.Lost2, token2.Desaturate("PS"));
+        backgr.Add(BgMode.Player1Lost, ImageExtensions.GetOverlayOnBackground(
+            token1.Desaturate("PS"), 
+            new Bitmap(token1),
+            Point.Empty,
+            token1.Size,
+            "left",
+            "top",
+            0.75,
+            "over"
+        ));
+        backgr.Add(BgMode.Player2Lost, ImageExtensions.GetOverlayOnBackground(
+            token2.Desaturate("PS"),
+            new Bitmap(token2),
+            Point.Empty,
+            token2.Size,
+            "left",
+            "top",
+            0.75,
+            "over"
+        ));
 
     }
 

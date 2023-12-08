@@ -13,7 +13,9 @@ public class UIFonts
     static public readonly Font tiny = new("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point);
 
     static public readonly Font menu = new("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+    static public readonly Font button = new("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
     static public readonly Font info = new ("Segoe UI", 13F, FontStyle.Regular, GraphicsUnit.Point);
+
 }
 
 public class UIColors

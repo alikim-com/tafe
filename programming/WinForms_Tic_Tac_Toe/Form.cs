@@ -299,6 +299,7 @@ partial class AppForm : Form
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
+        EM.Subscribe(EM.Evt.SyncBoardWin, VBridge.SyncBoardWinHandler);
         EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
         EM.Subscribe(EM.Evt.GameOver, VBridge.GameOverHandler);
         EM.Subscribe(EM.Evt.GameTie, VBridge.GameTieHandler);
@@ -414,7 +415,7 @@ partial class AppForm : Form
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
         labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
-        toolStripButton.Font = new("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+        toolStripButton.Font = UIFonts.button;
 
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
 

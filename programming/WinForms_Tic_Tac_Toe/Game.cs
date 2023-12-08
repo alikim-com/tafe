@@ -1,4 +1,6 @@
 ﻿
+using System.Linq;
+
 namespace WinFormsApp1;
 
 /// <summary>
@@ -180,6 +182,14 @@ class Game
         {
             state = State.Won;
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
+
+            // grey tiles update
+            var lostTiles = new List<Tile>();
+            for (var i = 0; i < board.Length; i++)
+                if (board[i] != curPlayer) lostTiles.Add(board.GetTile(i));
+            
+            EM.Raise(EM.Evt.SyncBoardWin, new { }, new KeyValuePair<Roster, List<Tile>>(curPlayer, lostTiles));
+
             return;
         }
 

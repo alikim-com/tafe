@@ -15,7 +15,7 @@ internal class VBridge
     {
         { ChoiceItem.Side.None, CellWrapper.BgMode.Default },
         { ChoiceItem.Side.Left, CellWrapper.BgMode.Player1 },
-        { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 }
+        { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 },
     };
 
     // LabelManager
@@ -121,6 +121,27 @@ internal class VBridge
             var bg = Utils.SafeDictValue(sideToBg, side);
             cellBgs.Add(new Point(rc.row, rc.col), bg);
         }
+
+        EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
+    };
+
+    /// <summary>
+    /// Subscribed to EM.EvtSyncBoardWin event<br/>
+    /// Translates game board state into UI states;<br/>
+    /// applies greyed bgs to cells owned by the winner
+    /// </summary>
+    static internal EventHandler<KeyValuePair<Game.Roster, List<Tile>>> SyncBoardWinHandler =
+    (object? s, KeyValuePair<Game.Roster, List<Tile>> e) =>
+    {
+        Dictionary<Point, CellWrapper.BgMode> cellBgs = new();
+
+        var (winner, tiles) = e;
+        var side = Utils.SafeDictValue(rosterToSide, winner);
+        var bgFullColor = Utils.SafeDictValue(sideToBg, side);
+        var bgGreyedOut = Utils.SafeEnumFromStr<CellWrapper.BgMode>($"{bgFullColor}Lost");
+
+        foreach (var rc in tiles)
+            cellBgs.Add(new Point(rc.row, rc.col), bgGreyedOut);
 
         EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
     };
