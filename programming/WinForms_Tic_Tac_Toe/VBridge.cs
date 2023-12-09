@@ -36,7 +36,7 @@ internal class VBridge
 
     // labels colors
     static readonly Color infoBackNone = Color.FromArgb(80, 0, 0, 0);
-    
+
     static readonly Color infoBackLeft = ColorExtensions.BlendOver(
         ColorExtensions.Scale(UIColors.TintLeft, 0.8), infoBackNone);
 
@@ -78,7 +78,7 @@ internal class VBridge
             enumInfo.Add(state, chItem.IdentityName);
             enumInfo.Add(stateMove, msgMove);
             enumInfo.Add(stateWon, msgWon);
-            
+
             // enum Bg colors
             var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
             var stateFore = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}Fore");
@@ -101,7 +101,7 @@ internal class VBridge
             LabelManager.Info.Player1,
             LabelManager.Info.Player2,
             LabelManager.Bg.None,
-            LabelManager.Bg.Player1Fore, 
+            LabelManager.Bg.Player1Fore,
             LabelManager.Bg.Player2Fore,
         });
     }
@@ -130,18 +130,18 @@ internal class VBridge
     /// Translates game board state into UI states;<br/>
     /// applies greyed bgs to cells owned by the winner
     /// </summary>
-    static internal EventHandler<KeyValuePair<Game.Roster, List<Tile>>> SyncBoardWinHandler =
-    (object? s, KeyValuePair<Game.Roster, List<Tile>> e) =>
+    static internal EventHandler<Dictionary<Tile, Game.Roster>> SyncBoardWinHandler =
+    (object? s, Dictionary<Tile, Game.Roster> e) =>
     {
         Dictionary<Point, CellWrapper.BgMode> cellBgs = new();
 
-        var (winner, tiles) = e;
-        var side = Utils.SafeDictValue(rosterToSide, winner);
-        var bgFullColor = Utils.SafeDictValue(sideToBg, side);
-        var bgGreyedOut = Utils.SafeEnumFromStr<CellWrapper.BgMode>($"{bgFullColor}Lost");
-
-        foreach (var rc in tiles)
+        foreach (var (rc, rId) in e)
+        {
+            var side = Utils.SafeDictValue(rosterToSide, rId);
+            var bgFullColor = Utils.SafeDictValue(sideToBg, side);
+            var bgGreyedOut = Utils.SafeEnumFromStr<CellWrapper.BgMode>($"{bgFullColor}Lost");
             cellBgs.Add(new Point(rc.row, rc.col), bgGreyedOut);
+        }
 
         EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
     };
@@ -168,11 +168,11 @@ internal class VBridge
         var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
         var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { 
-            stateWon, 
-            stateBg, 
-            LabelManager.Bg.Player1ForeDim, 
-            LabelManager.Bg.Player2ForeDim, 
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
+            stateWon,
+            stateBg,
+            LabelManager.Bg.Player1ForeDim,
+            LabelManager.Bg.Player2ForeDim,
         });
     };
 

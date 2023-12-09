@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.Linq;
 
 namespace WinFormsApp1;
@@ -184,11 +185,14 @@ class Game
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
 
             // grey tiles update
-            var lostTiles = new List<Tile>();
+            var lostTiles = new Dictionary<Tile, Roster>();
             for (var i = 0; i < board.Length; i++)
-                if (board[i] != curPlayer) lostTiles.Add(board.GetTile(i));
+            {
+                var bi = board[i];
+                if (bi != curPlayer && bi != Roster.None) lostTiles.Add(board.GetTile(i), bi);
+            }
             
-            EM.Raise(EM.Evt.SyncBoardWin, new { }, new KeyValuePair<Roster, List<Tile>>(curPlayer, lostTiles));
+            EM.Raise(EM.Evt.SyncBoardWin, new { }, lostTiles);
 
             return;
         }

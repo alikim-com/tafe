@@ -1,8 +1,10 @@
 ﻿namespace imageUtility;
 
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Numerics;
 
 static public class ColorExtensions
 {
@@ -221,7 +223,14 @@ static public class ImageExtensions
         return dst;
     }
 
-    static public Image Desaturate(this Image src, string mode)
+    /// <summary>
+    /// Makes a black & white version of an image
+    /// </summary>
+    /// <param name="mode">"desaturate" - formula ised un Photoshop</param>
+    /// <param name="factor">in "desaturate" mode - the desired progression towards B&W image E[0,1]</param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    static public Image Desaturate(this Image src, string mode, double factor = 1)
     {
         if (mode != "PS")
             throw new NotImplementedException($"Image.Desaturate : mode '{mode}'");
@@ -235,13 +244,20 @@ static public class ImageExtensions
             {
                 Color sRGB = srcBmp.GetPixel(x, y);
                 // photoshop desaturate
-                int avr = (
-                    Math.Min(sRGB.R, Math.Min(sRGB.G, sRGB.B)) +
-                    Math.Max(sRGB.R, Math.Max(sRGB.G, sRGB.B))
-                ) / 2;
-                dst.SetPixel(x, y, Color.FromArgb(sRGB.A, avr, avr, avr));
+                var min = Math.Min(sRGB.R, Math.Min(sRGB.G, sRGB.B));
+                var max = Math.Max(sRGB.R, Math.Max(sRGB.G, sRGB.B));
+                int avr = (min + max) / 2;
+                dst.SetPixel(x, y, Color.FromArgb(
+                    sRGB.A,
+                    Lerp(sRGB.R, avr, factor),
+                    Lerp(sRGB.G, avr, factor),
+                    Lerp(sRGB.B, avr, factor)
+                ));
             }
 
         return dst;
     }
+
+    static public int Lerp(int beg, int end, double f) => beg + (int)((end - beg) * f);
+    static public double Lerp(double beg, double end, double f) => beg + (end - beg) * f;
 }

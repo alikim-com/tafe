@@ -17,7 +17,7 @@ internal class EM
     /// </summary>
     /// <param>List of cells to grey out upon winning,<br/>
     /// containing row(X) and column(Y) of a cell and the player occupying it</param>
-    static event EventHandler<KeyValuePair<Game.Roster,List<Tile>>> EvtSyncBoardWin = delegate { };
+    static event EventHandler<Dictionary<Tile, Game.Roster>> EvtSyncBoardWin = delegate { };
     /// <summary>
     /// Sync the board with EvtSyncBoard translation done by VBridge
     /// </summary>
