@@ -293,6 +293,8 @@ partial class AppForm : Form
 
     void SetupSubsAndCb()
     {
+        EM.Subscribe(EM.Evt.GStateChanged, GStateChangedHandler());
+
         EM.Subscribe(EM.Evt.GameOver, GameOverHandler());
         EM.Subscribe(EM.Evt.GameTie, GameTieHandler());
 

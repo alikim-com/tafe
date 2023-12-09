@@ -7,6 +7,10 @@ namespace WinFormsApp1;
 internal class EM
 {
     /// <summary>
+    /// Notifies Menu about changes in game state
+    /// </summary>
+    static event EventHandler<Game.State> EvtGStateChanged = delegate { };
+    /// <summary>
     /// Translates game states into UI states in VBridge
     /// </summary>
     /// <param>List of cells to update,<br/>
@@ -60,6 +64,7 @@ internal class EM
     /// </summary>
     internal enum Evt
     {
+        GStateChanged,
         SyncBoard,
         SyncBoardWin,
         SyncBoardUI,
@@ -75,6 +80,7 @@ internal class EM
     /// To raise or sub/unsub to events by their enum names
     /// </summary>
     static readonly Dictionary<Evt, Delegate> dict = new() {
+        { Evt.GStateChanged, EvtGStateChanged },
         { Evt.SyncBoard, EvtSyncBoard },
         { Evt.SyncBoardWin, EvtSyncBoardWin },
         { Evt.SyncBoardUI, EvtSyncBoardUI },

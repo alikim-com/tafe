@@ -62,7 +62,7 @@ internal class TurnWheel
 
         AssertPlayer();
 
-        Game.state = Game.State.Started;
+        Game.GState = Game.State.Started;
     }
 
     static void GoNextPlayer() => head = head == Game.TurnList.Length - 1 ? 0 : head + 1;
@@ -88,6 +88,7 @@ internal class TurnWheel
 
     static internal void GameCountdown()
     {
+        Game.GState = Game.State.Countdown;
         Thread thread = new(CntDown);
         thread.Start();
     }

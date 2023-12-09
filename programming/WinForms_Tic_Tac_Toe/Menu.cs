@@ -8,6 +8,13 @@ partial class AppForm
 
     AboutForm? aboutForm;
 
+    private EventHandler<Game.State> GStateChangedHandler() => (object? _, Game.State state) =>
+    {
+        var enable = state != Game.State.Countdown;
+        menuLoad.Enabled = enable;
+        menuSave.Enabled = enable;
+    };
+
     private void MenuHelpAbout_Click(object sender, EventArgs e)
     {
         aboutForm ??= new AboutForm();
@@ -23,7 +30,7 @@ partial class AppForm
             layoutName,
             Game.board.ToArray(),
             Game.TurnList,
-            Game.state,
+            Game.GState,
             TurnWheel.Head,
             chosenArr
         );
