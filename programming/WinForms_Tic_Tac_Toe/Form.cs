@@ -276,6 +276,7 @@ partial class AppForm : Form
         {
             case Game.State.Won:
                 EM.Raise(EM.Evt.GameOver, new { }, TurnWheel.CurPlayer);
+                Game.GreyOutLostTiles(TurnWheel.CurPlayer);
                 break;
             case Game.State.Tie:
                 EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());

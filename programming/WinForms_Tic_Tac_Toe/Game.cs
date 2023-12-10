@@ -189,15 +189,7 @@ class Game
             GState = State.Won;
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
 
-            // grey tiles update
-            var lostTiles = new Dictionary<Tile, Roster>();
-            for (var i = 0; i < board.Length; i++)
-            {
-                var bi = board[i];
-                if (bi != curPlayer && bi != Roster.None) lostTiles.Add(board.GetTile(i), bi);
-            }
-
-            EM.Raise(EM.Evt.SyncBoardWin, new { }, lostTiles);
+            GreyOutLostTiles(curPlayer);
 
             return;
         }
@@ -213,5 +205,17 @@ class Game
             GState = State.Tie;
             EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());
         }
+    }
+
+    static internal void GreyOutLostTiles(Roster curPlayer)
+    {
+        var lostTiles = new Dictionary<Tile, Roster>();
+        for (var i = 0; i < board.Length; i++)
+        {
+            var bi = board[i];
+            if (bi != curPlayer && bi != Roster.None) lostTiles.Add(board.GetTile(i), bi);
+        }
+
+        EM.Raise(EM.Evt.SyncBoardWin, new { }, lostTiles);
     }
 }
