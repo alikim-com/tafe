@@ -125,7 +125,7 @@ internal class EM
         if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Subscribe : no event for Evt.{enm}");
 
-            dict[enm] = Delegate.Combine(evt, handler);
+        dict[enm] = Delegate.Combine(evt, handler);
     }
 
     static internal void Unsubscribe(Evt enm, Delegate handler)

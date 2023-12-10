@@ -33,7 +33,7 @@ partial class SetupForm : Form
         ForeColor = theme.Text;
         BackColor = theme.Prime;
 
-        foreLeft = UIColors.ForeLeft; 
+        foreLeft = UIColors.ForeLeft;
         foreRight = UIColors.ForeRight;
         foreLeftDim = ColorExtensions.BlendOver(Color.FromArgb(96, 0, 0, 0), foreLeft);
         foreRightDim = ColorExtensions.BlendOver(Color.FromArgb(96, 0, 0, 0), foreRight);
@@ -103,7 +103,7 @@ partial class SetupForm : Form
         Point locId = identityLeft.Location;
         int allegX = allegLeft.Location.X + allegLeft.Width;
         locId.Y += 15;
-        
+
         foreach (var (rostItem, identity) in Game.rosterIdentity)
         {
             tab++;

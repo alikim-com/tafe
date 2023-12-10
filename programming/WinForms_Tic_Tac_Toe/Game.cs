@@ -1,8 +1,4 @@
-﻿
-using System.Collections.Generic;
-using System.Linq;
-
-namespace WinFormsApp1;
+﻿namespace WinFormsApp1;
 
 /// <summary>
 /// Defines players roster, evaluates the board and winning conditions
@@ -40,15 +36,15 @@ class Game
     }
 
     static internal State _state = State.Countdown;
-    static internal State GState 
+    static internal State GState
     {
         get => _state;
         set
-        { 
+        {
             _state = value;
             EM.Raise(EM.Evt.GStateChanged, new { }, _state);
         }
-    } 
+    }
 
     /// <summary>
     /// Players from Roster in the order of their turns;<br/>
@@ -120,7 +116,7 @@ class Game
                 }
             }
 
-            if(info.takenStats.Count > 0) info.dominant = info.takenStats.MaxBy(rec => rec.Value);
+            if (info.takenStats.Count > 0) info.dominant = info.takenStats.MaxBy(rec => rec.Value);
 
             linesInfo.Add(info);
         }
@@ -188,7 +184,7 @@ class Game
 
         var gameWon = dominant?.Value == 3;
 
-        if(gameWon)
+        if (gameWon)
         {
             GState = State.Won;
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
@@ -200,7 +196,7 @@ class Game
                 var bi = board[i];
                 if (bi != curPlayer && bi != Roster.None) lostTiles.Add(board.GetTile(i), bi);
             }
-            
+
             EM.Raise(EM.Evt.SyncBoardWin, new { }, lostTiles);
 
             return;

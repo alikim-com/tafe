@@ -1,17 +1,8 @@
 ﻿
 namespace WinFormsApp1;
 
-/// <summary>
-/// Controls board cells backgrounds and associated mouse events
-/// </summary>
-internal class CellWrapper : IComponent
+class CellBg
 {
-    readonly Panel box;
-    readonly Point rc;
-    internal Point RC { get => rc; }
-    readonly Dictionary<BgMode, Image> backgr = new();
-    readonly Dictionary<BgMode, EventHandler> evtDetail = new();
-
     internal enum BgMode
     {
         // star
@@ -25,6 +16,62 @@ internal class CellWrapper : IComponent
         Player1Lost,
         Player2Lost,
     }
+
+    static protected readonly Dictionary<BgMode, Image> backgr = new();
+
+    static internal void CreateBgSet(Size boxSize)
+    {
+        Image bgHover = Resource.Star.GetOverlayOnBackground(
+            new Size( // to improve quality in bigger app window
+                (int)(boxSize.Width * 1.5),
+                (int)(boxSize.Height * 1.5)),
+            null,
+            "center",
+            "center"
+        );
+        Image bgDef = bgHover.GetImageCopyWithAlpha(0.70f);
+
+        backgr.Add(BgMode.Default, bgDef);
+        backgr.Add(BgMode.MouseEnter, bgHover);
+        backgr.Add(BgMode.MouseLeave, bgDef);
+
+        Image token1 = Resource.TokenLeft.GetOverlayOnBackground(
+            new Size(
+                (int)(boxSize.Width * 1.5),
+                (int)(boxSize.Height * 1.5)),
+            null,
+            "center",
+            "center"
+        );
+
+        Image token2 = Resource.TokenRight.GetOverlayOnBackground(
+            new Size(
+                (int)(boxSize.Width * 1.5),
+                (int)(boxSize.Height * 1.5)),
+            null,
+            "center",
+            "center"
+        );
+
+        backgr.Add(BgMode.Player1, token1);
+        backgr.Add(BgMode.Player2, token2);
+
+        backgr.Add(BgMode.Player1Lost, token1.Desaturate("PS", 0.8));
+        backgr.Add(BgMode.Player2Lost, token2.Desaturate("PS", 0.8));
+    }
+
+}
+
+/// <summary>
+/// Controls board cells backgrounds and associated mouse events
+/// </summary>
+internal class CellWrapper : CellBg, IComponent
+{
+    readonly Panel box;
+    readonly Point rc;
+    internal Point RC { get => rc; }
+    
+    readonly Dictionary<BgMode, EventHandler> evtDetail = new();
 
     public bool IsLocked { get; set; } = false;
     bool isEnabled = false;
@@ -46,7 +93,6 @@ internal class CellWrapper : IComponent
             SetBg(val);
         };
 
-        CreateBgSet();
         CreateEventHandlers();
     }
 
@@ -57,63 +103,18 @@ internal class CellWrapper : IComponent
 
     void SetBg(BgMode mode) => evtDetail[mode](this, new EventArgs());
 
-    void CreateBgSet()
+    EventHandler CreateEventHandler(Image? image) => (object? sender, EventArgs e) =>
     {
-        Image bgHover = Resource.Star.GetOverlayOnBackground(
-            new Size( // to improve quality in bigger app window
-                (int)(box.Size.Width * 1.5),
-                (int)(box.Size.Height * 1.5)),
-            null,
-            "center",
-            "center"
-        );
-        Image bgDef = bgHover.GetImageCopyWithAlpha(0.70f);
-
-        backgr.Add(BgMode.Default, bgDef);
-        backgr.Add(BgMode.MouseEnter, bgHover);
-        backgr.Add(BgMode.MouseLeave, bgDef);
-
-        Image token1 = Resource.TokenLeft.GetOverlayOnBackground(
-            new Size(
-                (int)(box.Size.Width * 1.5),
-                (int)(box.Size.Height * 1.5)),
-            null,
-            "center",
-            "center"
-        );
-
-        Image token2= Resource.TokenRight.GetOverlayOnBackground(
-            new Size(
-                (int)(box.Size.Width * 1.5),
-                (int)(box.Size.Height * 1.5)),
-            null,
-            "center",
-            "center"
-        );
-
-        backgr.Add(BgMode.Player1, token1);
-        backgr.Add(BgMode.Player2, token2);
-
-        backgr.Add(BgMode.Player1Lost, token1.Desaturate("PS", 0.8));
-        backgr.Add(BgMode.Player2Lost, token2.Desaturate("PS", 0.8));
-    }
-
-    EventHandler CreateEventHandler(BgMode evtName)
-    {
-        return (object? sender, EventArgs e) =>
-        {
-            if (!backgr.TryGetValue(evtName, out Image? image)) return;
-            if (box.BackgroundImage != image)
-            {
-                box.BackgroundImage = image;
-            }
-        };
-    }
+        if (box.BackgroundImage != image) box.BackgroundImage = image;
+    };
 
     void CreateEventHandlers()
     {
         foreach (BgMode evtName in Enum.GetValues(typeof(BgMode)))
-            evtDetail.Add(evtName, CreateEventHandler(evtName));
+        {
+            if (!backgr.TryGetValue(evtName, out Image? image)) return;
+            evtDetail.Add(evtName, CreateEventHandler(image));
+        }
     }
 
     void AddHoverEventHandlers()
@@ -146,6 +147,13 @@ internal class CellWrapper : IComponent
         box.Click -= OnClick;
         RemoveHoverEventHandlers();
         box.Cursor = Cursors.Default;
+    }
+
+    public void Reset()
+    {
+        IsLocked = false;
+        isEnabled = true;
+        Disable();
     }
 
     /// <summary>

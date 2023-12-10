@@ -1,10 +1,8 @@
 ﻿namespace imageUtility;
 
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Numerics;
 
 static public class ColorExtensions
 {
@@ -142,7 +140,7 @@ static public class ImageExtensions
                     double aFact = a1 * (1 - a2);
                     double a = a2 + aFact;
                     double ra = 1 / a;
-                    Color blendOver = a == 0 ? Color.FromArgb(0,0,0,0) : 
+                    Color blendOver = a == 0 ? Color.FromArgb(0, 0, 0, 0) :
                     Color.FromArgb(
                         (int)(255 * a),
                         (int)((srcARGB.R * a2 + dstARGB.R * aFact) * ra),

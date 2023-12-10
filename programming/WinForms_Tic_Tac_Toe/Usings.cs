@@ -1,4 +1,4 @@
-﻿global using imageUtility;
-global using geomUtility;
+﻿global using geomUtility;
+global using imageUtility;
 global using uiRenderer;
 global using utils;

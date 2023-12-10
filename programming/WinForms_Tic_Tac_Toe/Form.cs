@@ -164,11 +164,7 @@ partial class AppForm : Form
         ShowEndGameButton(false);
 
         foreach (var cw in cellWrap)
-            if (cw is IComponent iComp)
-            {
-                iComp.IsLocked = false;
-                iComp.Disable();
-            }
+            if (cw is IComponent iComp) iComp.Reset();
     }
     void EnableUI()
     {
@@ -244,10 +240,15 @@ partial class AppForm : Form
         foreach (var cw in cellWrap)
             if (cw is IComponent iComp)
             {
-                var rc = cw.RC;
-                var owned = Game.board[rc.X, rc.Y] != Game.Roster.None;
-                if (owned) iComp.Disable(); else iComp.Enable();
-                iComp.IsLocked = owned;
+                iComp.Reset();
+                var owned = Game.board[cw.RC.X, cw.RC.Y] != Game.Roster.None;
+                if (owned || gameOver)
+                {
+                    iComp.Disable();
+                    iComp.IsLocked = true;
+
+                } else 
+                    iComp.Enable();
             }
 
         // <---- ResetUI() ----
@@ -448,6 +449,8 @@ partial class AppForm : Form
         {
             // --------- board cells ----------
 
+            CellBg.CreateBgSet(new Size(142, 135));
+
             int tabInd = 0;
             cells = new Panel[3, 3];
             for (int row = 0; row < 3; row++)
@@ -458,7 +461,7 @@ partial class AppForm : Form
                     p.Dock = DockStyle.Fill;
                     p.Margin = new Padding(12);
                     p.Name = $"cell{row}{col}";
-                    p.Size = new Size(109, 108);
+                  //  p.Size = new Size(109, 108);
                     p.TabIndex = tabInd++;
 
                     tLayout.Controls.Add(p, col, row);

@@ -205,7 +205,8 @@ public class Utils
     static public P? LoadProfileFromString<P>(string input)
     {
         var obj = JsonSerializer.Deserialize<P>(input);
-        if (obj == null) {
+        if (obj == null)
+        {
             Msg($"Utils.LoadProfileFromString : input string '{input}' produces null object");
             return default;
         }

@@ -42,7 +42,7 @@ partial class AppForm
     {
         var input = Utils.OpenLoadFileDialog(profPath);
         if (string.IsNullOrEmpty(input)) return;
-        
+
         var prof = Utils.LoadProfileFromString<SaveGame>(input);
         if (prof == default(SaveGame))
         {
