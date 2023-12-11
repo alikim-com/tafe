@@ -10,7 +10,9 @@ namespace WinFormsApp1;
 internal class TurnWheel
 {
     static int head;
-    static bool busy;
+    static bool isBusy;
+
+    static internal int Head { get => head; }
 
     static internal Game.Roster CurPlayer => Game.TurnList[head];
 
@@ -27,20 +29,20 @@ internal class TurnWheel
         DisableUICb = _DisableUICb;
     }
 
-    static internal void Reset()
+    static internal void Reset(int _head = -1)
     {
-        head = -1;
-        busy = false;
+        head = _head;
+        isBusy = false;
     }
 
     /// <summary>
     /// For Human players Comes from CellWrapper -> OnClick;<br/>
-    /// For AI players from CellWrapper -> AIMovedHandler -> OnClick
+    /// For AI players from CellWrapper -> AIMovedHandler -> OnClick<br/>
     /// </summary>
     static internal readonly EventHandler<Point> PlayerMovedHandler = (object? sender, Point e) =>
     {
-        if (busy) return;
-        busy = true;
+        if (isBusy) return;
+        isBusy = true;
 
         if (sender is not IComponent iComp)
             throw new Exception($"TurnWheel.PlayerMovedHandler : '{sender}' is not IComponent");
@@ -54,11 +56,13 @@ internal class TurnWheel
 
     static internal void Advance()
     {
-        busy = false;
+        isBusy = false;
 
         GoNextPlayer();
 
         AssertPlayer();
+
+        Game.GState = Game.State.Started;
     }
 
     static void GoNextPlayer() => head = head == Game.TurnList.Length - 1 ? 0 : head + 1;
@@ -66,7 +70,7 @@ internal class TurnWheel
     /// <summary>
     /// Ensure next click is scheduled and will be performed
     /// </summary>
-    static void AssertPlayer()
+    static internal void AssertPlayer()
     {
         if (CurPlayerIsAI)
         {
@@ -74,8 +78,8 @@ internal class TurnWheel
 
             EM.Raise(EM.Evt.AIMakeMove, new { }, CurPlayer);
 
-        } else if(CurPlayerIsHuman)
-        { 
+        } else if (CurPlayerIsHuman)
+        {
             EnableUICb();
         }
 
@@ -84,6 +88,7 @@ internal class TurnWheel
 
     static internal void GameCountdown()
     {
+        Game.GState = Game.State.Countdown;
         Thread thread = new(CntDown);
         thread.Start();
     }
@@ -99,7 +104,7 @@ internal class TurnWheel
         }
 
         // UI safety
-        EM.InvokeFromMainThread(Advance);
+        EM.InvokeFromMainThread(() => Advance());
     }
 
 }

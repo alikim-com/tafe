@@ -53,7 +53,7 @@ partial class UML_Events
         pictureBox1.Dock = DockStyle.Fill;
         pictureBox1.Location = new Point(0, 24);
         pictureBox1.Name = "pictureBox1";
-        pictureBox1.Size = new Size(1500, 876);
+        //pictureBox1.Size = new Size(1900, 1050);
         pictureBox1.TabIndex = 0;
         pictureBox1.TabStop = false;
         pictureBox1.Paint += PictureBox1_Paint;
@@ -66,7 +66,7 @@ partial class UML_Events
         // 
         label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
         label1.AutoSize = true;
-        label1.Location = new Point(10, 875);
+        label1.Location = new Point(10, 987);
         label1.Name = "label1";
         label1.Size = new Size(392, 15);
         label1.TabIndex = 1;
@@ -96,6 +96,7 @@ partial class UML_Events
         menuLoadOpen.Name = "menuLoadOpen";
         menuLoadOpen.Size = new Size(165, 22);
         menuLoadOpen.Text = "Open layout...";
+        menuLoadOpen.Click += MenuLoadOpen_Click;
         // 
         // menuLoadCollection
         // 
@@ -157,7 +158,7 @@ partial class UML_Events
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(1500, 900);
+        ClientSize = new Size(1900, 1020);
         Controls.Add(label1);
         Controls.Add(pictureBox1);
         Controls.Add(menuStrip1);

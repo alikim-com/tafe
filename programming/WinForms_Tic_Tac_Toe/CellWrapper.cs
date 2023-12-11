@@ -112,7 +112,11 @@ internal class CellWrapper : CellBg, IComponent
     {
         foreach (BgMode evtName in Enum.GetValues(typeof(BgMode)))
         {
-            if (!backgr.TryGetValue(evtName, out Image? image)) return;
+            if (!backgr.TryGetValue(evtName, out Image? image))
+            {
+                Utils.Msg($"CellWrapper.CreateEventHandlers : no image for event '{evtName}' found");
+                continue;
+            }
             evtDetail.Add(evtName, CreateEventHandler(image));
         }
     }

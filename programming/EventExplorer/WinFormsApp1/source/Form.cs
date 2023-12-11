@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -11,8 +10,8 @@ partial class AppForm : Form
     Size ncSize; // non-client area
     readonly int minWndWidth = 200;
     int minWndHeight = 0;
-    Dictionary<Label, Font> scalableLabels = new();
-    Dictionary<ToolStripLabel, Font> scalableTSLabels = new();
+    readonly Dictionary<Label, Font> scalableLabels = new();
+    readonly Dictionary<ToolStripLabel, Font> scalableTSLabels = new();
 
     struct ScalableTSButton
     {
@@ -85,6 +84,8 @@ partial class AppForm : Form
 
         InitializeMenu();
 
+        BuildProfileListMenu();
+
         // prevent background flickering
         var doubleBuffed = new object[] { tLayout, labelLeft, labelRight, labelVS, toolStripButton, toolStripButtonLabel };
         foreach (var ctrl in doubleBuffed) ApplyDoubleBuffer(tLayout);
@@ -105,15 +106,8 @@ partial class AppForm : Form
         // Event subscriptions & callbacks
         SetupSubsAndCb();
 
-        // MULTI-USE: resets everything and start the game
+        // MULTI-USE: resets everything and starts the game
         StartGame();
-
-        menuHelpAbout.Click += (object? sender, EventArgs e) =>
-        {
-            var fact = 0.5;
-            var size = toolStripButton.Size;
-            toolStripButton.Size = new Size((int)(size.Width * fact), (int)(size.Height * fact));
-        };
     }
 
     void InitializeMenu()
@@ -170,11 +164,7 @@ partial class AppForm : Form
         ShowEndGameButton(false);
 
         foreach (var cw in cellWrap)
-            if (cw is IComponent iComp)
-            {
-                iComp.IsLocked = false;
-                iComp.Disable();
-            }
+            if (cw is IComponent iComp) iComp.Reset();
     }
     void EnableUI()
     {
@@ -205,10 +195,10 @@ partial class AppForm : Form
         AIs.Clear();
 
         foreach (var chItm in chosenArr)
-            if (chItm.originType == "AI")
+            if (chItm.OriginType == "AI")
             {
-                var logic = chItm.rosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
-                var aiAgent = new AI(logic, chItm.rosterId);
+                var logic = chItm.RosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
+                var aiAgent = new AI(logic, chItm.RosterId);
                 AIs.Add(aiAgent);
 
                 EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
@@ -218,17 +208,102 @@ partial class AppForm : Form
         TurnWheel.GameCountdown();
     }
 
+    void LoadGame(SaveGame prof)
+    {
+        // retrieve players list
+        AssertPlayers(prof.Chosen);
+
+        // create player defined bg
+        CreateBackground();
+
+        // ---- Reset() ---->
+
+        // rebuild visual bridge for translation between
+        // Game <-> (CellWrapper, LabelManager)
+        VBridge.Reset(chosen);
+
+        // reset the game and the board
+        Game.Reset(
+            chosen.Select(chItm => chItm.RosterId).ToArray(),
+            prof.Board
+        );
+        // Game.SetTurns("random");
+
+        TurnWheel.Reset(prof.TurnWheelHead);
+
+        // ---- ResetUI() ---->
+
+        var gameOver = prof.State == Game.State.Won || prof.State == Game.State.Tie;
+
+        ShowEndGameButton(gameOver);
+
+        foreach (var cw in cellWrap)
+            if (cw is IComponent iComp)
+            {
+                iComp.Reset();
+                var owned = Game.board[cw.RC.X, cw.RC.Y] != Game.Roster.None;
+                if (owned || gameOver)
+                {
+                    iComp.Disable();
+                    iComp.IsLocked = true;
+
+                } else 
+                    iComp.Enable();
+            }
+
+        // <---- ResetUI() ----
+
+        // <---- Reset() ----
+
+        // (re)create AIs, if needed
+
+        foreach (var aiAgent in AIs)
+            EM.Unsubscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
+        AIs.Clear();
+
+        foreach (var chItm in chosenArr)
+            if (chItm.OriginType == "AI")
+            {
+                var logic = chItm.RosterId == Game.Roster.AI_One ? AI.Logic.RNG : AI.Logic.Easy;
+                var aiAgent = new AI(logic, chItm.RosterId);
+                AIs.Add(aiAgent);
+
+                EM.Subscribe(EM.Evt.AIMakeMove, aiAgent.MoveHandler);
+            }
+
+        // start game, if necessary
+        switch (prof.State)
+        {
+            case Game.State.Won:
+                EM.Raise(EM.Evt.GameOver, new { }, TurnWheel.CurPlayer);
+                Game.GreyOutLostTiles(TurnWheel.CurPlayer);
+                break;
+            case Game.State.Tie:
+                EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());
+                break;
+            case Game.State.Countdown:
+                TurnWheel.Advance();
+                break;
+            case Game.State.Started:
+                TurnWheel.AssertPlayer();
+                break;
+        }
+    }
+
     EventHandler<Game.Roster> GameOverHandler() => (object? _, Game.Roster __) => ShowEndGameButton(true);
     EventHandler GameTieHandler() => (object? _, EventArgs e) => ShowEndGameButton(true);
 
     void SetupSubsAndCb()
     {
+        EM.Subscribe(EM.Evt.GStateChanged, GStateChangedHandler());
+
         EM.Subscribe(EM.Evt.GameOver, GameOverHandler());
         EM.Subscribe(EM.Evt.GameTie, GameTieHandler());
 
         EM.Subscribe(EM.Evt.UpdateLabels, LabelManager.UpdateLabelsHandler);
 
         EM.Subscribe(EM.Evt.SyncBoard, VBridge.SyncBoardHandler);
+        EM.Subscribe(EM.Evt.SyncBoardWin, VBridge.SyncBoardWinHandler);
         EM.Subscribe(EM.Evt.SyncMoveLabels, VBridge.SyncMoveLabelsHandler);
         EM.Subscribe(EM.Evt.GameOver, VBridge.GameOverHandler);
         EM.Subscribe(EM.Evt.GameTie, VBridge.GameTieHandler);
@@ -267,7 +342,7 @@ partial class AppForm : Form
         VBridge.Reset(chosen);
 
         // reset the game and the board
-        Game.Reset(chosen.Select(chItm => chItm.rosterId).ToArray());
+        Game.Reset(chosen.Select(chItm => chItm.RosterId).ToArray());
         // Game.SetTurns("random");
 
         TurnWheel.Reset();
@@ -275,12 +350,12 @@ partial class AppForm : Form
         ResetUI();
     }
 
-    void AssertPlayers()
+    void AssertPlayers(IEnumerable<ChoiceItem>? _chosen = null)
     {
-        chosen = SetupForm.roster.Where(itm => itm.chosen);
+        chosen = _chosen ?? SetupForm.roster.Where(itm => itm.chosen);
         chosenArr = chosen.ToArray();
         if (chosenArr.Length != 2)
-            throw new Exception($"Form.CreateBackground : wrong number of players '{chosenArr.Length}'");
+            throw new Exception($"Form.AssertPlayers : wrong number of players '{chosenArr.Length}'");
 
         firstChosenIsLeft = chosenArr[0].side == ChoiceItem.Side.Left;
     }
@@ -288,8 +363,8 @@ partial class AppForm : Form
     void CreateBackground()
     {
         KeyValuePair<Game.Roster, Game.Roster> leftRightBg = firstChosenIsLeft ?
-            new(chosenArr[0].rosterId, chosenArr[1].rosterId) :
-            new(chosenArr[1].rosterId, chosenArr[0].rosterId);
+            new(chosenArr[0].RosterId, chosenArr[1].RosterId) :
+            new(chosenArr[1].RosterId, chosenArr[0].RosterId);
 
         foreach (var (_leftRightBg, bgImage) in mainBg)
             if (_leftRightBg.Equals(leftRightBg)) // cache exists
@@ -313,7 +388,7 @@ partial class AppForm : Form
         g.FillRectangle(brush, rect);
 
         Image?[] headImage = chosen.Select(itm =>
-            (Image?)Resource.ResourceManager.GetObject($"{itm.rosterId}_{itm.side}_Head")).ToArray();
+            (Image?)Resource.ResourceManager.GetObject($"{itm.RosterId}_{itm.side}_Head")).ToArray();
 
         KeyValuePair<Image?, Image?> leftRightImage = firstChosenIsLeft ?
             new(headImage[0], headImage[1]) : new(headImage[1], headImage[0]);
@@ -344,7 +419,7 @@ partial class AppForm : Form
         labelLeft.BackColor = labelRight.BackColor = UIColors.Transparent;
         labelLeft.Font = labelRight.Font = UIFonts.regular;
         labelVS.Font = new Font("Arial", 24F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point);
-        toolStripButton.Font = new("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+        toolStripButton.Font = UIFonts.button;
 
         labelLeft.Anchor = labelRight.Anchor = AnchorStyles.None;
 
@@ -375,6 +450,8 @@ partial class AppForm : Form
         {
             // --------- board cells ----------
 
+            CellBg.CreateBgSet(new Size(142, 135));
+
             int tabInd = 0;
             cells = new Panel[3, 3];
             for (int row = 0; row < 3; row++)
@@ -385,7 +462,7 @@ partial class AppForm : Form
                     p.Dock = DockStyle.Fill;
                     p.Margin = new Padding(12);
                     p.Name = $"cell{row}{col}";
-                    p.Size = new Size(109, 108);
+                  //  p.Size = new Size(109, 108);
                     p.TabIndex = tabInd++;
 
                     tLayout.Controls.Add(p, col, row);
@@ -457,7 +534,7 @@ partial class AppForm : Form
             switch ((WMSZ)m.WParam.ToInt32())
             {
                 case WMSZ.LEFT:
-                case WMSZ.RIGHT:                  
+                case WMSZ.RIGHT:
                     // width has changed, adjust height
                     clWidth = rc.Right - rc.Left - ncSize.Width;
                     clHeight = (int)(clWidth / clRatio);

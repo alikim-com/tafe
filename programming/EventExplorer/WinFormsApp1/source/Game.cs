@@ -1,5 +1,4 @@
-﻿
-namespace WinFormsApp1;
+﻿namespace WinFormsApp1;
 
 /// <summary>
 /// Defines players roster, evaluates the board and winning conditions
@@ -27,6 +26,25 @@ class Game
     };
 
     static Roster[] _turnList = Array.Empty<Roster>();
+
+    internal enum State
+    {
+        Countdown,
+        Started,
+        Won,
+        Tie
+    }
+
+    static internal State _state = State.Countdown;
+    static internal State GState
+    {
+        get => _state;
+        set
+        {
+            _state = value;
+            EM.Raise(EM.Evt.GStateChanged, new { }, _state);
+        }
+    }
 
     /// <summary>
     /// Players from Roster in the order of their turns;<br/>
@@ -98,7 +116,7 @@ class Game
                 }
             }
 
-            if(info.takenStats.Count > 0) info.dominant = info.takenStats.MaxBy(rec => rec.Value);
+            if (info.takenStats.Count > 0) info.dominant = info.takenStats.MaxBy(rec => rec.Value);
 
             linesInfo.Add(info);
         }
@@ -106,11 +124,11 @@ class Game
         return linesInfo;
     }
 
-    static internal void Reset(Roster[] turnlist)
+    static internal void Reset(Roster[] turnlist, Roster[]? _board = null)
     {
         TurnList = turnlist;
 
-        ResetBoard();
+        ResetBoard(_board);
 
         // add all the board cells to the update
         var update = new Dictionary<Tile, Roster>();
@@ -139,9 +157,12 @@ class Game
         }
     }
 
-    static void ResetBoard()
+    static void ResetBoard(Roster[]? _board)
     {
-        for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
+        if (_board != null)
+            for (int i = 0; i < board.Length; i++) board[i] = _board[i];
+        else
+            for (int i = 0; i < board.Length; i++) board[i] = Roster.None;
     }
 
     /// <summary>
@@ -161,20 +182,40 @@ class Game
 
         var dominant = linesInfo.MaxBy(rec => rec.dominant.Value)?.dominant;
 
-        var gameOver = dominant?.Value == 3;
+        var gameWon = dominant?.Value == 3;
 
-        if(gameOver)
+        if (gameWon)
         {
+            GState = State.Won;
             EM.Raise(EM.Evt.GameOver, new { }, curPlayer);
+
+            GreyOutLostTiles(curPlayer);
+
             return;
         }
 
         var maxCanTake = linesInfo.MaxBy(rec => rec.canTake.Count)?.canTake.Count;
 
-        if(maxCanTake > 0) 
+        if (maxCanTake > 0)
+        {
             TurnWheel.Advance();
 
-        else
+        } else
+        {
+            GState = State.Tie;
             EM.Raise(EM.Evt.GameTie, new { }, new EventArgs());
+        }
+    }
+
+    static internal void GreyOutLostTiles(Roster curPlayer)
+    {
+        var lostTiles = new Dictionary<Tile, Roster>();
+        for (var i = 0; i < board.Length; i++)
+        {
+            var bi = board[i];
+            if (bi != curPlayer && bi != Roster.None) lostTiles.Add(board.GetTile(i), bi);
+        }
+
+        EM.Raise(EM.Evt.SyncBoardWin, new { }, lostTiles);
     }
 }

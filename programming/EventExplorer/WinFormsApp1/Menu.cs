@@ -23,6 +23,39 @@ partial class UML_Events
         AddProfile(prof);
     }
 
+    void MenuLoadOpen_Click(object? sender, EventArgs e)
+    {
+        var input = Utils.OpenLoadFileDialog(profPath);
+        if (string.IsNullOrEmpty(input)) return;
+
+        var prof = Utils.LoadProfileFromString<Profile>(input);
+        if (prof == default(Profile))
+        {
+            Utils.Msg($"Menu.MenuLoadOpen_Click : profile from string '{input}' produces empty game");
+            return;
+        }
+
+        ApplyProfile(prof);
+    }
+
+    void ApplyProfile(Profile prof)
+    {
+        // update boxes from profile
+        menuLayout.Text = prof.Name;
+        foreach (var pbox in prof.Boxes)
+        {
+            var box = boxes.Find(b => b.name == pbox.Name);
+            if (box == null) continue;
+
+            box.pos = pbox.Pos;
+            box.size = pbox.Size;
+        }
+
+        // force repaint, no grid positioning
+        PaintCheckAfter(1);
+        UpdatePaintCheck(true, false);
+    }
+
     void ApplyProfile(string pname)
     {
         var prof = profiles.Find(p => p.Name == pname);

@@ -7,11 +7,21 @@ namespace WinFormsApp1;
 internal class EM
 {
     /// <summary>
+    /// Notifies Menu about changes in game state
+    /// </summary>
+    static event EventHandler<Game.State> EvtGStateChanged = delegate { };
+    /// <summary>
     /// Translates game states into UI states in VBridge
     /// </summary>
     /// <param>List of cells to update,<br/>
     /// containing row(X) and column(Y) of a cell and the player occupying it</param>
     static event EventHandler<Dictionary<Tile, Game.Roster>> EvtSyncBoard = delegate { };
+    /// <summary>
+    /// Translates game states into UI states in VBridge
+    /// </summary>
+    /// <param>List of cells to grey out upon winning,<br/>
+    /// containing row(X) and column(Y) of a cell and the player occupying it</param>
+    static event EventHandler<Dictionary<Tile, Game.Roster>> EvtSyncBoardWin = delegate { };
     /// <summary>
     /// Sync the board with EvtSyncBoard translation done by VBridge
     /// </summary>
@@ -54,7 +64,9 @@ internal class EM
     /// </summary>
     internal enum Evt
     {
+        GStateChanged,
         SyncBoard,
+        SyncBoardWin,
         SyncBoardUI,
         AIMakeMove,
         SyncMoveLabels,
@@ -68,7 +80,9 @@ internal class EM
     /// To raise or sub/unsub to events by their enum names
     /// </summary>
     static readonly Dictionary<Evt, Delegate> dict = new() {
+        { Evt.GStateChanged, EvtGStateChanged },
         { Evt.SyncBoard, EvtSyncBoard },
+        { Evt.SyncBoardWin, EvtSyncBoardWin },
         { Evt.SyncBoardUI, EvtSyncBoardUI },
         { Evt.AIMakeMove, EvtAIMakeMove },
         { Evt.SyncMoveLabels, EvtSyncMoveLabels },
@@ -111,7 +125,7 @@ internal class EM
         if (!dict.TryGetValue(enm, out var evt))
             throw new NotImplementedException($"EM.Subscribe : no event for Evt.{enm}");
 
-            dict[enm] = Delegate.Combine(evt, handler);
+        dict[enm] = Delegate.Combine(evt, handler);
     }
 
     static internal void Unsubscribe(Evt enm, Delegate handler)

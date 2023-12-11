@@ -15,7 +15,7 @@ internal class VBridge
     {
         { ChoiceItem.Side.None, CellWrapper.BgMode.Default },
         { ChoiceItem.Side.Left, CellWrapper.BgMode.Player1 },
-        { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 }
+        { ChoiceItem.Side.Right, CellWrapper.BgMode.Player2 },
     };
 
     // LabelManager
@@ -36,7 +36,7 @@ internal class VBridge
 
     // labels colors
     static readonly Color infoBackNone = Color.FromArgb(80, 0, 0, 0);
-    
+
     static readonly Color infoBackLeft = ColorExtensions.BlendOver(
         ColorExtensions.Scale(UIColors.TintLeft, 0.8), infoBackNone);
 
@@ -64,21 +64,21 @@ internal class VBridge
         {
             var side = chItem.side;
 
-            rosterToSide.Add(chItem.rosterId, side);
+            rosterToSide.Add(chItem.RosterId, side);
 
             var state = Utils.SafeDictValue(sideToPlayer, side);
             var stateMove = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Move");
             var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
 
-            var msgMove = chItem.originType == "AI" ?
-                $"{chItem.identityName} is moving..." : $"Your move, {chItem.identityName}...";
+            var msgMove = chItem.OriginType == "AI" ?
+                $"{chItem.IdentityName} is moving..." : $"Your move, {chItem.IdentityName}...";
 
-            var msgWon = $"Player {chItem.identityName} is the winner! Congratulations!";
+            var msgWon = $"Player {chItem.IdentityName} is the winner! Congratulations!";
 
-            enumInfo.Add(state, chItem.identityName);
+            enumInfo.Add(state, chItem.IdentityName);
             enumInfo.Add(stateMove, msgMove);
             enumInfo.Add(stateWon, msgWon);
-            
+
             // enum Bg colors
             var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
             var stateFore = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}Fore");
@@ -101,7 +101,7 @@ internal class VBridge
             LabelManager.Info.Player1,
             LabelManager.Info.Player2,
             LabelManager.Bg.None,
-            LabelManager.Bg.Player1Fore, 
+            LabelManager.Bg.Player1Fore,
             LabelManager.Bg.Player2Fore,
         });
     }
@@ -120,6 +120,27 @@ internal class VBridge
             var side = Utils.SafeDictValue(rosterToSide, rostId);
             var bg = Utils.SafeDictValue(sideToBg, side);
             cellBgs.Add(new Point(rc.row, rc.col), bg);
+        }
+
+        EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
+    };
+
+    /// <summary>
+    /// Subscribed to EM.EvtSyncBoardWin event<br/>
+    /// Translates game board state into UI states;<br/>
+    /// applies greyed bgs to cells owned by the winner
+    /// </summary>
+    static internal EventHandler<Dictionary<Tile, Game.Roster>> SyncBoardWinHandler =
+    (object? s, Dictionary<Tile, Game.Roster> e) =>
+    {
+        Dictionary<Point, CellWrapper.BgMode> cellBgs = new();
+
+        foreach (var (rc, rId) in e)
+        {
+            var side = Utils.SafeDictValue(rosterToSide, rId);
+            var bgFullColor = Utils.SafeDictValue(sideToBg, side);
+            var bgGreyedOut = Utils.SafeEnumFromStr<CellWrapper.BgMode>($"{bgFullColor}Lost");
+            cellBgs.Add(new Point(rc.row, rc.col), bgGreyedOut);
         }
 
         EM.Raise(EM.Evt.SyncBoardUI, s ?? new { }, cellBgs);
@@ -147,11 +168,11 @@ internal class VBridge
         var stateWon = Utils.SafeEnumFromStr<LabelManager.Info>($"{state}Won");
         var stateBg = Utils.SafeEnumFromStr<LabelManager.Bg>($"{state}InfoBack");
 
-        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] { 
-            stateWon, 
-            stateBg, 
-            LabelManager.Bg.Player1ForeDim, 
-            LabelManager.Bg.Player2ForeDim, 
+        EM.Raise(EM.Evt.UpdateLabels, new { }, new Enum[] {
+            stateWon,
+            stateBg,
+            LabelManager.Bg.Player1ForeDim,
+            LabelManager.Bg.Player2ForeDim,
         });
     };
 

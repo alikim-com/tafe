@@ -135,6 +135,26 @@ public class Utils
         }
     }
 
+    static public string OpenLoadFileDialog(string profPath)
+    {
+        using OpenFileDialog openFileDialog = new();
+
+        openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+        openFileDialog.Title = "Load layout";
+        openFileDialog.InitialDirectory = profPath;
+
+        DialogResult result = openFileDialog.ShowDialog();
+
+        if (result == DialogResult.OK)
+        {
+            string selectedFilePath = openFileDialog.FileName;
+            string outp = ReadFile(profPath, selectedFilePath);
+            return outp;
+        }
+
+        return "";
+    }
+
     static public P? LoadProfile<P>(string pfile, string profPath)
     {
         try
@@ -150,6 +170,17 @@ public class Utils
             Msg($"Utils.LoadProfile : There was an error <{ex.Message}> reading '{pfile}'");
             return default;
         }
+    }
+
+    static public P? LoadProfileFromString<P>(string input)
+    {
+        var obj = JsonSerializer.Deserialize<P>(input);
+        if (obj == null)
+        {
+            Msg($"Utils.LoadProfileFromString : input string '{input}' produces null object");
+            return default;
+        }
+        return obj;
     }
 }
 

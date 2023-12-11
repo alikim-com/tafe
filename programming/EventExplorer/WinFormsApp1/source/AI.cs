@@ -101,7 +101,7 @@ class AI
     Tile LogicEasy()
     {
         var linesInfo = Game.ExamineLines();
-        
+
         var playableLines = linesInfo.Where(rec => rec.canTake.Count > 0).ToArray();
 
         var playLine = playableLines.MaxBy(rec => rec.dominant.Value) ??

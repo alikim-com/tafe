@@ -275,6 +275,7 @@ public partial class UML_Events : Form
                     var classTo = itm.name;
                     foreach (var boxTo in boxes)
                     {
+                        if (boxTo == boxFrom) continue;
                         if (boxTo.cls.FindIndex(itm => itm.name == classTo) != -1)
                         {
                             DrawLineItemToBox(
@@ -297,6 +298,7 @@ public partial class UML_Events : Form
             {
                 foreach (var boxTo in boxes)
                 {
+                    if (boxTo == boxFrom) continue;
                     foreach (var sub in boxTo.subs)
                     {
                         if (sub.Key.Equals(trg.Key))
@@ -595,7 +597,7 @@ public class ClassBox
     static readonly Color[] _colors = new Color[]
     {
         Color.Red, Color.Green, Color.MediumSlateBlue, Color.Yellow, Color.Cyan, Color.Orange,
-        Color.CadetBlue, Color.Magenta, Color.LightGreen, Color.LightBlue, Color.LightCyan
+        Color.CadetBlue, Color.Magenta, Color.LightGreen, Color.LightBlue, Color.DeepSkyBlue
     };
 
     static public Color NextColor

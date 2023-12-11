@@ -1,6 +1,5 @@
 ﻿
 using System.ComponentModel;
-using static WinFormsApp1.LabelManager;
 
 namespace WinFormsApp1;
 
@@ -65,7 +64,7 @@ class LabelManager : INotifyPropertyChanged
         { AIMsg.Attack, " (attacking)"},
         { AIMsg.Defend, " (defending)"},
         { AIMsg.Random, " (random choice)"},
-        
+
         { Countdown.Three, "Game starts in 3..." },
         { Countdown.Two, "Game starts in 2..." },
         { Countdown.One, "Game starts in 1..." },
@@ -99,8 +98,7 @@ class LabelManager : INotifyPropertyChanged
                     stateToString.Add(enm, msg);
                 else
                     stateToString[enm] = msg;
-            }
-            else if(obj is Color backInfoColor)
+            } else if (obj is Color backInfoColor)
             {
                 if (!stateToColor.ContainsKey(enm))
                     stateToColor.Add(enm, backInfoColor);
