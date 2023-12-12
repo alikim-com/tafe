@@ -16,7 +16,8 @@ The engine mostly consists of `Game` and `TurnWheel` classes, where `AI` control
 - Multiple forms interaction
 - Preserving the aspect ratio of the main app window
 - AI players can have different levels of difficulty
-- Games can be saved and loaded (in JSON format)
+- Saving and loading games via JsonSerializer
+- Dynamic menu content
 ---
 - Scalable fonts
 - Image utilities for creating dynamic backgrounds, applying transparency & blending
@@ -24,8 +25,10 @@ The engine mostly consists of `Game` and `TurnWheel` classes, where `AI` control
 - A menu with fully customizable look and feel
 - AI-generated images
 
-
 ## How to play
 > Download [the stand-alone win-x64 version](https://raw.githubusercontent.com/alikim-com/tafe/main/programming/WinForms_Tic_Tac_Toe/WinForms_Tic_Tac_Toe_standalone.zip)
 
 > Download files from [the repository](https://github.com/alikim-com/tafe/tree/main/programming/WinForms_Tic_Tac_Toe) and compile your own executable.
+
+### How to save a game: 
+Enter a desired game name into the "Game name" field and then use the "Save as..." menu option to save the game. The name should be unique, i.e., not present on the "Saved games" menu list.<br/>Saving and loading games is disabled during the countdown.
