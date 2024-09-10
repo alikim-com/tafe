@@ -1,4 +1,4 @@
-> [CYMATICS by Nigel Stanford](https://youtube.com/clip/Ugkx8AJ7SKP55HDq4Mt3nDwl_JTS_K_Q13Sl?si=Kkz0SCr6RatnriJW)
+> [CYMATICS by Nigel Stanford](https://www.youtubetrimmer.com/view/?v=Q3oItpVa9fs&start=210&end=320&loop=1)
 
 > [Limitless Into (Infinite zoom)](https://www.youtube.com/watch?v=uy_NJjRT3zk)
 
