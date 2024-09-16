@@ -9,9 +9,8 @@ Aria Nova, born Skylar Chen in 2002, is an emerging electronic music artist know
 ## Goals
 The goal of this project is to create a cohesive visual identity for Aria Nova that reflects her music style and persona. This includes:
 
-1. Designing a logo/wordmark for Aria Nova
-2. Developing a consistent visual style for album artwork, merchandise, and promotional materials
-3. Creating guidelines for social media presence and website design
+1. Designing a logo for artist Aria Nova
+2. Developing a music video for Aria Nova single "Cosmic Wanderer"
 
 ## The Message
 We want to communicate Aria Nova's unique blend of retro and contemporary electronic styles, emphasizing themes of space, cosmic exploration, and dreamy atmospheres. Key concepts to convey:
