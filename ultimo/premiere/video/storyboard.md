@@ -81,7 +81,24 @@ They are looking at their changing skin with a mix of shock and fascination.
 It's looking at its changing skin color with wide, surprised eyes.
 > Oh my! This is unexpected!
 
+12. Both the astronaut (now completely green) and the Martian (now completely pink) are looking at each other
+with wide eyes and pointing at each other's changed appearance.
+> You're... pink!
+> And you're... green!
 
+13. The astronaut and Martian are now laughing heartily, their initial shock having turned into amusement.
+They're clutching their stomachs and their faces are creased with laughter.
 
+14. The astronaut and Martian are finishing their meal, giving thumbs up to each other.
+They now look like swapped versions of themselves - the astronaut green and the Martian pink.
+> That was quite a meal!
 
+15. The Martian, still pink, is waving goodbye to the astronaut. In the background, a futuristic Martian city
+dome can be seen in the distance.
+> Farewell, my green friend! Visit again soon!
+
+16. The astronaut, still green, is climbing back into the rocket. They're looking back over their shoulder,
+waving at the Martian one last time. The rocket is lifting off from the Martian surface, its thrusters glowing
+brightly and kicking up red dust.
+> And so, with new colors and new friendships, the first Martian picnic came to an end.
 
