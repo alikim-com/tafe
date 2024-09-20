@@ -50,8 +50,38 @@ a colorful picnic basket in one hand while carefully descending the ladder with 
 
 3. The astronaut is kneeling on the Martian surface, spreading out a red and white checkered picnic blanket.
 The picnic basket is open beside them, and they're starting to unpack various food items.
+> Time for the first Martian picnic in history!
 
-5. 
+4. A green Martian with antenna and large, curious eyes is peeking out from behind a large red rock formation.
+Only half of its face and one antenna are visible.
+
+5. The astronaut is seated on the picnic blanket, about to take a bite of a sandwich. Their helmet is off,
+revealing their face. The Martian has stepped out from behind the rock, waving hello with a friendly smile.
+> Hello, Earthling!
+
+6. The astronaut is now standing, waving back at the Martian. The Martian is revealing its own lunch container,
+which is a translucent, bubble-like sphere containing strange, glowing foods.
+> Well, this is unexpected! Would you like to join me?
+
+7. The astronaut and the Martian are now seated together on the picnic blanket. The astronaut is gesturing
+to the blanket, inviting the Martian to make itself comfortable.
+> Please, make yourself at home. I've got plenty to share!
+
+8. Close-up of their hands exchanging food items. The astronaut's gloved hand is offering a shiny red apple,
+while the Martian's green hand is offering a glowing purple fruit that looks like a cross between a grape and a star.
+
+9. Split-screen showing both the astronaut and the Martian taking a bite of the exchanged foods simultaneously.
+The astronaut is biting into the glowing purple fruit, while the Martian is biting into the red apple.
+
+10. The astronaut's skin is starting to turn a light shade of green, spreading from their hands up their arms.
+They are looking at their changing skin with a mix of shock and fascination.
+> What's happening to me?
+
+11. The Martian's skin is turning a light shade of pink, spreading from its face down to its body.
+It's looking at its changing skin color with wide, surprised eyes.
+> Oh my! This is unexpected!
+
+
 
 
 
