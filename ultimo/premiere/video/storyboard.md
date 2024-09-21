@@ -102,3 +102,4 @@ waving at the Martian one last time. The rocket is lifting off from the Martian 
 brightly and kicking up red dust.
 > And so, with new colors and new friendships, the first Martian picnic came to an end.
 
+- [hailuoai](https://hailuoai.com/video)
