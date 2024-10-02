@@ -37,7 +37,7 @@ maggots and worms mush 6sec
 
 a table with a chair and a glass of water in the spotlight 3sec
 
-a centipede on the floor moving from under the table 4sec
+a centipede on the floor moving from under the table away 4sec
 
 a rare part of an animal seen through the barn door moving 2sec
 
